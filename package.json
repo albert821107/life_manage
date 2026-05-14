@@ -1,0 +1,32 @@
+{
+  "name": "life-manager",
+  "version": "1.0.0",
+  "description": "個人人生管理系統 v1 - 記帳 / 任務 / 健身 / 投資 / AI助理 / LINE通知",
+  "main": "js/server.js",
+  "scripts": {
+    "start": "node js/server.js",
+    "dev": "nodemon js/server.js",
+    "pm2:start": "pm2 start ecosystem.pm2.config.js",
+    "pm2:stop": "pm2 stop life-manager",
+    "pm2:restart": "pm2 restart life-manager",
+    "pm2:logs": "pm2 logs life-manager"
+  },
+  "keywords": ["life-manager", "personal", "productivity", "sqlite"],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.7.2",
+    "sql.js": "^1.11.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "node-cron": "^3.0.3",
+    "openai": "^4.52.0",
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}

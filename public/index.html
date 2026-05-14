@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>個人人生管理系統 v1</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --primary:       #6366f1;
+      --primary-dark:  #4f46e5;
+      --sidebar-bg:    #1e1b4b;
+      --sidebar-hover: #2d2a6e;
+      --sidebar-act:   #4338ca;
+      --success:       #10b981;
+      --danger:        #ef4444;
+      --warning:       #f59e0b;
+      --info:          #3b82f6;
+      --bg:            #f1f5f9;
+      --card:          #ffffff;
+      --border:        #e2e8f0;
+      --text:          #1e293b;
+      --muted:         #64748b;
+      --radius:        10px;
+      --sh:            0 1px 3px rgba(0,0,0,.08);
+      --sh-md:         0 4px 12px rgba(0,0,0,.1);
+      --tr:            .15s ease;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang TC','Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden;}
+
+    /* ── Sidebar ── */
+    .sidebar{width:220px;background:var(--sidebar-bg);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+    .sidebar-brand{padding:22px 20px 18px;border-bottom:1px solid rgba(255,255,255,.1);}
+    .sidebar-brand h2{color:#fff;font-size:14px;font-weight:700;line-height:1.5;}
+    .sidebar-brand .ver{color:#a5b4fc;font-size:11px;margin-top:2px;}
+    .nav{padding:10px 8px;flex:1;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;color:#c7d2fe;font-size:14px;transition:var(--tr);margin-bottom:2px;user-select:none;}
+    .nav-item:hover{background:var(--sidebar-hover);}
+    .nav-item.active{background:var(--sidebar-act);color:#fff;font-weight:600;}
+    .nav-item .ico{font-size:17px;width:22px;text-align:center;}
+    .sidebar-footer{padding:16px;border-top:1px solid rgba(255,255,255,.1);}
+    .sidebar-footer small{color:#6366f1;font-size:11px;}
+
+    /* ── Main ── */
+    .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+    .header{background:var(--card);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:var(--sh);}
+    .header-left h1{font-size:17px;font-weight:700;}
+    .header-left .sub{font-size:12px;color:var(--muted);}
+    .header-right{display:flex;align-items:center;gap:10px;}
+    #clock{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;}
+    .content{flex:1;overflow-y:auto;padding:24px;}
+
+    /* ── Sections ── */
+    .section{display:none;animation:fadeIn .2s ease;}
+    .section.active{display:block;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+    .sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+    .sec-header h2{font-size:19px;font-weight:700;}
+    .sec-header-right{display:flex;gap:8px;align-items:center;}
+
+    /* ── Stats Grid ── */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:20px;}
+    .stat-card{background:var(--card);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--sh);border:1px solid var(--border);}
+    .stat-card .lbl{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+    .stat-card .val{font-size:26px;font-weight:800;}
+    .stat-card .sub{font-size:12px;color:var(--muted);margin-top:4px;}
+
+    /* ── Cards ── */
+    .card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--sh);border:1px solid var(--border);margin-bottom:16px;}
+    .card-title{font-size:14px;font-weight:700;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);color:var(--text);}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+
+    /* ── Table ── */
+    .tbl-wrap{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;font-size:14px;}
+    th{text-align:left;padding:9px 12px;font-size:12px;color:var(--muted);font-weight:700;border-bottom:1px solid var(--border);background:#f8fafc;white-space:nowrap;}
+    td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tbody tr:hover td{background:#f8fafc;}
+
+    /* ── Badges ── */
+    .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+    .b-income{background:#d1fae5;color:#065f46;}
+    .b-expense{background:#fee2e2;color:#991b1b;}
+    .b-high{background:#fee2e2;color:#991b1b;}
+    .b-medium{background:#fef3c7;color:#92400e;}
+    .b-low{background:#dbeafe;color:#1e40af;}
+    .b-pending{background:#e2e8f0;color:#475569;}
+    .b-in_progress{background:#dbeafe;color:#1e40af;}
+    .b-done{background:#d1fae5;color:#065f46;}
+    .b-buy{background:#d1fae5;color:#065f46;}
+    .b-sell{background:#fee2e2;color:#991b1b;}
+    .b-stock{background:#ede9fe;color:#5b21b6;}
+    .b-crypto{background:#fef3c7;color:#92400e;}
+    .b-etf{background:#dbeafe;color:#1e40af;}
+    .b-sent{background:#d1fae5;color:#065f46;}
+    .b-failed{background:#fee2e2;color:#991b1b;}
+
+    /* ── Buttons ── */
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:none;font-size:14px;font-weight:500;cursor:pointer;transition:var(--tr);line-height:1;}
+    .btn:disabled{opacity:.5;cursor:not-allowed;}
+    .btn-primary{background:var(--primary);color:#fff;}
+    .btn-primary:hover:not(:disabled){background:var(--primary-dark);}
+    .btn-success{background:var(--success);color:#fff;}
+    .btn-danger{background:var(--danger);color:#fff;}
+    .btn-outline{background:transparent;color:var(--text);border:1px solid var(--border);}
+    .btn-outline:hover{background:var(--bg);}
+    .btn-ghost{background:transparent;color:var(--muted);border:none;}
+    .btn-ghost:hover{background:var(--bg);color:var(--text);}
+    .btn-sm{padding:4px 10px;font-size:12px;}
+    .btn-xs{padding:3px 8px;font-size:11px;}
+
+    /* ── Form ── */
+    .form-group{margin-bottom:14px;}
+    .form-group label{display:block;font-size:13px;font-weight:600;margin-bottom:5px;}
+    .form-control{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:14px;transition:var(--tr);background:var(--card);color:var(--text);font-family:inherit;}
+    .form-control:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,102,241,.12);}
+    select.form-control{cursor:pointer;}
+    textarea.form-control{resize:vertical;min-height:72px;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+    /* ── Modal ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(15,15,30,.55);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(2px);}
+    .modal-overlay.active{display:flex;}
+    .modal{background:var(--card);border-radius:14px;width:500px;max-width:92vw;max-height:88vh;overflow-y:auto;box-shadow:0 24px 72px rgba(0,0,0,.22);}
+    .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);}
+    .modal-head h3{font-size:15px;font-weight:700;}
+    .modal-head .close-btn{background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;}
+    .modal-body{padding:22px;}
+    .modal-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;}
+
+    /* ── Toast ── */
+    #toast-box{position:fixed;bottom:22px;right:22px;display:flex;flex-direction:column;gap:8px;z-index:2000;}
+    .toast{padding:11px 18px;border-radius:8px;font-size:13px;font-weight:600;animation:toastIn .25s ease;max-width:320px;box-shadow:var(--sh-md);}
+    .toast-ok{background:#064e3b;color:#fff;}
+    .toast-err{background:#7f1d1d;color:#fff;}
+    .toast-info{background:#1e3a5f;color:#fff;}
+    @keyframes toastIn{from{transform:translateX(110%);opacity:0}to{transform:none;opacity:1}}
+
+    /* ── Kanban ── */
+    .kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+    .kol{background:#f1f5f9;border-radius:10px;padding:14px;}
+    .kol-head{font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+    .kol-head .cnt{background:var(--primary);color:#fff;border-radius:20px;padding:1px 8px;font-size:11px;}
+    .task-card{background:var(--card);border-radius:8px;padding:12px;margin-bottom:8px;box-shadow:var(--sh);border:1px solid var(--border);cursor:pointer;transition:var(--tr);}
+    .task-card:hover{border-color:var(--primary);box-shadow:var(--sh-md);}
+    .task-title{font-size:14px;font-weight:600;margin-bottom:6px;line-height:1.4;}
+    .task-meta{font-size:11px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+    .overdue{color:var(--danger)!important;font-weight:600;}
+
+    /* ── Chat ── */
+    .chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 220px);min-height:380px;background:var(--card);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--sh);overflow:hidden;}
+    .chat-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;}
+    .chat-msg{max-width:78%;padding:11px 15px;border-radius:12px;font-size:14px;line-height:1.65;white-space:pre-wrap;word-break:break-word;}
+    .chat-msg.user{align-self:flex-end;background:var(--primary);color:#fff;border-bottom-right-radius:3px;}
+    .chat-msg.assistant{align-self:flex-start;background:#f1f5f9;border-bottom-left-radius:3px;}
+    .chat-msg .role-label{font-size:10px;font-weight:700;margin-bottom:4px;opacity:.7;}
+    .chat-bar{display:flex;gap:8px;padding:14px;border-top:1px solid var(--border);}
+    .chat-bar textarea{flex:1;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:14px;resize:none;height:42px;font-family:inherit;transition:var(--tr);}
+    .chat-bar textarea:focus{outline:none;border-color:var(--primary);}
+    .chat-empty{color:var(--muted);text-align:center;padding:40px;font-size:14px;}
+
+    /* ── Investment P&L ── */
+    .pnl-pos{color:var(--success);font-weight:700;}
+    .pnl-neg{color:var(--danger);font-weight:700;}
+
+    /* ── Progress bar ── */
+    .prog-bar{background:#e2e8f0;border-radius:4px;height:6px;overflow:hidden;margin-top:6px;}
+    .prog-fill{height:100%;border-radius:4px;transition:width .4s ease;}
+
+    /* ── Divider ── */
+    .divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+
+    /* ── Responsive ── */
+    @media(max-width:800px){
+      .sidebar{width:60px;}
+      .sidebar-brand h2,.sidebar-brand .ver,.nav-item span,.sidebar-footer{display:none;}
+      .nav-item{justify-content:center;}
+      .kanban,.grid-2,.grid-3{grid-template-columns:1fr;}
+      .form-row{grid-template-columns:1fr;}
+      .stats-grid{grid-template-columns:1fr 1fr;}
+    }
+    @media(max-width:480px){
+      .stats-grid{grid-template-columns:1fr;}
+      .content{padding:14px;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ SIDEBAR ══════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <h2>🧠 人生管理系統</h2>
+    <div class="ver">Personal Life Manager v1</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-item active" data-sec="dashboard"   onclick="nav('dashboard')">  <span class="ico">📊</span><span>概覽</span></div>
+    <div class="nav-item"        data-sec="accounting"  onclick="nav('accounting')"> <span class="ico">💰</span><span>記帳</span></div>
+    <div class="nav-item"        data-sec="tasks"       onclick="nav('tasks')">      <span class="ico">✅</span><span>任務</span></div>
+    <div class="nav-item"        data-sec="fitness"     onclick="nav('fitness')">    <span class="ico">💪</span><span>健身</span></div>
+    <div class="nav-item"        data-sec="investment"  onclick="nav('investment')"> <span class="ico">📈</span><span>投資</span></div>
+    <div class="nav-item"        data-sec="ai"          onclick="nav('ai')">         <span class="ico">🤖</span><span>AI 助理</span></div>
+    <div class="nav-item"        data-sec="line"        onclick="nav('line')">       <span class="ico">🔔</span><span>LINE 通知</span></div>
+  </nav>
+  <div class="sidebar-footer"><small id="db-status">● 已連線</small></div>
+</aside>
+
+<!-- ══════════════ MAIN ══════════════ -->
+<div class="main">
+  <header class="header">
+    <div class="header-left">
+      <h1 id="page-title">📊 概覽</h1>
+      <div class="sub" id="page-sub">生活數據一覽</div>
+    </div>
+    <div class="header-right">
+      <span id="clock">--:--:--</span>
+      <button class="btn btn-outline btn-sm" onclick="nav('line')">🔔 LINE</button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- ════ DASHBOARD ════ -->
+    <div class="section active" id="section-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="lbl">💰 本月支出</div>
+          <div class="val" id="d-expense">--</div>
+          <div class="sub" id="d-income">收入: --</div>
+        </div>
+        <div class="stat-card">
+          <div class="lbl">✅ 待辦任務</div>
+          <div class="val" id="d-tasks">--</div>
+          <div class="sub" id="d-overdue">逾期: --</div>
+        </div>
+        <div class="stat-card">
+          <div class="lbl">💪 本週運動</div>
+          <div class="val" id="d-fitness">--</div>
+          <div class="sub" id="d-fmin">分鐘</div>
+        </div>
+        <div class="stat-card">
+          <div class="lbl">📈 投資組合</div>
+          <div class="val" id="d-invest">--</div>
+          <div class="sub" id="d-pnl">損益: --</div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">最近收支記錄</div>
+          <div id="d-acct-list"><div style="color:var(--muted);font-size:14px;padding:12px 0;">載入中...</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">待辦任務清單</div>
+          <div id="d-task-list"><div style="color:var(--muted);font-size:14px;padding:12px 0;">載入中...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ ACCOUNTING ════ -->
+    <div class="section" id="section-accounting">
+      <div class="sec-header">
+        <h2>💰 記帳</h2>
+        <div class="sec-header-right">
+          <input type="month" id="acct-month" class="form-control" style="width:150px;" onchange="loadAccounting()">
+          <button class="btn btn-primary" onclick="showAddAccounting()">＋ 新增</button>
+        </div>
+      </div>
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);">
+        <div class="stat-card"><div class="lbl">本月收入</div><div class="val" id="a-income" style="color:var(--success);">--</div></div>
+        <div class="stat-card"><div class="lbl">本月支出</div><div class="val" id="a-expense" style="color:var(--danger);">--</div></div>
+        <div class="stat-card"><div class="lbl">本月結餘</div><div class="val" id="a-balance">--</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card" style="grid-column:1/3;">
+          <div class="card-title">交易記錄</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>日期</th><th>類型</th><th>金額</th><th>類別</th><th>備註</th><th>操作</th></tr></thead>
+              <tbody id="acct-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">載入中...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ TASKS ════ -->
+    <div class="section" id="section-tasks">
+      <div class="sec-header">
+        <h2>✅ 任務管理</h2>
+        <button class="btn btn-primary" onclick="showAddTask()">＋ 新增任務</button>
+      </div>
+      <div class="kanban" id="kanban-board">
+        <div class="kol">
+          <div class="kol-head">📋 待辦 <span class="cnt" id="cnt-pending">0</span></div>
+          <div id="col-pending"></div>
+        </div>
+        <div class="kol">
+          <div class="kol-head">🔄 進行中 <span class="cnt" id="cnt-in_progress">0</span></div>
+          <div id="col-in_progress"></div>
+        </div>
+        <div class="kol">
+          <div class="kol-head">✅ 完成 <span class="cnt" id="cnt-done">0</span></div>
+          <div id="col-done"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ FITNESS ════ -->
+    <div class="section" id="section-fitness">
+      <div class="sec-header">
+        <h2>💪 健身記錄</h2>
+        <div class="sec-header-right">
+          <input type="month" id="fit-month" class="form-control" style="width:150px;" onchange="loadFitness()">
+          <button class="btn btn-primary" onclick="showAddFitness()">＋ 記錄運動</button>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="lbl">本週運動次數</div><div class="val" id="f-week-cnt">--</div><div class="sub" id="f-week-dur">-- 分鐘</div></div>
+        <div class="stat-card"><div class="lbl">本週消耗熱量</div><div class="val" id="f-week-cal">--</div><div class="sub">卡路里</div></div>
+        <div class="stat-card"><div class="lbl">本月運動次數</div><div class="val" id="f-month-cnt">--</div><div class="sub">次</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">運動記錄</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>日期</th><th>項目</th><th>時長(分)</th><th>熱量(卡)</th><th>備註</th><th>操作</th></tr></thead>
+            <tbody id="fit-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">載入中...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ INVESTMENT ════ -->
+    <div class="section" id="section-investment">
+      <div class="sec-header">
+        <h2>📈 投資管理</h2>
+        <div class="sec-header-right">
+          <button class="btn btn-outline btn-sm" onclick="showAddHolding()">＋ 手動持倉</button>
+          <button class="btn btn-primary" onclick="showAddTxn()">＋ 新增交易</button>
+        </div>
+      </div>
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
+        <div class="stat-card"><div class="lbl">總持倉成本</div><div class="val" id="inv-cost">--</div></div>
+        <div class="stat-card"><div class="lbl">總持倉市值</div><div class="val" id="inv-value">--</div></div>
+        <div class="stat-card"><div class="lbl">未實現損益</div><div class="val" id="inv-pnl">--</div></div>
+        <div class="stat-card"><div class="lbl">報酬率</div><div class="val" id="inv-pct">--</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">持倉明細 <small style="font-weight:400;color:var(--muted);">（點擊現價欄位可更新）</small></div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>代碼</th><th>名稱</th><th>類型</th><th>股數</th><th>均成本</th><th>現價</th><th>市值</th><th>損益</th><th>損益%</th><th>操作</th></tr></thead>
+            <tbody id="inv-tbody"><tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px;">載入中...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">交易紀錄</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>日期</th><th>代碼</th><th>動作</th><th>股數</th><th>價格</th><th>總金額</th><th>備註</th></tr></thead>
+            <tbody id="txn-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;">載入中...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ AI ════ -->
+    <div class="section" id="section-ai">
+      <div class="sec-header">
+        <h2>🤖 AI 助理</h2>
+        <div class="sec-header-right">
+          <span id="ai-mode-badge" class="badge b-pending" style="font-size:12px;">載入中...</span>
+          <button class="btn btn-outline btn-sm" onclick="clearAIHistory()">🗑 清除對話</button>
+        </div>
+      </div>
+      <div class="chat-wrap">
+        <div class="chat-msgs" id="chat-msgs">
+          <div class="chat-empty">👋 你好！我是你的個人生活管理 AI 助理。<br>我了解你的財務、任務、健身和投資狀況，歡迎提問！</div>
+        </div>
+        <div class="chat-bar">
+          <textarea id="chat-input" placeholder="輸入問題... (Enter 送出，Shift+Enter 換行)" rows="1"></textarea>
+          <button class="btn btn-primary" id="chat-send-btn" onclick="sendChat()">送出</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ LINE ════ -->
+    <div class="section" id="section-line">
+      <div class="sec-header">
+        <h2>🔔 LINE 通知</h2>
+        <div id="line-status-badge"></div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">發送自訂通知</div>
+          <div class="form-group">
+            <label>通知訊息</label>
+            <textarea id="line-msg" class="form-control" placeholder="輸入要發送到 LINE 的訊息..." rows="4"></textarea>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary" onclick="sendLineMsg()">📤 發送</button>
+            <button class="btn btn-outline" onclick="sendLineSummary()">📊 發送今日摘要</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">通知設定說明</div>
+          <div style="font-size:13px;line-height:1.8;color:var(--muted);">
+            <p>📌 <strong>取得 LINE Notify Token</strong></p>
+            <ol style="padding-left:16px;margin-top:8px;margin-bottom:12px;">
+              <li>前往 <a href="https://notify-bot.line.me/zh_TW/" target="_blank" style="color:var(--primary);">LINE Notify</a></li>
+              <li>登入 LINE 帳號</li>
+              <li>產生個人存取權杖</li>
+              <li>複製 Token 填入 <code>.env</code> 的 <code>LINE_NOTIFY_TOKEN</code></li>
+            </ol>
+            <p>📌 <strong>每日自動摘要</strong></p>
+            <p style="margin-top:4px;">在 <code>.env</code> 設定：<br><code>DAILY_NOTIFY_ENABLED=true</code><br><code>DAILY_NOTIFY_CRON=0 8 * * *</code></p>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">通知歷史</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>時間</th><th>狀態</th><th>訊息</th></tr></thead>
+            <tbody id="line-tbody"><tr><td colspan="3" style="text-align:center;color:var(--muted);padding:24px;">載入中...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ══════════════ MODAL ══════════════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-box"></div>
+</div>
+
+<!-- ══════════════ TOAST ══════════════ -->
+<div id="toast-box"></div>
+
+<script>
+// ════════════════════════════════════════════════
+// Socket.io
+// ════════════════════════════════════════════════
+const socket = io();
+socket.on('accounting:update',  () => { if (state.sec==='accounting')  loadAccounting();  if(state.sec==='dashboard') loadDashboard(); });
+socket.on('tasks:update',       () => { if (state.sec==='tasks')       loadTasks();       if(state.sec==='dashboard') loadDashboard(); });
+socket.on('fitness:update',     () => { if (state.sec==='fitness')     loadFitness(); });
+socket.on('investment:update',  () => { if (state.sec==='investment')  loadInvestment(); });
+socket.on('ai:update',          () => { if (state.sec==='ai')          loadAI(); });
+socket.on('line:update',        () => { if (state.sec==='line')        loadLine(); });
+
+// ════════════════════════════════════════════════
+// State
+// ════════════════════════════════════════════════
+const state = {
+  sec: 'dashboard',
+  acctMonth: new Date().toISOString().slice(0,7),
+  fitMonth:  new Date().toISOString().slice(0,7),
+};
+
+const PAGE_META = {
+  dashboard:  ['📊 概覽',   '生活數據一覽'],
+  accounting: ['💰 記帳',   '收支記錄管理'],
+  tasks:      ['✅ 任務管理','待辦事項追蹤'],
+  fitness:    ['💪 健身記錄','運動日誌'],
+  investment: ['📈 投資管理','持倉與交易'],
+  ai:         ['🤖 AI 助理','智能生活分析'],
+  line:       ['🔔 LINE 通知','即時通知管理'],
+};
+
+// ════════════════════════════════════════════════
+// Utilities
+// ════════════════════════════════════════════════
+function $(id){ return document.getElementById(id); }
+
+async function api(path, method='GET', body){
+  const opts = { method, headers:{'Content-Type':'application/json'} };
+  if(body) opts.body = JSON.stringify(body);
+  const r = await fetch(path, opts);
+  return r.json();
+}
+
+function fmtMoney(n){ return '$'+Number(n||0).toLocaleString('zh-TW',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+function fmtDate(d){ return d ? d.slice(0,10) : '-'; }
+function today(){ return new Date().toISOString().slice(0,10); }
+
+function toast(msg, type='ok'){
+  const d = document.createElement('div');
+  d.className = `toast toast-${type}`;
+  d.textContent = msg;
+  $('toast-box').appendChild(d);
+  setTimeout(()=>d.remove(), 3200);
+}
+
+// Clock
+setInterval(()=>{
+  const n=new Date();
+  $('clock').textContent = [n.getHours(),n.getMinutes(),n.getSeconds()].map(x=>String(x).padStart(2,'0')).join(':');
+},1000);
+
+// Initialise month inputs
+$('acct-month').value = state.acctMonth;
+$('fit-month').value  = state.fitMonth;
+
+// ════════════════════════════════════════════════
+// Navigation
+// ════════════════════════════════════════════════
+const LOADERS = { dashboard:loadDashboard, accounting:loadAccounting, tasks:loadTasks, fitness:loadFitness, investment:loadInvestment, ai:loadAI, line:loadLine };
+
+function nav(sec){
+  state.sec = sec;
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.sec===sec));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  $(`section-${sec}`).classList.add('active');
+  const [title, sub] = PAGE_META[sec];
+  $('page-title').textContent = title;
+  $('page-sub').textContent   = sub;
+  LOADERS[sec]?.();
+}
+
+// ════════════════════════════════════════════════
+// Modal
+// ════════════════════════════════════════════════
+function showModal(title, bodyHTML, { onSubmit, submitLabel='儲存', wide=false }={}){
+  const box = $('modal-box');
+  if(wide) box.style.width='640px'; else box.style.width='';
+  box.innerHTML = `
+    <div class="modal-head">
+      <h3>${title}</h3>
+      <button class="close-btn" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">${bodyHTML}</div>
+    ${onSubmit ? `<div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" id="modal-submit-btn" onclick="window.__modalSubmit()">${submitLabel}</button>
+    </div>` : ''}
+  `;
+  $('modal-overlay').classList.add('active');
+  window.__modalSubmit = onSubmit;
+}
+
+function closeModal(e){
+  if(e && e.target !== $('modal-overlay')) return;
+  $('modal-overlay').classList.remove('active');
+}
+function closeModalForce(){ $('modal-overlay').classList.remove('active'); }
+
+// ════════════════════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════════════════════
+async function loadDashboard(){
+  const [acct, taskSum, fitSum, invSum, recentAcct, recentTasks] = await Promise.all([
+    api(`/api/accounting/summary`),
+    api(`/api/tasks/summary`),
+    api(`/api/fitness/summary`),
+    api(`/api/investment/summary`),
+    api(`/api/accounting?month=${state.acctMonth}`),
+    api(`/api/tasks?status=pending`),
+  ]);
+
+  // Stats
+  $('d-expense').textContent = fmtMoney(acct.data?.expense);
+  $('d-income').textContent  = '收入: ' + fmtMoney(acct.data?.income);
+  $('d-tasks').textContent   = taskSum.data?.pending ?? '--';
+  $('d-overdue').textContent = '逾期: ' + (taskSum.data?.overdue ?? '--') + ' 件';
+  $('d-fitness').textContent = fitSum.data?.week?.count ?? '--';
+  $('d-fmin').textContent    = (fitSum.data?.week?.duration ?? '--') + ' 分鐘';
+  const invVal = parseFloat(invSum.data?.totalValue||0);
+  const invPnl = parseFloat(invSum.data?.pnl||0);
+  $('d-invest').textContent = fmtMoney(invVal);
+  const pnlEl = $('d-pnl');
+  pnlEl.textContent = '損益: ' + (invPnl>=0?'+':'') + fmtMoney(invPnl);
+  pnlEl.style.color = invPnl>=0 ? 'var(--success)' : 'var(--danger)';
+
+  // Recent transactions
+  const rows = (recentAcct.data||[]).slice(0,6);
+  $('d-acct-list').innerHTML = rows.length ? rows.map(r=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+      <div>
+        <span class="badge b-${r.type}" style="margin-right:6px;">${r.type==='income'?'收入':'支出'}</span>
+        <span style="font-size:13px;">${r.category}</span>
+        ${r.note ? `<span style="color:var(--muted);font-size:12px;margin-left:4px;">${r.note}</span>` : ''}
+      </div>
+      <div style="font-weight:700;color:${r.type==='income'?'var(--success)':'var(--danger)'};">
+        ${r.type==='income'?'+':'-'}${fmtMoney(r.amount)}
+      </div>
+    </div>
+  `).join('') : '<div style="color:var(--muted);font-size:13px;padding:8px 0;">本月尚無記錄</div>';
+
+  // Tasks
+  const tasks = (recentTasks.data||[]).slice(0,6);
+  $('d-task-list').innerHTML = tasks.length ? tasks.map(t=>{
+    const isOv = t.due_date && t.due_date < today();
+    return `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+        <div>
+          <span class="badge b-${t.priority}" style="margin-right:6px;">${{high:'高',medium:'中',low:'低'}[t.priority]}</span>
+          <span style="font-size:13px;">${t.title}</span>
+        </div>
+        ${t.due_date ? `<span style="font-size:11px;" class="${isOv?'overdue':''}">${isOv?'⚠️ ':''}${t.due_date}</span>` : ''}
+      </div>
+    `;
+  }).join('') : '<div style="color:var(--muted);font-size:13px;padding:8px 0;">🎉 無待辦任務</div>';
+}
+
+// ════════════════════════════════════════════════
+// ACCOUNTING
+// ════════════════════════════════════════════════
+async function loadAccounting(){
+  const m = $('acct-month').value || state.acctMonth;
+  state.acctMonth = m;
+  const [list, sum] = await Promise.all([
+    api(`/api/accounting?month=${m}`),
+    api(`/api/accounting/summary?month=${m}`)
+  ]);
+
+  $('a-income').textContent  = fmtMoney(sum.data?.income);
+  $('a-expense').textContent = fmtMoney(sum.data?.expense);
+  const bal = (sum.data?.income||0) - (sum.data?.expense||0);
+  const balEl = $('a-balance');
+  balEl.textContent  = fmtMoney(bal);
+  balEl.style.color  = bal>=0 ? 'var(--success)' : 'var(--danger)';
+
+  const rows = list.data||[];
+  $('acct-tbody').innerHTML = rows.length ? rows.map(r=>`
+    <tr>
+      <td style="color:var(--muted);">${r.date}</td>
+      <td><span class="badge b-${r.type}">${r.type==='income'?'收入':'支出'}</span></td>
+      <td style="font-weight:700;color:${r.type==='income'?'var(--success)':'var(--danger)'};">${r.type==='income'?'+':'-'}${fmtMoney(r.amount)}</td>
+      <td>${r.category}</td>
+      <td style="color:var(--muted);">${r.note||'-'}</td>
+      <td><button class="btn btn-xs btn-danger" onclick="deleteAcct(${r.id})">刪除</button></td>
+    </tr>
+  `).join('') : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:28px;">本月尚無記錄</td></tr>`;
+}
+
+async function deleteAcct(id){
+  if(!confirm('確定刪除此筆記錄？')) return;
+  await api(`/api/accounting/${id}`, 'DELETE');
+  toast('已刪除', 'ok');
+  loadAccounting();
+}
+
+const EXPENSE_CATS = ['餐飲','交通','購物','娛樂','醫療','住房','教育','訂閱','健身','其他'];
+const INCOME_CATS  = ['薪資','獎金','投資收益','兼職','其他'];
+
+function showAddAccounting(){
+  showModal('新增收支記錄', `
+    <div class="form-row">
+      <div class="form-group">
+        <label>類型 *</label>
+        <select id="f-type" class="form-control" onchange="updateCategories()">
+          <option value="expense">支出</option>
+          <option value="income">收入</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>金額 *</label>
+        <input type="number" id="f-amount" class="form-control" placeholder="0" min="0.01" step="0.01">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>類別 *</label>
+        <select id="f-cat" class="form-control"></select>
+      </div>
+      <div class="form-group">
+        <label>日期 *</label>
+        <input type="date" id="f-date" class="form-control" value="${today()}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>備註</label>
+      <input type="text" id="f-note" class="form-control" placeholder="可選填">
+    </div>
+  `, {
+    onSubmit: async ()=>{
+      const type     = $('f-type').value;
+      const amount   = $('f-amount').value;
+      const category = $('f-cat').value;
+      const date     = $('f-date').value;
+      const note     = $('f-note').value;
+      if(!amount || parseFloat(amount)<=0){ toast('請填寫正確金額','err'); return; }
+      const r = await api('/api/accounting','POST',{type,amount,category,note,date});
+      if(r.success){ toast('已新增記錄','ok'); closeModalForce(); loadAccounting(); }
+      else toast(r.error,'err');
+    }
+  });
+  updateCategories();
+}
+
+function updateCategories(){
+  const type = $('f-type')?.value;
+  const cats = type==='income' ? INCOME_CATS : EXPENSE_CATS;
+  if($('f-cat')) $('f-cat').innerHTML = cats.map(c=>`<option>${c}</option>`).join('');
+}
+
+// ════════════════════════════════════════════════
+// TASKS
+// ════════════════════════════════════════════════
+async function loadTasks(){
+  const r = await api('/api/tasks');
+  const tasks = r.data||[];
+  const cols = { pending:[], in_progress:[], done:[] };
+  tasks.forEach(t => cols[t.status]?.push(t));
+
+  Object.entries(cols).forEach(([status, list])=>{
+    $(`cnt-${status}`).textContent = list.length;
+    $(`col-${status}`).innerHTML = list.length ? list.map(t=>taskCardHTML(t)).join('') :
+      `<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px 0;">無</div>`;
+  });
+}
+
+function taskCardHTML(t){
+  const isOv = t.due_date && t.due_date < today() && t.status !== 'done';
+  const nextStatus = {pending:'in_progress', in_progress:'done', done:'pending'}[t.status];
+  const nextLabel  = {pending:'→ 進行中', in_progress:'→ 完成', done:'↩ 復原'}[t.status];
+  return `
+    <div class="task-card">
+      <div class="task-title">${t.title}</div>
+      ${t.description ? `<div style="font-size:12px;color:var(--muted);margin-bottom:6px;">${t.description}</div>` : ''}
+      <div class="task-meta">
+        <span class="badge b-${t.priority}">${{high:'🔴 高',medium:'🟡 中',low:'🔵 低'}[t.priority]}</span>
+        ${t.due_date ? `<span class="${isOv?'overdue':''}">${isOv?'⚠️ ':''} ${t.due_date}</span>` : ''}
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px;">
+        <button class="btn btn-xs btn-outline" onclick="moveTask(${t.id},'${nextStatus}')">${nextLabel}</button>
+        <button class="btn btn-xs btn-outline" onclick="showEditTask(${t.id})">✏️ 編輯</button>
+        <button class="btn btn-xs btn-danger"  onclick="deleteTask(${t.id})">刪除</button>
+      </div>
+    </div>
+  `;
+}
+
+async function moveTask(id, status){
+  await api(`/api/tasks/${id}/status`,'PATCH',{status});
+  loadTasks();
+}
+
+async function deleteTask(id){
+  if(!confirm('確定刪除此任務？')) return;
+  await api(`/api/tasks/${id}`,'DELETE');
+  toast('已刪除','ok'); loadTasks();
+}
+
+function showAddTask(){
+  showModal('新增任務', `
+    <div class="form-group"><label>任務標題 *</label><input type="text" id="t-title" class="form-control" placeholder="輸入任務名稱"></div>
+    <div class="form-group"><label>描述</label><textarea id="t-desc" class="form-control" placeholder="可選填"></textarea></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>優先級</label>
+        <select id="t-pri" class="form-control">
+          <option value="high">🔴 高</option>
+          <option value="medium" selected>🟡 中</option>
+          <option value="low">🔵 低</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>到期日</label>
+        <input type="date" id="t-due" class="form-control">
+      </div>
+    </div>
+  `,{
+    onSubmit: async ()=>{
+      const title = $('t-title').value.trim();
+      if(!title){ toast('請填寫任務標題','err'); return; }
+      const r = await api('/api/tasks','POST',{title, description:$('t-desc').value, priority:$('t-pri').value, due_date:$('t-due').value||null});
+      if(r.success){ toast('任務已新增','ok'); closeModalForce(); loadTasks(); }
+      else toast(r.error,'err');
+    }
+  });
+  setTimeout(()=>$('t-title')?.focus(),100);
+}
+
+function showEditTask(id){
+  api(`/api/tasks`).then(r=>{
+    const t = (r.data||[]).find(x=>x.id===id);
+    if(!t) return;
+    showModal('編輯任務', `
+      <div class="form-group"><label>任務標題 *</label><input type="text" id="t-title" class="form-control" value="${t.title}"></div>
+      <div class="form-group"><label>描述</label><textarea id="t-desc" class="form-control">${t.description||''}</textarea></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>優先級</label>
+          <select id="t-pri" class="form-control">
+            <option value="high" ${t.priority==='high'?'selected':''}>🔴 高</option>
+            <option value="medium" ${t.priority==='medium'?'selected':''}>🟡 中</option>
+            <option value="low" ${t.priority==='low'?'selected':''}>🔵 低</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>狀態</label>
+          <select id="t-status" class="form-control">
+            <option value="pending" ${t.status==='pending'?'selected':''}>📋 待辦</option>
+            <option value="in_progress" ${t.status==='in_progress'?'selected':''}>🔄 進行中</option>
+            <option value="done" ${t.status==='done'?'selected':''}>✅ 完成</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>到期日</label>
+        <input type="date" id="t-due" class="form-control" value="${t.due_date||''}">
+      </div>
+    `,{
+      submitLabel:'更新',
+      onSubmit: async ()=>{
+        const title = $('t-title').value.trim();
+        if(!title){ toast('請填寫任務標題','err'); return; }
+        const r = await api(`/api/tasks/${id}`,'PUT',{
+          title, description:$('t-desc').value,
+          priority:$('t-pri').value, status:$('t-status').value, due_date:$('t-due').value||null
+        });
+        if(r.success){ toast('已更新','ok'); closeModalForce(); loadTasks(); }
+        else toast(r.error,'err');
+      }
+    });
+  });
+}
+
+// ════════════════════════════════════════════════
+// FITNESS
+// ════════════════════════════════════════════════
+async function loadFitness(){
+  const m = $('fit-month').value || state.fitMonth;
+  state.fitMonth = m;
+  const [list, sum] = await Promise.all([
+    api(`/api/fitness?month=${m}`),
+    api('/api/fitness/summary')
+  ]);
+
+  $('f-week-cnt').textContent = sum.data?.week?.count ?? '--';
+  $('f-week-dur').textContent = (sum.data?.week?.duration ?? '--') + ' 分鐘';
+  $('f-week-cal').textContent = sum.data?.week?.calories ?? '--';
+  $('f-month-cnt').textContent= sum.data?.month?.count ?? '--';
+
+  const rows = list.data||[];
+  $('fit-tbody').innerHTML = rows.length ? rows.map(r=>`
+    <tr>
+      <td style="color:var(--muted);">${r.date}</td>
+      <td>${r.type}</td>
+      <td>${r.duration||0}</td>
+      <td>${r.calories||0}</td>
+      <td style="color:var(--muted);">${r.note||'-'}</td>
+      <td><button class="btn btn-xs btn-danger" onclick="deleteFitness(${r.id})">刪除</button></td>
+    </tr>
+  `).join('') : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:28px;">本月尚無運動記錄</td></tr>`;
+}
+
+async function deleteFitness(id){
+  if(!confirm('確定刪除？')) return;
+  await api(`/api/fitness/${id}`,'DELETE');
+  toast('已刪除','ok'); loadFitness();
+}
+
+const FIT_TYPES = ['跑步','重訓','游泳','瑜伽','腳踏車','登山','球類運動','HIIT','散步','其他'];
+
+function showAddFitness(){
+  showModal('記錄運動', `
+    <div class="form-row">
+      <div class="form-group">
+        <label>運動項目 *</label>
+        <select id="fi-type" class="form-control">
+          ${FIT_TYPES.map(t=>`<option>${t}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>日期 *</label>
+        <input type="date" id="fi-date" class="form-control" value="${today()}">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>時長（分鐘）</label>
+        <input type="number" id="fi-dur" class="form-control" placeholder="0" min="0">
+      </div>
+      <div class="form-group">
+        <label>消耗熱量（卡）</label>
+        <input type="number" id="fi-cal" class="form-control" placeholder="0" min="0">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>備註</label>
+      <input type="text" id="fi-note" class="form-control" placeholder="可選填">
+    </div>
+  `,{
+    onSubmit: async ()=>{
+      const type = $('fi-type').value;
+      const date = $('fi-date').value;
+      if(!date){ toast('請填寫日期','err'); return; }
+      const r = await api('/api/fitness','POST',{type, duration:$('fi-dur').value||0, calories:$('fi-cal').value||0, note:$('fi-note').value, date});
+      if(r.success){ toast('運動記錄已新增','ok'); closeModalForce(); loadFitness(); }
+      else toast(r.error,'err');
+    }
+  });
+}
+
+// ════════════════════════════════════════════════
+// INVESTMENT
+// ════════════════════════════════════════════════
+async function loadInvestment(){
+  const [holdings, sum, txns] = await Promise.all([
+    api('/api/investment/holdings'),
+    api('/api/investment/summary'),
+    api('/api/investment/txns'),
+  ]);
+
+  const pnl = parseFloat(sum.data?.pnl||0);
+  const pct  = parseFloat(sum.data?.pnlPct||0);
+  $('inv-cost').textContent  = fmtMoney(sum.data?.totalCost);
+  $('inv-value').textContent = fmtMoney(sum.data?.totalValue);
+  const pnlEl = $('inv-pnl');
+  pnlEl.textContent  = (pnl>=0?'+':'')+fmtMoney(pnl);
+  pnlEl.style.color  = pnl>=0?'var(--success)':'var(--danger)';
+  const pctEl = $('inv-pct');
+  pctEl.textContent  = (pct>=0?'+':'')+pct+'%';
+  pctEl.style.color  = pct>=0?'var(--success)':'var(--danger)';
+
+  // Holdings table
+  const hs = holdings.data||[];
+  $('inv-tbody').innerHTML = hs.length ? hs.map(h=>{
+    const cost  = h.shares * h.avg_cost;
+    const price = h.current_price>0 ? h.current_price : h.avg_cost;
+    const val   = h.shares * price;
+    const p     = val - cost;
+    const pp    = cost>0 ? ((p/cost)*100).toFixed(2) : 0;
+    return `
+      <tr>
+        <td><strong>${h.symbol}</strong></td>
+        <td>${h.name}</td>
+        <td><span class="badge b-${h.type}">${h.type}</span></td>
+        <td>${h.shares}</td>
+        <td>${fmtMoney(h.avg_cost)}</td>
+        <td>
+          <span onclick="editPrice('${h.symbol}',${h.current_price})" style="cursor:pointer;text-decoration:underline dotted;color:var(--primary);" title="點擊更新現價">
+            ${fmtMoney(price)}
+          </span>
+        </td>
+        <td>${fmtMoney(val)}</td>
+        <td class="${p>=0?'pnl-pos':'pnl-neg'}">${p>=0?'+':''}${fmtMoney(p)}</td>
+        <td class="${pp>=0?'pnl-pos':'pnl-neg'}">${pp>=0?'+':''}${pp}%</td>
+        <td>
+          <button class="btn btn-xs btn-danger" onclick="deleteHolding('${h.symbol}')">刪除</button>
+        </td>
+      </tr>
+    `;
+  }).join('') : `<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:28px;">尚無持倉</td></tr>`;
+
+  // Txns table
+  const ts = txns.data||[];
+  $('txn-tbody').innerHTML = ts.length ? ts.map(t=>`
+    <tr>
+      <td style="color:var(--muted);">${t.date}</td>
+      <td><strong>${t.symbol}</strong></td>
+      <td><span class="badge b-${t.action}">${t.action==='buy'?'買入':'賣出'}</span></td>
+      <td>${t.shares}</td>
+      <td>${fmtMoney(t.price)}</td>
+      <td>${fmtMoney(t.total)}</td>
+      <td style="color:var(--muted);">${t.note||'-'}</td>
+    </tr>
+  `).join('') : `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:28px;">尚無交易紀錄</td></tr>`;
+}
+
+function editPrice(symbol, current){
+  const p = prompt(`更新 ${symbol} 現價（目前：${current}）:`);
+  if(p===null) return;
+  const price = parseFloat(p);
+  if(isNaN(price)||price<0){ toast('請輸入有效價格','err'); return; }
+  api(`/api/investment/holdings/${symbol}/price`,'PATCH',{current_price:price})
+    .then(r=>{ if(r.success){toast('現價已更新','ok');loadInvestment();} else toast(r.error,'err'); });
+}
+
+async function deleteHolding(symbol){
+  if(!confirm(`確定移除 ${symbol} 的持倉記錄？`)) return;
+  await api(`/api/investment/holdings/${symbol}`,'DELETE');
+  toast('已移除','ok'); loadInvestment();
+}
+
+function showAddTxn(){
+  showModal('新增投資交易', `
+    <div class="form-row">
+      <div class="form-group">
+        <label>股票/幣種代碼 *</label>
+        <input type="text" id="inv-sym" class="form-control" placeholder="例：2330、BTC">
+      </div>
+      <div class="form-group">
+        <label>動作 *</label>
+        <select id="inv-act" class="form-control">
+          <option value="buy">買入</option>
+          <option value="sell">賣出</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>名稱（買入時選填）</label>
+        <input type="text" id="inv-name" class="form-control" placeholder="台積電、Bitcoin…">
+      </div>
+      <div class="form-group">
+        <label>類型</label>
+        <select id="inv-type" class="form-control">
+          <option value="stock">股票</option>
+          <option value="etf">ETF</option>
+          <option value="crypto">加密貨幣</option>
+          <option value="bond">債券</option>
+          <option value="other">其他</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>數量/股數 *</label>
+        <input type="number" id="inv-shares" class="form-control" placeholder="0" min="0.0001" step="0.0001">
+      </div>
+      <div class="form-group">
+        <label>成交價格 *</label>
+        <input type="number" id="inv-price" class="form-control" placeholder="0" min="0.01" step="0.01">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>交易日期 *</label>
+        <input type="date" id="inv-date" class="form-control" value="${today()}">
+      </div>
+      <div class="form-group">
+        <label>備註</label>
+        <input type="text" id="inv-note" class="form-control" placeholder="可選填">
+      </div>
+    </div>
+  `,{
+    onSubmit: async ()=>{
+      const sym    = $('inv-sym').value.trim().toUpperCase();
+      const shares = parseFloat($('inv-shares').value);
+      const price  = parseFloat($('inv-price').value);
+      const date   = $('inv-date').value;
+      if(!sym||!shares||!price||!date){ toast('請填寫所有必填欄位','err'); return; }
+      const r = await api('/api/investment/txns','POST',{
+        symbol:sym, name:$('inv-name').value||sym, type:$('inv-type').value,
+        action:$('inv-act').value, shares, price, date, note:$('inv-note').value
+      });
+      if(r.success){ toast('交易已記錄','ok'); closeModalForce(); loadInvestment(); }
+      else toast(r.error,'err');
+    }
+  });
+}
+
+function showAddHolding(){
+  showModal('手動新增/更新持倉', `
+    <div class="form-row">
+      <div class="form-group"><label>代碼 *</label><input type="text" id="h-sym" class="form-control" placeholder="2330"></div>
+      <div class="form-group"><label>名稱 *</label><input type="text" id="h-name" class="form-control" placeholder="台積電"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>類型</label>
+        <select id="h-type" class="form-control">
+          <option value="stock">股票</option><option value="etf">ETF</option>
+          <option value="crypto">加密貨幣</option><option value="bond">債券</option><option value="other">其他</option>
+        </select>
+      </div>
+      <div class="form-group"><label>持有股數</label><input type="number" id="h-shares" class="form-control" placeholder="0" step="0.0001"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>平均成本</label><input type="number" id="h-cost" class="form-control" placeholder="0" step="0.01"></div>
+      <div class="form-group"><label>現價</label><input type="number" id="h-price" class="form-control" placeholder="0" step="0.01"></div>
+    </div>
+    <div class="form-group"><label>備註</label><input type="text" id="h-note" class="form-control"></div>
+  `,{
+    submitLabel:'儲存持倉',
+    onSubmit: async ()=>{
+      const sym = $('h-sym').value.trim().toUpperCase();
+      if(!sym||!$('h-name').value){ toast('請填寫代碼和名稱','err'); return; }
+      const r = await api(`/api/investment/holdings/${sym}`,'PUT',{
+        name:$('h-name').value, type:$('h-type').value,
+        shares:$('h-shares').value||0, avg_cost:$('h-cost').value||0,
+        current_price:$('h-price').value||0, note:$('h-note').value
+      });
+      if(r.success){ toast('持倉已更新','ok'); closeModalForce(); loadInvestment(); }
+      else toast(r.error,'err');
+    }
+  });
+}
+
+// ════════════════════════════════════════════════
+// AI CHAT
+// ════════════════════════════════════════════════
+let aiLoading = false;
+
+async function loadAI(){
+  const r = await api('/api/ai/history');
+  const msgs = r.data||[];
+  const badge = $('ai-mode-badge');
+  if(r.mockMode){
+    badge.textContent='模擬模式'; badge.className='badge b-pending';
+    badge.title='請在 .env 設定 OPENAI_API_KEY 以使用真實 AI';
+  } else {
+    badge.textContent='OpenAI 已連線'; badge.className='badge b-done';
+  }
+  renderChat(msgs);
+}
+
+function renderChat(msgs){
+  const el = $('chat-msgs');
+  if(!msgs.length){
+    el.innerHTML = `<div class="chat-empty">👋 你好！我是你的個人生活管理 AI 助理。<br>我了解你的財務、任務、健身和投資狀況，歡迎提問！</div>`;
+    return;
+  }
+  el.innerHTML = msgs.map(m=>`
+    <div class="chat-msg ${m.role}">
+      <div class="role-label">${m.role==='user'?'你':'AI 助理'}</div>
+      ${escHtml(m.content)}
+    </div>
+  `).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+async function sendChat(){
+  if(aiLoading) return;
+  const inp = $('chat-input');
+  const msg = inp.value.trim();
+  if(!msg) return;
+
+  inp.value='';
+  inp.style.height='42px';
+  aiLoading=true;
+  $('chat-send-btn').disabled=true;
+  $('chat-send-btn').textContent='...';
+
+  // Optimistic render
+  const el = $('chat-msgs');
+  el.innerHTML += `<div class="chat-msg user"><div class="role-label">你</div>${escHtml(msg)}</div>`;
+  el.innerHTML += `<div class="chat-msg assistant" id="ai-typing"><div class="role-label">AI 助理</div>⌛ 思考中...</div>`;
+  el.scrollTop = el.scrollHeight;
+
+  try {
+    const r = await api('/api/ai/chat','POST',{message:msg});
+    if(r.success){
+      loadAI();
+    } else {
+      $('ai-typing')?.remove();
+      el.innerHTML += `<div class="chat-msg assistant"><div class="role-label">AI 助理</div>❌ ${escHtml(r.error||'錯誤')}</div>`;
+      el.scrollTop = el.scrollHeight;
+    }
+  } catch(e){
+    $('ai-typing')?.remove();
+    el.innerHTML += `<div class="chat-msg assistant"><div class="role-label">AI 助理</div>❌ 連線失敗</div>`;
+  }
+  aiLoading=false;
+  $('chat-send-btn').disabled=false;
+  $('chat-send-btn').textContent='送出';
+}
+
+async function clearAIHistory(){
+  if(!confirm('確定清除所有對話紀錄？')) return;
+  await api('/api/ai/history','DELETE');
+  toast('對話已清除','ok'); loadAI();
+}
+
+// Enter to send
+$('chat-input').addEventListener('keydown', e=>{
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendChat(); }
+});
+$('chat-input').addEventListener('input', function(){
+  this.style.height='42px';
+  this.style.height = Math.min(this.scrollHeight, 120)+'px';
+});
+
+// ════════════════════════════════════════════════
+// LINE NOTIFY
+// ════════════════════════════════════════════════
+async function loadLine(){
+  const [status, history] = await Promise.all([
+    api('/api/line/status'),
+    api('/api/line/history'),
+  ]);
+
+  const badge = $('line-status-badge');
+  if(status.data?.configured){
+    badge.innerHTML = '<span class="badge b-done">✓ LINE Token 已設定</span>';
+  } else {
+    badge.innerHTML = '<span class="badge b-failed">✗ LINE Token 未設定</span>';
+  }
+
+  const rows = history.data||[];
+  $('line-tbody').innerHTML = rows.length ? rows.map(r=>`
+    <tr>
+      <td style="color:var(--muted);white-space:nowrap;">${r.created_at||'-'}</td>
+      <td><span class="badge b-${r.status}">${r.status==='sent'?'成功':'失敗'}</span></td>
+      <td style="font-size:12px;white-space:pre-wrap;max-width:400px;">${escHtml(r.message)}</td>
+    </tr>
+  `).join('') : `<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:28px;">尚無通知紀錄</td></tr>`;
+}
+
+async function sendLineMsg(){
+  const msg = $('line-msg').value.trim();
+  if(!msg){ toast('請輸入訊息內容','err'); return; }
+  const r = await api('/api/line/notify','POST',{message:msg});
+  if(r.success){ toast('LINE 通知已發送','ok'); $('line-msg').value=''; loadLine(); }
+  else toast(r.error||'發送失敗','err');
+}
+
+async function sendLineSummary(){
+  const r = await api('/api/line/notify/summary','POST',{});
+  if(r.success){ toast('日報已發送至 LINE','ok'); loadLine(); }
+  else toast(r.error||'發送失敗','err');
+}
+
+// ════════════════════════════════════════════════
+// Init
+// ════════════════════════════════════════════════
+loadDashboard();
+</script>
+</body>
+</html>
