@@ -12,6 +12,8 @@
 | 📈 投資 | 持倉管理、買賣交易記錄、損益計算 |
 | 🤖 AI 助理 | OpenAI 整合（含模擬模式）、上下文感知問答 |
 | 🔔 LINE 通知 | LINE Notify 即時推播、每日摘要排程 |
+| ✈️ Telegram | Telegram Bot 即時推播、每日摘要排程 |
+| 🗺️ 旅遊足跡 | 多國地圖、點擊記錄造訪區域、進度統計 |
 
 ---
 
@@ -60,6 +62,8 @@ http://localhost:3100
 | `LINE_NOTIFY_TOKEN` | LINE Notify Token | - |
 | `DAILY_NOTIFY_ENABLED` | 啟用每日摘要推播 | `false` |
 | `DAILY_NOTIFY_CRON` | 推播時間（Cron 格式）| `0 8 * * *` |
+| `TELEGRAM_BOT_TOKEN` | Telegram Bot Token | - |
+| `TELEGRAM_CHAT_ID` | Telegram 接收者 Chat ID | - |
 
 ---
 
@@ -119,6 +123,22 @@ http://localhost:3100
 | POST | `/notify` | 發送自訂通知 |
 | POST | `/notify/summary` | 發送今日摘要 |
 
+### Telegram 通知 `/api/telegram`
+| 方法 | 路徑 | 說明 |
+|------|------|------|
+| GET | `/status` | 檢查 Bot 設定 |
+| GET | `/history` | 通知發送歷史 |
+| POST | `/notify` | 發送自訂通知 |
+| POST | `/notify/summary` | 發送今日摘要 |
+
+### 旅遊足跡 `/api/travel`
+| 方法 | 路徑 | 說明 |
+|------|------|------|
+| GET | `/summary` | 各國已造訪區域數量 |
+| GET | `/visited` | 取得某國造訪記錄 (`?country=`) |
+| GET | `/geojson/:country` | 取得國家 GeoJSON 地圖資料 |
+| POST | `/visited` | 切換區域造訪狀態（已訪則移除）|
+
 ---
 
 ## PM2 部署
@@ -155,11 +175,15 @@ life_manager/
 │       ├── fitness.js       # 健身模組
 │       ├── investment.js    # 投資模組
 │       ├── ai.js            # AI 助理模組
-│       └── line_notify.js   # LINE 通知模組
+│       ├── line_notify.js   # LINE 通知模組
+│       ├── telegram.js      # Telegram Bot 模組
+│       └── travel.js        # 旅遊足跡模組
 ├── public/
 │   └── index.html           # 前端 SPA
 ├── data/                    # SQLite 資料庫（自動建立）
 ├── logs/                    # 日誌（自動建立）
+├── scripts/
+│   └── seed_geojson.js      # 預先下載地圖 GeoJSON 至 SQLite
 ├── .env.example             # 環境變數範本
 ├── .env                     # 你的環境變數（不上傳 git）
 ├── package.json
@@ -176,7 +200,8 @@ life_manager/
 - **資料庫**: SQLite（better-sqlite3，無需額外安裝 DB server）
 - **排程**: node-cron
 - **AI**: OpenAI API（gpt-4o-mini）
-- **通知**: LINE Notify API
+- **通知**: LINE Notify API、Telegram Bot API
+- **地圖**: Leaflet.js + GeoJSON（快取於 SQLite）
 - **前端**: Vanilla HTML/CSS/JS + Socket.io + Chart.js
 - **流程管理**: PM2
 # life_manage

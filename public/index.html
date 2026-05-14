@@ -481,8 +481,6 @@
       </div>
     </div>
 
-    </div>
-
     <!-- ════ TRAVEL ════ -->
     <div class="section" id="section-travel">
       <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:16px;gap:8px;">
@@ -500,18 +498,22 @@
   <div style="position:absolute;top:24px;left:24px;right:24px;bottom:24px;background:var(--card);border-radius:16px;display:flex;flex-direction:column;box-shadow:0 24px 72px rgba(0,0,0,.3);overflow:hidden;">
     <div style="flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border);">
       <div>
-        <h3 id="map-overlay-title" style="font-size:22px;font-weight:700;"></h3>
+        <h3 id="map-overlay-title" style="font-size:22px;font-weight:700;display:flex;align-items:center;gap:10px;"><img id="map-overlay-flag" src="" alt="" style="width:32px;height:32px;object-fit:contain;"><span id="map-overlay-name"></span></h3>
         <div id="map-overlay-sub" style="font-size:14px;color:var(--muted);margin-top:2px;"></div>
       </div>
-      <button onclick="closeMapOverlay()" style="background:none;border:none;font-size:28px;cursor:pointer;color:var(--muted);line-height:1;padding:4px 8px;">✕</button>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="travel-lang-btn" onclick="toggleTravelLang()" class="btn btn-outline btn-sm" style="font-size:13px;">中文</button>
+        <button onclick="closeMapOverlay()" style="background:none;border:none;font-size:28px;cursor:pointer;color:var(--muted);line-height:1;padding:4px 8px;">✕</button>
+      </div>
     </div>
-    <div style="flex:1;min-height:0;position:relative;">
-      <div id="travel-map" style="position:absolute;inset:0;"></div>
+    <div style="flex:1;min-height:0;display:flex;overflow:hidden;">
+      <div id="travel-map" style="flex:1;min-width:0;"></div>
+      <div id="travel-region-list" style="width:240px;flex-shrink:0;overflow-y:auto;border-left:1px solid var(--border);background:#fafafa;"></div>
     </div>
     <div style="flex-shrink:0;padding:12px 24px;border-top:1px solid var(--border);display:flex;align-items:center;gap:20px;font-size:14px;color:var(--muted);">
       <span style="display:flex;align-items:center;gap:6px;"><span style="width:16px;height:16px;background:#10b981;border-radius:3px;display:inline-block;"></span>已造訪</span>
       <span style="display:flex;align-items:center;gap:6px;"><span style="width:16px;height:16px;background:#e2e8f0;border:1px solid #94a3b8;border-radius:3px;display:inline-block;"></span>未造訪</span>
-      <span style="margin-left:auto;">💡 點擊地區標記造訪</span>
+      <span style="margin-left:auto;">💡 點擊地圖或右側列表標記造訪</span>
       <span id="map-visited-count" style="font-weight:700;color:var(--success);font-size:16px;"></span>
     </div>
   </div>
@@ -1319,13 +1321,58 @@ async function sendTgSummary(){
 // ════════════════════════════════════════════════
 // Travel
 // ════════════════════════════════════════════════
+
+// ── 繁體中文地名對照表 ──
+const _ZH_NAMES = {
+  japan: {
+    'Hokkaido':'北海道','Aomori':'青森縣','Iwate':'岩手縣','Miyagi':'宮城縣',
+    'Akita':'秋田縣','Yamagata':'山形縣','Fukushima':'福島縣','Ibaraki':'茨城縣',
+    'Tochigi':'栃木縣','Gunma':'群馬縣','Saitama':'埼玉縣','Chiba':'千葉縣',
+    'Tokyo':'東京都','Kanagawa':'神奈川縣','Niigata':'新潟縣','Toyama':'富山縣',
+    'Ishikawa':'石川縣','Fukui':'福井縣','Yamanashi':'山梨縣','Nagano':'長野縣',
+    'Gifu':'岐阜縣','Shizuoka':'靜岡縣','Aichi':'愛知縣','Mie':'三重縣',
+    'Shiga':'滋賀縣','Kyoto':'京都府','Osaka':'大阪府','Hyogo':'兵庫縣',
+    'Nara':'奈良縣','Wakayama':'和歌山縣','Tottori':'鳥取縣','Shimane':'島根縣',
+    'Okayama':'岡山縣','Hiroshima':'廣島縣','Yamaguchi':'山口縣','Tokushima':'德島縣',
+    'Kagawa':'香川縣','Ehime':'愛媛縣','Kochi':'高知縣','Fukuoka':'福岡縣',
+    'Saga':'佐賀縣','Nagasaki':'長崎縣','Kumamoto':'熊本縣','Oita':'大分縣',
+    'Miyazaki':'宮崎縣','Kagoshima':'鹿兒島縣','Okinawa':'沖繩縣'
+  },
+
+  thailand: {
+    'Bangkok':'曼谷','Nonthaburi':'暖武里','Pathum Thani':'巴吞他尼',
+    'Samut Prakan':'北欖坡','Nakhon Pathom':'那空巴色','Samut Sakhon':'薩穆特沙空',
+    'Samut Songkhram':'薩穆特頌堪','Ratchaburi':'拉差武里','Kanchanaburi':'北碧',
+    'Suphan Buri':'素攀武里','Ang Thong':'萬公','Sing Buri':'信武里',
+    'Lop Buri':'華富里','Saraburi':'沙拉武里','Nakhon Nayok':'那空乃',
+    'Phra Nakhon Si Ayutthaya':'大城','Chai Nat':'猜納','Chachoengsao':'北柳',
+    'Chon Buri':'春武里','Rayong':'羅勇','Chanthaburi':'尖竹汶','Trat':'達叻',
+    'Sa Kaeo':'沙繳','Nakhon Ratchasima':'呵叻','Buri Ram':'武里南',
+    'Surin':'素輦','Si Sa Ket':'四色菊','Ubon Ratchathani':'烏汶府',
+    'Yasothon':'雅沙他寧','Roi Et':'黎逸','Maha Sarakham':'瑪哈沙拉坎',
+    'Khon Kaen':'孔敬','Udon Thani':'烏隆','Nong Khai':'廊開',
+    'Nong Bua Lam Phu':'農布瓦蘭蓬','Loei':'黎府','Sakon Nakhon':'色軍',
+    'Nakhon Phanom':'那空帕農','Mukdahan':'莫達漢','Kalasin':'加拉信',
+    'Amnat Charoen':'阿納乍能','Bueng Kan':'彭干','Chiang Rai':'清萊',
+    'Chiang Mai':'清邁','Phayao':'帕堯','Nan':'南府','Phrae':'拍府',
+    'Lampang':'南邦','Lamphun':'南奔','Uttaradit':'烏他拉迪',
+    'Mae Hong Son':'湄宏順','Chaiyaphum':'猜亞蓬','Prachin Buri':'巴真武里',
+    'Sukhothai':'素可泰','Phitsanulok':'彭世洛','Phichit':'彼差汶',
+    'Phetchabun':'碧差汶','Tak':'達府','Kamphaeng Phet':'甘烹碧',
+    'Nakhon Sawan':'那空沙旺','Uthai Thani':'烏泰他尼府','Phetchaburi':'碧武里',
+    'Prachuap Khiri Khan':'巴蜀','Chumphon':'春蓬','Ranong':'拉農',
+    'Surat Thani':'素叻他尼','Phang Nga':'攀牙','Phuket':'普吉',
+    'Krabi':'甲米','Nakhon Si Thammarat':'那空是貪瑪叻','Trang':'董里',
+    'Phatthalung':'博他倫','Songkhla':'宋卡','Satun':'沙敦',
+    'Pattani':'北大年','Yala':'也拉','Narathiwat':'陶公'
+  },
+
+};
+
 const TRAVEL_COUNTRIES = {
-  japan:   { name: '日本', flag: '🇯🇵', geojson: 'https://cdn.jsdelivr.net/gh/dataofjapan/land/japan.geojson', getRegionName: p => p.nam_ja||p.nam||p.name||'未知', getRegionId: p => String(p.nam||p.name||'?'), center:[37.0,136.0], zoom:5, totalRegions:47 },
-  thailand:{ name: '泰國', flag: '🇹🇭', geojson: 'https://cdn.jsdelivr.net/gh/apisit/thailand.json/thailand.json', getRegionName: p => p.name||'未知', getRegionId: p => String(p.provinceCode||p.name||'?'), center:[13.0,101.0], zoom:6, totalRegions:77 },
-  korea:   { name: '韓國', flag: '🇰🇷', geojson: 'https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2012/json/skorea_provinces_geo_simple.json', getRegionName: p => p.name_eng||p.name||'未知', getRegionId: p => String(p.code||p.name||'?'), center:[36.5,127.5], zoom:7, totalRegions:17 },
-  taiwan:  { name: '台灣', flag: '🇹🇼', geojson: 'https://cdn.jsdelivr.net/gh/g0v/twgeojson/twCounty2010.geo.json', getRegionName: p => p.COUNTYNAME||p.name||'未知', getRegionId: p => String(p.COUNTYID||p.COUNTYNAME||'?'), center:[23.5,121.0], zoom:7, totalRegions:22 },
-  hk:      { name: '香港', flag: '🇭🇰', geojson: 'https://raw.githubusercontent.com/hkgov-opensource/hk-district-geojson/main/hk_district.geojson', getRegionName: p => p.ENAME||p.CNAME||p.name||'未知', getRegionId: p => String(p.DISTRICT||p.ENAME||'?'), center:[22.35,114.15], zoom:11, totalRegions:18 },
-  vietnam: { name: '越南', flag: '🇻🇳', geojson: 'https://raw.githubusercontent.com/wmgeolab/geoBoundaries/main/releaseData/gbOpen/VNM/ADM1/geoBoundaries-VNM-ADM1_simplified.geojson', getRegionName: p => p.shapeName||p.name||'未知', getRegionId: p => String(p.shapeID||p.shapeName||'?'), center:[16.0,106.0], zoom:6, totalRegions:63 }
+  japan:   { name: '日本',   flag: '/flags/jp.svg', getRegionName: p => p.nam_ja||p.nam||p.name||'未知', getRegionNameZh: p => { const b=String(p.nam||'').replace(/ (?:Ken|Fu|To|Do)$/i,'').trim(); return _ZH_NAMES.japan[b]||p.nam_ja||p.nam||'未知'; }, getRegionId: p => String(p.nam||p.name||'?'), center:[37.0,136.0], zoom:5, totalRegions:47 },
+  thailand:{ name: '泰國',   flag: '/flags/th.svg', getRegionName: p => p.name||'未知', getRegionNameZh: p => _ZH_NAMES.thailand[p.name]||p.name||'未知', getRegionId: p => String(p.provinceCode||p.name||'?'), center:[13.0,101.0], zoom:6, totalRegions:77 },
+  taiwan:  { name: '台灣',   flag: '/flags/tw.svg', getRegionName: p => p.name||'未知', getRegionNameZh: p => p.name_traditional_chinese||p.name||'未知', getRegionId: p => String(p.name||'?'), center:[23.5,121.0], zoom:7, totalRegions:22 }
 };
 
 let _travelMap = null;
@@ -1333,8 +1380,18 @@ let _travelVisited = new Set();
 let _travelCountry = null;
 let _travelGeoLayer = null;
 let _travelLoadId = 0;   // race condition guard
+let _travelLangZh = false;
+let _travelGeoData = null;
+let _travelCurrentConfig = null;
 
 let _travelView = 'card';
+
+function toggleTravelLang() {
+  _travelLangZh = !_travelLangZh;
+  const btn = $('travel-lang-btn');
+  if (btn) btn.textContent = _travelLangZh ? '原文' : '中文';
+  if (_travelGeoData && _travelCurrentConfig) _renderTravelMap(_travelGeoData, _travelCurrentConfig);
+}
 
 function setTravelView(v) {
   _travelView = v;
@@ -1360,7 +1417,7 @@ async function loadTravel() {
       return `<div onclick="openCountryMap('${key}')" style="width:180px;flex-shrink:0;background:var(--card);border:2px solid var(--border);border-radius:14px;padding:22px 18px;cursor:pointer;transition:border-color .15s,transform .15s,box-shadow .15s;text-align:center;"
         onmouseover="this.style.borderColor='var(--primary)';this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(99,102,241,.18)'"
         onmouseout="this.style.borderColor='var(--border)';this.style.transform='';this.style.boxShadow=''">
-        <div style="font-size:52px;line-height:1;margin-bottom:10px;">${c.flag}</div>
+        <img src="${c.flag}" alt="${c.name}" style="width:52px;height:52px;object-fit:contain;margin-bottom:10px;">
         <div style="font-size:20px;font-weight:800;margin-bottom:6px;">${c.name}</div>
         <div style="font-size:13px;color:var(--muted);margin-bottom:10px;"><span style="font-size:22px;font-weight:800;color:var(--success);">${cnt}</span> / ${total} 區</div>
         <div style="background:#e2e8f0;border-radius:4px;height:5px;overflow:hidden;margin-bottom:10px;"><div style="background:var(--success);width:${pct}%;height:100%;border-radius:4px;"></div></div>
@@ -1376,7 +1433,7 @@ async function loadTravel() {
         const pct = total !== '?' ? Math.round(cnt/total*100) : 0;
         return `<div onclick="openCountryMap('${key}')" style="display:flex;align-items:center;gap:16px;padding:16px 22px;cursor:pointer;border-bottom:${i<entries.length-1?'1px solid var(--border)':'none'};transition:background .12s;"
           onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
-          <span style="font-size:36px;line-height:1;flex-shrink:0;">${c.flag}</span>
+          <img src="${c.flag}" alt="${c.name}" style="width:36px;height:36px;object-fit:contain;flex-shrink:0;">
           <div style="flex:1;min-width:0;">
             <div style="font-size:17px;font-weight:700;">${c.name}</div>
             <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
@@ -1400,7 +1457,9 @@ async function openCountryMap(countryKey) {
 
   const overlay = $('map-overlay');
   overlay.style.display = 'block';
-  $('map-overlay-title').textContent = config.flag + ' ' + config.name;
+  $('map-overlay-flag').src = config.flag;
+  $('map-overlay-flag').alt = config.name;
+  $('map-overlay-name').textContent = config.name;
   $('map-overlay-sub').textContent = '載入地圖中...';
   $('map-visited-count').textContent = '';
 
@@ -1435,8 +1494,18 @@ async function openCountryMap(countryKey) {
   }
 }
 
+function _escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 function _renderTravelMap(geoData, config) {
+  _travelGeoData = geoData;
+  _travelCurrentConfig = config;
   if (_travelGeoLayer) { _travelGeoLayer.remove(); }
+  const getName = props => (_travelLangZh && config.getRegionNameZh)
+    ? (config.getRegionNameZh(props) || config.getRegionName(props))
+    : config.getRegionName(props);
+
   _travelGeoLayer = L.geoJSON(geoData, {
     style: feature => {
       const id = config.getRegionId(feature.properties);
@@ -1449,21 +1518,16 @@ function _renderTravelMap(geoData, config) {
       };
     },
     onEachFeature: (feature, layer) => {
-      const name    = config.getRegionName(feature.properties);
+      const name    = getName(feature.properties);
       const id      = config.getRegionId(feature.properties);
       const visited = () => _travelVisited.has(id);
 
-      // 永久顯示地區名稱在色塊中央
       layer.bindTooltip(name, {
-        permanent: true,
-        direction: 'center',
-        className: 'travel-region-label',
-        opacity: 1,
-        noWrap: true,
-        offset: [0, 0]
+        permanent: true, direction: 'center',
+        className: 'travel-region-label', opacity: 1, noWrap: true, offset: [0, 0]
       });
 
-      layer.on('click', async () => {
+      const doToggle = async () => {
         const r = await api('/api/travel/visited', 'POST', { country: _travelCountry, region_id: id, region_name: name });
         if (r.success) {
           if (r.action === 'added') _travelVisited.add(id);
@@ -1474,9 +1538,11 @@ function _renderTravelMap(geoData, config) {
             color:       visited() ? '#065f46' : '#94a3b8'
           });
           _updateMapCount();
+          _renderRegionList(_travelGeoData, _travelCurrentConfig);
           loadTravel();
         }
-      });
+      };
+      layer.on('click', doToggle);
       layer.on('mouseover', function() {
         if (!visited()) this.setStyle({ fillColor: '#a5b4fc', fillOpacity: 0.7 });
       });
@@ -1489,6 +1555,60 @@ function _renderTravelMap(geoData, config) {
     }
   }).addTo(_travelMap);
   _travelMap.fitBounds(_travelGeoLayer.getBounds(), { padding: [20, 20] });
+  _renderRegionList(geoData, config);
+}
+
+function _renderRegionList(geoData, config) {
+  const listEl = $('travel-region-list');
+  if (!listEl) return;
+  const features = (geoData && geoData.features) ? [...geoData.features] : [];
+  const getName = props => (_travelLangZh && config.getRegionNameZh)
+    ? (config.getRegionNameZh(props) || config.getRegionName(props))
+    : config.getRegionName(props);
+  features.sort((a, b) => getName(a.properties).localeCompare(getName(b.properties), 'zh-TW'));
+  const total   = features.length;
+  const visited = features.filter(f => _travelVisited.has(config.getRegionId(f.properties))).length;
+  listEl.innerHTML =
+    `<div style="padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;color:var(--muted);background:var(--bg);position:sticky;top:0;z-index:1;letter-spacing:.5px;">
+      全部區域 ${visited}/${total}
+    </div>` +
+    features.map(f => {
+      const id = config.getRegionId(f.properties);
+      const name = getName(f.properties);
+      const v = _travelVisited.has(id);
+      const bg = v ? '#f0fdf4' : '';
+      const bgHover = v ? '#dcfce7' : '#f8fafc';
+      return `<div data-rid="${_escHtml(id)}" data-rname="${_escHtml(name)}" onclick="toggleRegionFromList(this)"
+        style="padding:9px 14px;cursor:pointer;display:flex;align-items:center;gap:9px;border-bottom:1px solid #f1f5f9;font-size:13px;background:${bg};"
+        onmouseover="this.style.background='${bgHover}'" onmouseout="this.style.background='${bg}'">
+        <span style="width:9px;height:9px;border-radius:50%;flex-shrink:0;background:${v?'#10b981':'#cbd5e1'};"></span>
+        <span style="flex:1;line-height:1.3;">${_escHtml(name)}</span>
+        ${v ? '<span style="color:#10b981;font-size:12px;font-weight:700;">\u2713</span>' : ''}
+      </div>`;
+    }).join('');
+}
+
+async function toggleRegionFromList(el) {
+  const id   = el.dataset.rid;
+  const name = el.dataset.rname;
+  const r = await api('/api/travel/visited', 'POST', { country: _travelCountry, region_id: id, region_name: name });
+  if (!r.success) return;
+  if (r.action === 'added') _travelVisited.add(id);
+  else _travelVisited.delete(id);
+  // 同步更新地圖色彩
+  if (_travelGeoLayer) {
+    _travelGeoLayer.eachLayer(layer => {
+      if (!layer.feature) return;
+      const fid = _travelCurrentConfig.getRegionId(layer.feature.properties);
+      if (fid === id) {
+        const v = _travelVisited.has(id);
+        layer.setStyle({ fillColor: v?'#10b981':'#e2e8f0', fillOpacity: v?0.75:0.55, color: v?'#065f46':'#94a3b8' });
+      }
+    });
+  }
+  _updateMapCount();
+  _renderRegionList(_travelGeoData, _travelCurrentConfig);
+  loadTravel();
 }
 
 function _updateMapCount() {

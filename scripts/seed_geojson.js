@@ -11,10 +11,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const COUNTRIES = {
   japan:    'https://cdn.jsdelivr.net/gh/dataofjapan/land/japan.geojson',
   thailand: 'https://cdn.jsdelivr.net/gh/apisit/thailand.json/thailand.json',
-  korea:    'https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2012/json/skorea_provinces_geo_simple.json',
-  taiwan:   'https://cdn.jsdelivr.net/gh/g0v/twgeojson/twCounty2010.geo.json',
-  hk:       'https://raw.githubusercontent.com/hkgov-opensource/hk-district-geojson/main/hk_district.geojson',
-  vietnam:  'https://raw.githubusercontent.com/wmgeolab/geoBoundaries/main/releaseData/gbOpen/VNM/ADM1/geoBoundaries-VNM-ADM1_simplified.geojson'
+  taiwan:   'https://raw.githubusercontent.com/codeforgermany/click_that_hood/main/public/data/taiwan.geojson'
 };
 
 function fetchUrl(url, redirectCount = 0) {
