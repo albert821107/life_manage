@@ -81,7 +81,10 @@ async function init() {
     `CREATE TABLE IF NOT EXISTS investments (id INTEGER PRIMARY KEY AUTOINCREMENT, symbol TEXT NOT NULL UNIQUE, name TEXT NOT NULL, type TEXT DEFAULT 'stock', shares REAL DEFAULT 0, avg_cost REAL DEFAULT 0, current_price REAL DEFAULT 0, note TEXT DEFAULT '', updated_at TEXT DEFAULT (datetime('now','localtime')))`,
     `CREATE TABLE IF NOT EXISTS investment_txns (id INTEGER PRIMARY KEY AUTOINCREMENT, symbol TEXT NOT NULL, action TEXT NOT NULL, shares REAL NOT NULL, price REAL NOT NULL, total REAL NOT NULL, date TEXT NOT NULL, note TEXT DEFAULT '', created_at TEXT DEFAULT (datetime('now','localtime')))`,
     `CREATE TABLE IF NOT EXISTS ai_chats (id INTEGER PRIMARY KEY AUTOINCREMENT, role TEXT NOT NULL, content TEXT NOT NULL, created_at TEXT DEFAULT (datetime('now','localtime')))`,
-    `CREATE TABLE IF NOT EXISTS line_notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, message TEXT NOT NULL, status TEXT DEFAULT 'sent', created_at TEXT DEFAULT (datetime('now','localtime')))`
+    `CREATE TABLE IF NOT EXISTS line_notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, message TEXT NOT NULL, status TEXT DEFAULT 'sent', created_at TEXT DEFAULT (datetime('now','localtime')))`,
+    `CREATE TABLE IF NOT EXISTS telegram_notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, message TEXT NOT NULL, status TEXT DEFAULT 'sent', created_at TEXT DEFAULT (datetime('now','localtime')))`,
+    `CREATE TABLE IF NOT EXISTS travel_visited (id INTEGER PRIMARY KEY AUTOINCREMENT, country TEXT NOT NULL, region_id TEXT NOT NULL, region_name TEXT NOT NULL, visited_at TEXT DEFAULT (datetime('now','localtime')), UNIQUE(country, region_id))`,
+    `CREATE TABLE IF NOT EXISTS travel_geojson (country TEXT NOT NULL PRIMARY KEY, geojson TEXT NOT NULL, updated_at TEXT DEFAULT (datetime('now','localtime')))`
   ];
   SCHEMA.forEach(s => { try { raw.run(s); } catch(e) { console.error('[DB]', e.message); } });
   _db.persist();

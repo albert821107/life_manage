@@ -51,6 +51,8 @@ app.use(express.static(path.join(__dirname, '../public')));
   const investmentRouter = require('./modules/investment')(io);
   const aiRouter         = require('./modules/ai')(io);
   const lineModule       = require('./modules/line_notify')(io);
+  const telegramModule   = require('./modules/telegram')(io);
+  const travelRouter     = require('./modules/travel')(io);
 
   app.use('/api/accounting', accountingRouter);
   app.use('/api/tasks',      tasksRouter);
@@ -58,6 +60,8 @@ app.use(express.static(path.join(__dirname, '../public')));
   app.use('/api/investment', investmentRouter);
   app.use('/api/ai',         aiRouter);
   app.use('/api/line',       lineModule.router);
+  app.use('/api/telegram',   telegramModule.router);
+  app.use('/api/travel',     travelRouter);
 
   app.get('/api/health', (req, res) => {
     res.json({ success: true, version: '1.0.0', uptime: Math.floor(process.uptime()) });
