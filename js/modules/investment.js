@@ -375,16 +375,17 @@ module.exports = (io) => {
         : '--';
     });
 
-    const invTWD  = rows.filter(r => r.category === '投資').reduce((s, r) => s + (r.twdAmount || 0), 0);
-    const cashTWD = rows.filter(r => r.category === '現金').reduce((s, r) => s + (r.twdAmount || 0), 0);
+    const invTWD  = rows.filter(r => r.category === '投資' && r.twdAmount !== null).reduce((s, r) => s + r.twdAmount, 0);
+    const cashTWD = totalTWD - invTWD;
+    const invPct  = totalTWD > 0 ? +((invTWD / totalTWD) * 100).toFixed(1) : 0;
 
     return {
       accounts: rows,
       totalTWD,
       investmentTWD: invTWD,
       cashTWD,
-      investmentPct: totalTWD > 0 ? ((invTWD / totalTWD) * 100).toFixed(1) : '0',
-      cashPct:       totalTWD > 0 ? ((cashTWD / totalTWD) * 100).toFixed(1) : '0',
+      investmentPct: invPct.toFixed(1),
+      cashPct:       (100 - invPct).toFixed(1),
       rates:         rates,
       history:       db.prepare(`SELECT * FROM assets_snapshots ORDER BY date ASC`).all(),
     };

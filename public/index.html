@@ -1382,7 +1382,6 @@ async function loadMarket(market){
       <td style="white-space:nowrap;">
         <span class="drag-handle" title="拖曳排序">⠿</span>
         <button class="btn btn-xs btn-outline" onclick="editHolding(this.closest('tr'))">✏️</button>
-        <button class="btn btn-xs btn-danger" onclick="deleteHolding('${sym}')">刪</button>
       </td>
     </tr>`;
   }).join('') : `<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:28px;">尚無${_mktLabel(market)}庫存</td></tr>`;
@@ -1424,17 +1423,39 @@ async function loadShorts(){
   }).join('') : `<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px;">尚無借券記錄</td></tr>`;
 }
 
-async function showAddShort(){
+async function _initShortAutocomplete(){
+  const symEl = document.getElementById('sh-sym');
+  const listEl = document.getElementById('dl-sh-sym');
+  if(!symEl||!listEl) return;
   const stocks = await getTwStocks();
-  const dlId = 'dl-short-sym';
+  const _setName = n=>{ const d=document.getElementById('sh-name-display'),h=document.getElementById('sh-name'); if(d)d.textContent=n||'—'; if(h)h.value=n||''; };
+  function _show(q){
+    if(!q){ listEl.style.display='none'; return; }
+    const lower=q.toLowerCase();
+    const hits=stocks.filter(s=>s.code.toLowerCase().startsWith(lower)||s.name.includes(q)).slice(0,8);
+    if(!hits.length){ listEl.style.display='none'; return; }
+    listEl.innerHTML=hits.map(s=>`<div class="autocomplete-item" data-code="${s.code}" data-name="${s.name}"><span class="ac-code">${s.code}</span><span class="ac-name">${s.name}</span></div>`).join('');
+    listEl.querySelectorAll('.autocomplete-item').forEach(el=>el.addEventListener('mousedown',e=>{ e.preventDefault(); symEl.value=el.dataset.code; _setName(el.dataset.name); listEl.style.display='none'; }));
+    listEl.style.display='block';
+  }
+  symEl.addEventListener('input',()=>{ const q=symEl.value.trim(); if(!q){ listEl.style.display='none'; _setName(''); return; } _show(q); });
+  symEl.addEventListener('blur',()=>{ setTimeout(()=>{ listEl.style.display='none'; const sym=symEl.value.trim().toUpperCase(); if(sym&&!document.getElementById('sh-name')?.value){ const f=stocks.find(x=>x.code===sym); if(f)_setName(f.name); } },160); });
+}
+
+async function showAddShort(){
   showModal('新增借券賣出', `
     <div class="form-row">
-      <div class="form-group">
-        <label>代碼 *</label>
-        <input type="text" id="sh-sym" class="form-control" placeholder="2330" list="${dlId}">
-        <datalist id="${dlId}">${stocks.map(s=>`<option value="${s.code}" label="${s.name}"></option>`).join('')}</datalist>
+      <div class="form-group"><label>代碼 *</label>
+        <div class="autocomplete-wrap">
+          <input type="text" id="sh-sym" class="form-control" placeholder="輸入代碼或名稱" autocomplete="off">
+          <div class="autocomplete-list" id="dl-sh-sym"></div>
+        </div>
       </div>
-      <div class="form-group"><label>名稱</label><input type="text" id="sh-name" class="form-control" placeholder="台積電"></div>
+      <div class="form-group">
+        <label>名稱</label>
+        <div id="sh-name-display" style="padding:8px 12px;background:#f8fafc;border:1px solid var(--border);border-radius:var(--radius);color:var(--muted);min-height:38px;font-size:15px;">—</div>
+        <input type="hidden" id="sh-name">
+      </div>
     </div>
     <div class="form-row">
       <div class="form-group"><label>股數 *</label><input type="number" id="sh-shares" class="form-control" placeholder="1000" step="1" min="1"></div>
@@ -1452,13 +1473,13 @@ async function showAddShort(){
       const price = parseFloat($('sh-price').value);
       const date = $('sh-date').value;
       if(!sym||!shares||!price||!date){ toast('請填寫所有必填欄位','err'); return; }
-      let name = $('sh-name').value.trim();
-      if(!name){ const found = stocks.find(s=>s.code===sym); name = found ? found.name : sym; }
+      let name = $('sh-name').value.trim() || sym;
       const r = await api('/api/investment/shorts/txn','POST',{symbol:sym, name, action:'short_sell', shares, price, date, note:$('sh-note').value});
       if(r.success){ toast('借券部位已新增','ok'); closeModalForce(); loadShorts(); }
       else toast(r.error||'新增失敗','err');
     }
   });
+  _initShortAutocomplete();
 }
 
 async function editShortPrice(symbol, current){
@@ -1519,44 +1540,55 @@ async function loadForex(){
   }).join('') : `<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:28px;">尚無外匯持倉記錄</td></tr>`;
 }
 
+const _FX_PAIRS = [
+  ['USD/TWD','USD','TWD'],['JPY/TWD','JPY','TWD'],['EUR/TWD','EUR','TWD'],
+  ['GBP/TWD','GBP','TWD'],['HKD/TWD','HKD','TWD'],['CNY/TWD','CNY','TWD'],
+  ['AUD/TWD','AUD','TWD'],['CAD/TWD','CAD','TWD'],['SGD/TWD','SGD','TWD'],
+  ['CHF/TWD','CHF','TWD'],['KRW/TWD','KRW','TWD'],['THB/TWD','THB','TWD'],
+];
+function _onFxPairChange(){
+  const pair = ($('fx-pair')?.value||'').toUpperCase();
+  const found = _FX_PAIRS.find(p=>p[0]===pair);
+  const base = found?found[1]:''; const quote = found?found[2]:'';
+  const bd=$('fx-base-display'),bh=$('fx-base'),qd=$('fx-quote-display'),qh=$('fx-quote');
+  if(bd)bd.textContent=base||'—'; if(bh)bh.value=base;
+  if(qd)qd.textContent=quote||'—'; if(qh)qh.value=quote;
+}
 function showAddForex(){
+  const displayStyle='padding:8px 12px;background:#f8fafc;border:1px solid var(--border);border-radius:var(--radius);color:var(--muted);min-height:38px;font-size:15px;';
   showModal('新增外匯持倉', `
     <div class="form-row">
-      <div class="form-group"><label>貨幣對 *</label><input type="text" id="fx-pair" class="form-control" placeholder="USD/TWD" list="dl-fx-pair">
-        <datalist id="dl-fx-pair">
-          <option value="USD/TWD"><option value="JPY/TWD"><option value="EUR/TWD">
-          <option value="GBP/TWD"><option value="HKD/TWD"><option value="CNY/TWD">
-          <option value="AUD/TWD"><option value="CAD/TWD"><option value="SGD/TWD">
-          <option value="CHF/TWD"><option value="KRW/TWD"><option value="THB/TWD">
-        </datalist>
+      <div class="form-group">
+        <label>貨幣對 *</label>
+        <select id="fx-pair" class="form-control" onchange="_onFxPairChange()">
+          <option value="">選擇貨幣對...</option>
+          ${_FX_PAIRS.map(p=>`<option value="${p[0]}">${p[0]}</option>`).join('')}
+        </select>
       </div>
-      <div class="form-group"><label>基準貨幣 *</label><input type="text" id="fx-base" class="form-control" placeholder="USD"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>報價貨幣 *</label><input type="text" id="fx-quote" class="form-control" placeholder="TWD"></div>
       <div class="form-group"><label>金額 *</label><input type="number" id="fx-amount" class="form-control" placeholder="1000" step="any"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>成本匯率 *</label><input type="number" id="fx-entry" class="form-control" placeholder="31.5" step="any"></div>
-      <div class="form-group"><label>現值匯率</label><input type="number" id="fx-current" class="form-control" placeholder="31.5" step="any"></div>
+      <div class="form-group"><label>基準貨幣</label><div id="fx-base-display" style="${displayStyle}">—</div><input type="hidden" id="fx-base"></div>
+      <div class="form-group"><label>報價貨幣</label><div id="fx-quote-display" style="${displayStyle}">—</div><input type="hidden" id="fx-quote"></div>
     </div>
     <div class="form-row">
+      <div class="form-group"><label>成本匯率 *</label><input type="number" id="fx-entry" class="form-control" placeholder="31.5" step="any"></div>
       <div class="form-group"><label>日期 *</label><input type="date" id="fx-date" class="form-control" value="${new Date().toISOString().slice(0,10)}"></div>
-      <div class="form-group"><label>備註</label><input type="text" id="fx-note" class="form-control"></div>
     </div>
+    <div class="form-group"><label>備註</label><input type="text" id="fx-note" class="form-control"></div>
   `,{
     submitLabel:'新增外匯',
     onSubmit: async ()=>{
-      const pair = $('fx-pair').value.trim().toUpperCase();
-      const base = $('fx-base').value.trim().toUpperCase();
-      const quote = $('fx-quote').value.trim().toUpperCase();
+      const pair = ($('fx-pair')?.value||'').toUpperCase();
+      const base = ($('fx-base')?.value||'').toUpperCase();
+      const quote = ($('fx-quote')?.value||'').toUpperCase();
       const amount = parseFloat($('fx-amount').value);
       const entry = parseFloat($('fx-entry').value);
       const date = $('fx-date').value;
       if(!pair||!base||!quote||!amount||!entry||!date){ toast('請填寫所有必填欄位','err'); return; }
       const r = await api('/api/investment/forex','POST',{
         pair, base_currency:base, quote_currency:quote, amount, entry_rate:entry,
-        current_rate:parseFloat($('fx-current').value)||entry, date, note:$('fx-note').value
+        current_rate:entry, date, note:$('fx-note').value
       });
       if(r.success){ toast('外匯持倉已新增','ok'); closeModalForce(); loadForex(); }
       else toast(r.error||'新增失敗','err');
@@ -1607,7 +1639,7 @@ async function loadAssets(){
   $('ast-cash-pct').textContent = `佔 ${d.cashPct}%`;
   $('ast-ratio').textContent    = `${d.investmentPct}% / ${d.cashPct}%`;
   $('ast-bar-inv').style.width  = d.investmentPct + '%';
-  $('ast-bar-cash').style.width = d.cashPct + '%';
+  $('ast-bar-cash').style.flex  = '1';
 
   // ── 市場持倉摘要卡 ──
   const [twSum, usSum, cryptoSum] = await Promise.all([
