@@ -1,40 +1,4 @@
-      <!-- ── 存款 ── -->
-      <div class="inv-sub" id="inv-sub-forex">
-        <div class="stats-grid">
-          <div class="stat-card"><div class="lbl">存款總額(TWD)</div><div class="val" id="dep-total">--</div></div>
-          <div class="stat-card"><div class="lbl">帳戶數</div><div class="val" id="dep-count">--</div></div>
-          <div class="stat-card"><div class="lbl">佔總資產</div><div class="val" id="dep-pct">--%</div></div>
-        </div>
-        <div class="card">
-          <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
-            <span>帳戶列表</span>
-            <div style="display:flex;gap:8px;">
-              <button class="btn btn-sm btn-danger" id="btn-acc-bulk-delete" disabled onclick="deleteSelectedAccounts()">🗑 刪除</button>
-              <button class="btn btn-sm btn-primary" onclick="showAddAccount()">＋ 新增存款</button>
-            </div>
-          </div>
-          <div class="tbl-wrap">
-            <table id="ast-table">
-              <thead>
-                <tr>
-                  <th class="th-check"><input type="checkbox" id="acc-chk-all" onchange="toggleAccSelectAll(this)"></th>
-                  <th>帳戶</th><th>幣種</th>
-                  <th style="text-align:right;">金額</th>
-                  <th style="text-align:right;">匯率</th>
-                  <th style="text-align:right;">換算台幣</th>
-                  <th style="text-align:right;">佔比</th>
-                  <th>類別</th>
-                  <th style="width:80px;"></th>
-                </tr>
-              </thead>
-              <tbody id="ast-tbody">
-                <tr><td colspan="9" style="text-align:center;color:var(--muted);padding:32px;">尚無存款記錄，點擊「＋ 新增存款」開始建立</td></tr>
-              </tbody>
-              <tfoot id="ast-tfoot"></tfoot>
-            </table>
-          </div>
-        </div>
-      </div><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
@@ -526,15 +490,37 @@
 
       <!-- ── 存款 ── -->
       <div class="inv-sub" id="inv-sub-forex">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="lbl">存款總額(TWD)</div><div class="val" id="dep-total">--</div></div>
+          <div class="stat-card"><div class="lbl">帳戶數</div><div class="val" id="dep-count">--</div></div>
+          <div class="stat-card"><div class="lbl">佔總資產</div><div class="val" id="dep-pct">--%</div></div>
+        </div>
         <div class="card">
           <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
-            <span>💰 存款明細</span>
-            <button class="btn btn-sm btn-primary" onclick="showAddDeposit()">＋ 新增存款</button>
+            <span>帳戶列表</span>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-sm btn-danger" id="btn-acc-bulk-delete" disabled onclick="deleteSelectedAccounts()">&#128465; 刪除</button>
+              <button class="btn btn-sm btn-primary" onclick="showAddAccount()">&#65291; 新增存款</button>
+            </div>
           </div>
           <div class="tbl-wrap">
-            <table>
-              <thead><tr><th>存款類型</th><th>機構/帳戶</th><th>幣種</th><th>金額</th><th>日期</th><th>備註</th><th></th></tr></thead>
-              <tbody id="forex-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:28px;">尚無存款記錄</td></tr></tbody>
+            <table id="ast-table">
+              <thead>
+                <tr>
+                  <th class="th-check"><input type="checkbox" id="acc-chk-all" onchange="toggleAccSelectAll(this)"></th>
+                  <th>帳戶</th><th>幣種</th>
+                  <th style="text-align:right;">金額</th>
+                  <th style="text-align:right;">匯率</th>
+                  <th style="text-align:right;">換算台幣</th>
+                  <th style="text-align:right;">佔比</th>
+                  <th>類別</th>
+                  <th style="width:80px;"></th>
+                </tr>
+              </thead>
+              <tbody id="ast-tbody">
+                <tr><td colspan="9" style="text-align:center;color:var(--muted);padding:32px;">尚無存款記錄，點擊「&#65291; 新增存款」開始建立</td></tr>
+              </tbody>
+              <tfoot id="ast-tfoot"></tfoot>
             </table>
           </div>
         </div>
