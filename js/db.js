@@ -84,9 +84,20 @@ async function init() {
     `CREATE TABLE IF NOT EXISTS line_notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, message TEXT NOT NULL, status TEXT DEFAULT 'sent', created_at TEXT DEFAULT (datetime('now','localtime')))`,
     `CREATE TABLE IF NOT EXISTS telegram_notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, message TEXT NOT NULL, status TEXT DEFAULT 'sent', created_at TEXT DEFAULT (datetime('now','localtime')))`,
     `CREATE TABLE IF NOT EXISTS travel_visited (id INTEGER PRIMARY KEY AUTOINCREMENT, country TEXT NOT NULL, region_id TEXT NOT NULL, region_name TEXT NOT NULL, visited_at TEXT DEFAULT (datetime('now','localtime')), UNIQUE(country, region_id))`,
-    `CREATE TABLE IF NOT EXISTS travel_geojson (country TEXT NOT NULL PRIMARY KEY, geojson TEXT NOT NULL, updated_at TEXT DEFAULT (datetime('now','localtime')))`
+    `CREATE TABLE IF NOT EXISTS travel_geojson (country TEXT NOT NULL PRIMARY KEY, geojson TEXT NOT NULL, updated_at TEXT DEFAULT (datetime('now','localtime')))`,
+    `CREATE TABLE IF NOT EXISTS nav_order (sec TEXT NOT NULL PRIMARY KEY, position INTEGER NOT NULL)`,
+    `CREATE TABLE IF NOT EXISTS assets_accounts (id INTEGER PRIMARY KEY AUTOINCREMENT, unit TEXT NOT NULL, currency TEXT NOT NULL DEFAULT 'TWD', amount REAL DEFAULT 0, category TEXT DEFAULT '現金', sort_order INTEGER DEFAULT 0, note TEXT DEFAULT '', updated_at TEXT DEFAULT (datetime('now','localtime')))`,
+    `CREATE TABLE IF NOT EXISTS assets_rates (currency TEXT NOT NULL PRIMARY KEY, rate REAL NOT NULL DEFAULT 1, updated_at TEXT DEFAULT (datetime('now','localtime')))`,
+    `CREATE TABLE IF NOT EXISTS assets_snapshots (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT NOT NULL, total_twd REAL NOT NULL, note TEXT DEFAULT '', created_at TEXT DEFAULT (datetime('now','localtime')))`
   ];
   SCHEMA.forEach(s => { try { raw.run(s); } catch(e) { console.error('[DB]', e.message); } });
+
+  // ── migrations ──
+  try { raw.run(`ALTER TABLE investments ADD COLUMN market TEXT DEFAULT 'tw'`); } catch(e) { /* already exists */ }
+  try { raw.run(`CREATE TABLE IF NOT EXISTS tw_shorts (id INTEGER PRIMARY KEY AUTOINCREMENT, symbol TEXT NOT NULL UNIQUE, name TEXT DEFAULT '', short_shares REAL DEFAULT 0, avg_sell_price REAL DEFAULT 0, current_price REAL DEFAULT 0, note TEXT DEFAULT '', updated_at TEXT DEFAULT (datetime('now','localtime')))`); } catch(e) { /* already exists */ }
+  try { raw.run(`CREATE TABLE IF NOT EXISTS forex (id INTEGER PRIMARY KEY AUTOINCREMENT, pair TEXT NOT NULL, base_currency TEXT NOT NULL, quote_currency TEXT NOT NULL, amount REAL DEFAULT 0, entry_rate REAL DEFAULT 0, current_rate REAL DEFAULT 0, date TEXT NOT NULL, note TEXT DEFAULT '', status TEXT DEFAULT 'open', created_at TEXT DEFAULT (datetime('now','localtime')), updated_at TEXT DEFAULT (datetime('now','localtime')))`); } catch(e) { /* already exists */ }
+  try { raw.run(`ALTER TABLE investments ADD COLUMN sort_order INTEGER DEFAULT 0`); } catch(e) { /* already exists */ }
+
   _db.persist();
   console.log('\u2713 SQLite (sql.js) \u5df2\u8f09\u5165: ' + DB_PATH);
   return _db;

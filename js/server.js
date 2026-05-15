@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 'use strict';
 
 /**
@@ -65,6 +64,26 @@ app.use(express.static(path.join(__dirname, '../public')));
 
   app.get('/api/health', (req, res) => {
     res.json({ success: true, version: '1.0.0', uptime: Math.floor(process.uptime()) });
+  });
+
+  // ==========================================
+  // Nav Order Settings
+  // ==========================================
+  app.get('/api/settings/nav-order', (req, res) => {
+    const db = require('./db').get();
+    const rows = db.prepare('SELECT sec, position FROM nav_order ORDER BY position').all();
+    res.json({ success: true, order: rows.map(r => r.sec) });
+  });
+
+  app.post('/api/settings/nav-order', (req, res) => {
+    const db = require('./db').get();
+    const { order } = req.body;
+    if (!Array.isArray(order)) return res.json({ success: false, error: 'order must be array' });
+    db.prepare('DELETE FROM nav_order').run();
+    order.forEach((sec, i) => {
+      db.prepare('INSERT INTO nav_order (sec, position) VALUES (?, ?)').run(sec, i);
+    });
+    res.json({ success: true });
   });
 
   // ==========================================

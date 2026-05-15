@@ -10,7 +10,7 @@
     "pm2:stop": "pm2 stop life-manager",
     "pm2:restart": "pm2 restart life-manager",
     "pm2:logs": "pm2 logs life-manager",
-    "postinstall": "node scripts/seed_geojson.js"
+    "seed": "node scripts/seed_geojson.js"
   },
   "keywords": ["life-manager", "personal", "productivity", "sqlite"],
   "author": "",
