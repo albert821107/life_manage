@@ -1,6 +1,6 @@
       <!-- ── 存款 ── -->
       <div class="inv-sub" id="inv-sub-forex">
-        <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px;">
+        <div class="stats-grid">
           <div class="stat-card"><div class="lbl">存款總額(TWD)</div><div class="val" id="dep-total">--</div></div>
           <div class="stat-card"><div class="lbl">帳戶數</div><div class="val" id="dep-count">--</div></div>
           <div class="stat-card"><div class="lbl">佔總資產</div><div class="val" id="dep-pct">--%</div></div>
@@ -250,7 +250,8 @@
     .travel-region-label::before { display: none !important; }
 
     /* ── Investment Sub-tabs ── */
-    .inv-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:18px;}
+    .inv-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:18px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-shrink:0;}
+    .inv-tabs::-webkit-scrollbar{height:2px;}
     .inv-tab{padding:9px 22px;cursor:pointer;font-size:15px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:var(--tr);display:flex;align-items:center;gap:6px;}
     .inv-tab:hover{color:var(--text);}
     .inv-tab.active{color:var(--primary);border-bottom-color:var(--primary);}
@@ -448,12 +449,12 @@
 
       <!-- ── 資產總覽 ── -->
       <div class="inv-sub active" id="inv-sub-assets">
-        <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px;">
+        <div class="stats-grid">
           <div class="stat-card"><div class="lbl">總資產(TWD)</div><div class="val" id="ast-total">--</div></div>
           <div class="stat-card"><div class="lbl">📈 庫存市值</div><div class="val" id="ast-inv" style="color:var(--primary);">--</div><div class="sub" id="ast-inv-pct">佔 --%</div></div>
           <div class="stat-card"><div class="lbl">💵 存款總額</div><div class="val" id="ast-cash" style="color:var(--success);">--</div><div class="sub" id="ast-cash-pct">佔 --%</div></div>
         </div>
-        <div id="ast-market-cards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px;"></div>
+        <div id="ast-market-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px;"></div>
         <div class="grid-2">
           <div class="card">
             <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
