@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c ' *)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('cashTWD:', d.get\\('data',{}\\).get\\('cashTWD'\\), 'investmentTWD:', d.get\\('data',{}\\).get\\('investmentTWD'\\), 'totalTWD:', d.get\\('data',{}\\).get\\('totalTWD'\\)\\)\")",
+      "Bash(git commit -m ' *)",
+      "Bash(git commit -m 'fix\\(invest\\): 頁籤/stats-grid 響應式佈局修正，窄螢幕不再跑版 *)",
+      "Bash(node -e ' *)",
+      "Bash(git commit *)"
+    ]
+  }
+}
