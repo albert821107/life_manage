@@ -1,4 +1,40 @@
-<!DOCTYPE html>
+      <!-- ── 存款 ── -->
+      <div class="inv-sub" id="inv-sub-forex">
+        <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px;">
+          <div class="stat-card"><div class="lbl">存款總額(TWD)</div><div class="val" id="dep-total">--</div></div>
+          <div class="stat-card"><div class="lbl">帳戶數</div><div class="val" id="dep-count">--</div></div>
+          <div class="stat-card"><div class="lbl">佔總資產</div><div class="val" id="dep-pct">--%</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>帳戶列表</span>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-sm btn-danger" id="btn-acc-bulk-delete" disabled onclick="deleteSelectedAccounts()">🗑 刪除</button>
+              <button class="btn btn-sm btn-primary" onclick="showAddAccount()">＋ 新增存款</button>
+            </div>
+          </div>
+          <div class="tbl-wrap">
+            <table id="ast-table">
+              <thead>
+                <tr>
+                  <th class="th-check"><input type="checkbox" id="acc-chk-all" onchange="toggleAccSelectAll(this)"></th>
+                  <th>帳戶</th><th>幣種</th>
+                  <th style="text-align:right;">金額</th>
+                  <th style="text-align:right;">匯率</th>
+                  <th style="text-align:right;">換算台幣</th>
+                  <th style="text-align:right;">佔比</th>
+                  <th>類別</th>
+                  <th style="width:80px;"></th>
+                </tr>
+              </thead>
+              <tbody id="ast-tbody">
+                <tr><td colspan="9" style="text-align:center;color:var(--muted);padding:32px;">尚無存款記錄，點擊「＋ 新增存款」開始建立</td></tr>
+              </tbody>
+              <tfoot id="ast-tfoot"></tfoot>
+            </table>
+          </div>
+        </div>
+      </div><!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
@@ -398,7 +434,6 @@
         <div class="sec-header-right" id="inv-header-assets" style="display:flex;">
           <button class="btn btn-outline btn-sm" onclick="showAssetRates()">💱 匯率設定</button>
           <button class="btn btn-outline btn-sm" onclick="saveAssetSnapshot()">📷 記錄快照</button>
-          <button class="btn btn-primary" onclick="showAddAccount()">＋ 新增帳戶</button>
         </div>
       </div>
 
@@ -413,66 +448,24 @@
 
       <!-- ── 資產總覽 ── -->
       <div class="inv-sub active" id="inv-sub-assets">
-        <!-- 統計卡 -->
-        <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px;">
+        <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px;">
           <div class="stat-card"><div class="lbl">總資產(TWD)</div><div class="val" id="ast-total">--</div></div>
           <div class="stat-card"><div class="lbl">📈 庫存市值</div><div class="val" id="ast-inv" style="color:var(--primary);">--</div><div class="sub" id="ast-inv-pct">佔 --%</div></div>
-          <div class="stat-card"><div class="lbl">💵 帳戶資產</div><div class="val" id="ast-cash" style="color:var(--success);">--</div><div class="sub" id="ast-cash-pct">佔 --%</div></div>
-          <div class="stat-card">
-            <div class="lbl">庫存 / 帳戶比</div>
-            <div style="font-size:14px;font-weight:700;margin:6px 0;" id="ast-ratio">-- / --</div>
-            <div class="pct-bar-wrap"><div class="pct-bar-inv" id="ast-bar-inv" style="width:50%"></div><div class="pct-bar-cash" id="ast-bar-cash" style="width:50%"></div></div>
-          </div>
+          <div class="stat-card"><div class="lbl">💵 存款總額</div><div class="val" id="ast-cash" style="color:var(--success);">--</div><div class="sub" id="ast-cash-pct">佔 --%</div></div>
         </div>
-
-        <!-- 市場持倉摘要 -->
-        <div id="ast-market-cards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;"></div>
-
+        <div id="ast-market-cards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px;"></div>
         <div class="grid-2">
-          <!-- 左：帳戶明細表 -->
           <div class="card">
             <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
-              <span>各單位資產明細</span>
-              <div style="display:flex;gap:8px;">
-                <button class="btn btn-sm btn-danger" id="btn-acc-bulk-delete" disabled onclick="deleteSelectedAccounts()">🗑 刪除</button>
-              </div>
+              <span>總資產歷史走勢</span>
+              <small style="font-weight:400;color:var(--muted);font-size:12px;">點擊「📷 記錄快照」新增</small>
             </div>
-            <div class="tbl-wrap">
-              <table id="ast-table">
-                <thead>
-                  <tr>
-                    <th class="th-check"><input type="checkbox" id="acc-chk-all" onchange="toggleAccSelectAll(this)"></th>
-                    <th>單位</th><th>幣種</th>
-                    <th style="text-align:right;">金額</th>
-                    <th style="text-align:right;">匯率</th>
-                    <th style="text-align:right;">換算台幣</th>
-                    <th style="text-align:right;">佔比</th>
-                    <th>類別</th>
-                    <th style="width:80px;"></th>
-                  </tr>
-                </thead>
-                <tbody id="ast-tbody">
-                  <tr><td colspan="9" style="text-align:center;color:var(--muted);padding:32px;">尚無帳戶，點擊「＋ 新增帳戶」開始建立</td></tr>
-                </tbody>
-                <tfoot id="ast-tfoot"></tfoot>
-              </table>
-            </div>
+            <canvas id="assets-chart" height="155"></canvas>
+            <div id="assets-chart-empty" style="display:none;text-align:center;color:var(--muted);padding:28px;font-size:14px;">尚無快照記錄</div>
           </div>
-
-          <!-- 右：歷史走勢 + 快照列表 -->
-          <div>
-            <div class="card" style="margin-bottom:16px;">
-              <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
-                <span>總資產歷史走勢</span>
-                <small style="font-weight:400;color:var(--muted);font-size:12px;">點擊「📷 記錄快照」新增</small>
-              </div>
-              <canvas id="assets-chart" height="155"></canvas>
-              <div id="assets-chart-empty" style="display:none;text-align:center;color:var(--muted);padding:28px;font-size:14px;">尚無快照記錄</div>
-            </div>
-            <div class="card">
-              <div class="card-title">快照紀錄</div>
-              <div id="ast-snapshots"><div style="color:var(--muted);font-size:14px;">載入中...</div></div>
-            </div>
+          <div class="card">
+            <div class="card-title">快照紀錄</div>
+            <div id="ast-snapshots"><div style="color:var(--muted);font-size:14px;">載入中...</div></div>
           </div>
         </div>
       </div>
@@ -1676,22 +1669,43 @@ const _DEPOSIT_TYPES = ['活存','定存','現金','儲蓄','外幣存款'];
 const _DEPOSIT_CURRENCIES = ['TWD','USD','JPY','EUR','GBP','HKD','CNY','AUD','CAD','SGD','CHF','KRW','THB'];
 
 async function loadForex(){
-  const r = await api('/api/investment/forex');
-  const rows = r.data||[];
-  $('forex-tbody').innerHTML = rows.length ? rows.map(f=>{
-    const typeLabel = f.pair || '—';
-    const institution = f.quote_currency || '—';
-    const currency = f.base_currency || '—';
-    return `<tr>
-      <td><span class="badge b-pending">${typeLabel}</span></td>
-      <td><strong>${institution}</strong></td>
-      <td><span class="badge b-low">${currency}</span></td>
-      <td style="text-align:right;">${Number(f.amount).toLocaleString('zh-TW',{minimumFractionDigits:0,maximumFractionDigits:2})}</td>
-      <td style="color:var(--muted);">${f.date}</td>
-      <td style="color:var(--muted);font-size:13px;">${f.note||'—'}</td>
-      <td><button class="btn btn-xs btn-danger" onclick="deleteDeposit(${f.id})">刪</button></td>
-    </tr>`;
-  }).join('') : `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:28px;">尚無存款記錄</td></tr>`;
+  const r = await api('/api/investment/assets');
+  if(!r.success){ toast('存款載入失敗：'+r.error,'err'); return; }
+  const d = r.data;
+  const depEl = $('dep-total'), cntEl = $('dep-count'), pctEl = $('dep-pct');
+  if(depEl) depEl.textContent = fmtMoney(d.cashTWD||0);
+  if(cntEl) cntEl.textContent = (d.accounts||[]).length;
+  if(pctEl) pctEl.textContent = (d.cashPct||0)+'%';
+  const catBadge = c => c==='投資'
+    ? `<span class="badge b-stock">📈 投資</span>`
+    : `<span class="badge b-pending">💵 現金</span>`;
+  const accChkAll = $('acc-chk-all');
+  if(accChkAll){ accChkAll.checked=false; accChkAll.indeterminate=false; }
+  _updateAccBulkDeleteBtn();
+  $('ast-tbody').innerHTML = (d.accounts||[]).length ? (d.accounts).map(a => `
+    <tr data-id="${a.id}">
+      <td class="td-check"><input type="checkbox" class="acc-row-chk" data-id="${a.id}" onchange="onAccRowCheck()"></td>
+      <td><strong>${a.unit}</strong></td>
+      <td><span class="badge b-pending">${a.currency}</span></td>
+      <td style="text-align:right;">${Number(a.amount).toLocaleString('zh-TW',{minimumFractionDigits:0,maximumFractionDigits:4})}</td>
+      <td style="text-align:right;color:var(--muted);font-size:13px;">${a.rate}</td>
+      <td style="text-align:right;font-weight:600;">${a.twdAmount!==null?fmtMoney(a.twdAmount):'<span style="color:var(--warning);">未設匯率</span>'}</td>
+      <td style="text-align:right;color:var(--primary);font-size:13px;">${a.percentage}</td>
+      <td>${catBadge(a.category)}</td>
+      <td style="white-space:nowrap;">
+        <span class="acc-drag-handle" title="拖曳排序" style="cursor:grab;padding:0 6px;color:var(--muted);">⠿</span>
+        <button class="btn btn-xs btn-outline" onclick="showEditAccount(${a.id})">✏️</button>
+      </td>
+    </tr>
+  `).join('') : `<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:32px;">尚無存款記錄，點擊「＋ 新增存款」開始建立</td></tr>`;
+  $('ast-tfoot').innerHTML = (d.accounts||[]).length ? `
+    <tr class="assets-tbl-row-total">
+      <td></td><td colspan="4"><strong>合計</strong></td>
+      <td style="text-align:right;"><strong>${fmtMoney(d.cashTWD||0)}</strong></td>
+      <td style="text-align:right;font-weight:700;">100%</td>
+      <td colspan="2"></td>
+    </tr>` : '';
+  initAssetsSortable();
 }
 
 function showAddDeposit(){
@@ -1758,88 +1772,52 @@ async function loadAssets(){
   $('ast-inv-pct').textContent  = `佔 ${d.investmentPct}%`;
   $('ast-cash').textContent     = fmtMoney(d.cashTWD);
   $('ast-cash-pct').textContent = `佔 ${d.cashPct}%`;
-  $('ast-ratio').textContent    = `${d.investmentPct}% / ${d.cashPct}%`;
-  $('ast-bar-inv').style.width  = d.investmentPct + '%';
-  $('ast-bar-cash').style.flex  = '1';
 
   // ── 市場持倉摘要卡 ──
   const rateMap = { TWD: 1 };
   (d.rates || []).forEach(r => { rateMap[r.currency] = r.rate; });
   const usdRate = rateMap['USD'] || 1;
 
-  const [twSum, usSum, cryptoSum] = await Promise.all([
+  const [twSum, usSum, cryptoSum, shortsData] = await Promise.all([
     api('/api/investment/summary?market=tw'),
     api('/api/investment/summary?market=us'),
     api('/api/investment/summary?market=crypto'),
+    api('/api/investment/shorts'),
   ]);
+  const shortsTWD = (shortsData.data||[]).reduce((s,x)=>s+(x.short_shares*(x.current_price||x.avg_sell_price||0)),0);
   $('ast-market-cards').innerHTML = [
-    { label:'<img class="tab-flag" src="/flags/tw.svg" alt="TW"> 台股',    tab:'tw',     sum:twSum.data,     rate:1       },
-    { label:'<img class="tab-flag" src="/flags/us.svg" alt="US"> 美股',    tab:'us',     sum:usSum.data,     rate:usdRate },
+    { label:'<img class="tab-flag" src="/flags/tw.svg" alt="TW"> 台股', tab:'tw', sum:twSum.data, rate:1, extra:shortsTWD, extraLabel:'借券' },
+    { label:'<img class="tab-flag" src="/flags/us.svg" alt="US"> 美股', tab:'us', sum:usSum.data, rate:usdRate },
     { label:'💎 加密貨幣', tab:'crypto', sum:cryptoSum.data, rate:usdRate },
-  ].map(({label, tab, sum, rate}) => {
-    const pnl      = parseFloat(sum?.pnl||0) * rate;
-    const totalVal = parseFloat(sum?.totalValue||0) * rate;
-    const hasData  = parseFloat(sum?.count||0) > 0;
-    const curr     = rate === 1 ? '' : ' (TWD)';
+    { label:'💰 存款', tab:'forex', deposit:true, totalTWD:d.cashTWD||0, pct:d.cashPct||0 },
+  ].map(({label,tab,sum,rate,extra,extraLabel,deposit,totalTWD,pct})=>{
+    if(deposit){
+      const hasData = totalTWD > 0;
+      return `<div class="stat-card" style="cursor:pointer;transition:box-shadow .15s;" onclick="switchInvTab('${tab}')"
+          onmouseover="this.style.boxShadow='0 4px 16px rgba(99,102,241,.18)'" onmouseout="this.style.boxShadow=''">
+        <div class="lbl">${label}</div>
+        <div style="font-size:15px;font-weight:700;margin:6px 0;">${hasData ? fmtMoney(totalTWD) : '<span style="color:var(--muted);font-size:13px;">尚無存款</span>'}</div>
+        ${hasData ? `<div style="font-size:12px;color:var(--muted);">${pct}% 佔比</div>` : ''}
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">點擊進入 →</div>
+      </div>`;
+    }
+    const pnl=parseFloat(sum?.pnl||0)*rate;
+    const holdVal=parseFloat(sum?.totalValue||0)*rate;
+    const extraVal=extra||0;
+    const totalVal=holdVal+extraVal;
+    const hasData=parseFloat(sum?.count||0)>0||extraVal>0;
+    const curr=rate===1?'':' (TWD)';
     return `<div class="stat-card" style="cursor:pointer;transition:box-shadow .15s;" onclick="switchInvTab('${tab}')"
         onmouseover="this.style.boxShadow='0 4px 16px rgba(99,102,241,.18)'" onmouseout="this.style.boxShadow=''">
       <div class="lbl">${label}</div>
       <div style="font-size:15px;font-weight:700;margin:6px 0;">${hasData ? fmtMoney(totalVal)+curr : '<span style="color:var(--muted);font-size:13px;">尚無庫存</span>'}</div>
-      ${hasData ? `<div style="font-size:12px;" class="${pnl>=0?'pnl-pos':'pnl-neg'}">損益 ${pnl>=0?'+':''}${fmtMoney(pnl)} (${sum?.pnlPct||0}%)</div>` : ''}
+      ${parseFloat(sum?.count||0)>0?`<div style="font-size:12px;" class="${pnl>=0?'pnl-pos':'pnl-neg'}">損益 ${pnl>=0?'+':''}${fmtMoney(pnl)} (${sum?.pnlPct||0}%)</div>`:''}
+      ${extraVal>0?`<div style="font-size:11px;color:var(--muted);">含${extraLabel} ${fmtMoney(extraVal)}</div>`:''}
       <div style="font-size:11px;color:var(--muted);margin-top:4px;">點擊進入 →</div>
     </div>`;
   }).join('');
 
-  // ── 帳戶明細表 ──
-  const catBadge = c => c === '投資'
-    ? `<span class="badge b-stock">\ud83d\udcc8 \u6295\u8cc7</span>`
-    : `<span class="badge b-pending">\ud83d\udcb5 \u73fe\u91d1</span>`;
 
-  const accChkAll = $('acc-chk-all');
-  if(accChkAll){ accChkAll.checked=false; accChkAll.indeterminate=false; }
-  _updateAccBulkDeleteBtn();
-  $('ast-tbody').innerHTML = d.accounts.length ? d.accounts.map(a => `
-    <tr data-id="${a.id}">
-      <td class="td-check"><input type="checkbox" class="acc-row-chk" data-id="${a.id}" onchange="onAccRowCheck()"></td>
-      <td><strong>${a.unit}</strong></td>
-      <td><span class="badge b-pending">${a.currency}</span></td>
-      <td style="text-align:right;">${Number(a.amount).toLocaleString('zh-TW', {minimumFractionDigits:0,maximumFractionDigits:4})}</td>
-      <td style="text-align:right;color:var(--muted);font-size:13px;">${a.rate}</td>
-      <td style="text-align:right;font-weight:600;">${a.twdAmount !== null ? fmtMoney(a.twdAmount) : '<span style="color:var(--warning);">\u672a\u8a2d\u532f\u7387</span>'}</td>
-      <td style="text-align:right;color:var(--primary);font-size:13px;">${a.percentage}</td>
-      <td>${catBadge(a.category)}</td>
-      <td style="white-space:nowrap;">
-        <span class="acc-drag-handle" title="\u62d6\u66f3\u6392\u5e8f" style="cursor:grab;padding:0 6px;color:var(--muted);">\u283f</span>
-        <button class="btn btn-xs btn-outline" onclick="showEditAccount(${a.id})">✏️</button>
-      </td>
-    </tr>
-  `).join('') : `<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:32px;">\u5c1a\u7121\u5e33\u6236\uff0c\u9ede\u64ca\u300c\uff0b \u65b0\u589e\u5e33\u6236\u300d\u958b\u59cb\u5efa\u7acb</td></tr>`;
-
-  initAssetsSortable();
-
-  // 合計 + 投資/現金小計 in tfoot
-  $('ast-tfoot').innerHTML = `
-    <tr class="assets-tbl-row-total">
-      <td></td><td colspan="4"><strong>\u5408\u8a08</strong></td>
-      <td style="text-align:right;"><strong>${fmtMoney(d.totalTWD)}</strong></td>
-      <td style="text-align:right;font-weight:700;">100%</td>
-      <td colspan="2"></td>
-    </tr>
-    <tr style="background:#f8fafc;">
-      <td></td><td style="padding-left:8px;color:var(--primary);">\ud83d\udcc8 \u5eab\u5b58\u5e02\u503c</td>
-      <td colspan="3"></td>
-      <td style="text-align:right;color:var(--primary);font-weight:600;">${fmtMoney(d.holdingsTWD)}</td>
-      <td style="text-align:right;color:var(--primary);font-size:13px;">${d.investmentPct}%</td>
-      <td colspan="2"></td>
-    </tr>
-    <tr style="background:#f8fafc;">
-      <td></td><td style="padding-left:8px;color:var(--success);">\ud83d\udcb5 \u5e33\u6236\u8cc7\u7522</td>
-      <td colspan="3"></td>
-      <td style="text-align:right;color:var(--success);font-weight:600;">${fmtMoney(d.accountsTWD)}</td>
-      <td style="text-align:right;color:var(--success);font-size:13px;">${d.cashPct}%</td>
-      <td colspan="2"></td>
-    </tr>
-  `;
 
   // ── 歷史走勢圖 ──
   const hasHistory = d.history && d.history.length > 0;
@@ -1885,13 +1863,13 @@ async function loadAssets(){
 
 // ── 新增帳戶 ──
 function showAddAccount(){
-  showModal('\u65b0\u589e\u8cc7\u7522\u5e33\u6236', _accountForm(), {
+  showModal('新增存款', _accountForm(), {
     submitLabel: '\u65b0\u589e',
     onSubmit: async () => {
       const data = _readAccountForm();
       if(!data) return;
       const r = await api('/api/investment/assets/accounts', 'POST', data);
-      if(r.success){ toast('\u5e33\u6236\u5df2\u65b0\u589e','ok'); closeModalForce(); loadAssets(); }
+      if(r.success){ toast('存款已新增','ok'); closeModalForce(); loadForex(); }
       else toast(r.error,'err');
     }
   });
@@ -1902,13 +1880,13 @@ async function showEditAccount(id){
   const r = await api('/api/investment/assets');
   const a = r.data.accounts.find(x => x.id === id);
   if(!a) return;
-  showModal('\u7de8\u8f2f\u8cc7\u7522\u5e33\u6236', _accountForm(a), {
+  showModal('編輯存款帳戶', _accountForm(a), {
     submitLabel: '\u5132\u5b58',
     onSubmit: async () => {
       const data = _readAccountForm();
       if(!data) return;
       const rr = await api(`/api/investment/assets/accounts/${id}`, 'PUT', data);
-      if(rr.success){ toast('\u5e33\u6236\u5df2\u66f4\u65b0','ok'); closeModalForce(); loadAssets(); }
+      if(rr.success){ toast('\u5e33\u6236\u5df2\u66f4\u65b0','ok'); closeModalForce(); loadForex(); }
       else toast(rr.error,'err');
     }
   });
@@ -2026,7 +2004,7 @@ async function deleteSelectedAccounts(){
   if(!confirm(`刪除 ${ids.length} 筆帳戶？`)) return;
   for(const id of ids) await api(`/api/investment/assets/accounts/${id}`, 'DELETE');
   toast('已刪除', 'ok');
-  loadAssets();
+  loadForex();
 }
 
 // ── 記錄快照 ──
