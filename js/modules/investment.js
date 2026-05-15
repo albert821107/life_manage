@@ -98,12 +98,15 @@ module.exports = (io) => {
     const holdings = market
       ? db.prepare(`SELECT * FROM investments WHERE market=?`).all(market)
       : db.prepare(`SELECT * FROM investments`).all();
-    let totalCost = 0, totalValue = 0;
+    let totalCost = 0, totalValue = 0, totalFee = 0;
+    const isTw = market === 'tw';
     holdings.forEach(h => {
+      const val = h.shares * (h.current_price > 0 ? h.current_price : h.avg_cost);
       totalCost  += h.shares * h.avg_cost;
-      totalValue += h.shares * (h.current_price > 0 ? h.current_price : h.avg_cost);
+      totalValue += val;
+      if (isTw) totalFee += Math.ceil(val * 0.001425) + Math.ceil(val * 0.003);
     });
-    const pnl    = totalValue - totalCost;
+    const pnl    = totalValue - totalFee - totalCost;
     const pnlPct = totalCost > 0 ? ((pnl / totalCost) * 100).toFixed(2) : 0;
     res.json({ success: true, data: {
       totalCost:  totalCost.toFixed(2),
@@ -364,39 +367,53 @@ module.exports = (io) => {
 
   // ── 資產總覽（本地 CRUD）────────────────────────
 
-  // 計算輔助：取得所有帳戶 + 匯率 + 計算值
+  // 計算輔助：取得所有帳戶 + 匯率 + 庫存市值
   function calcAssets() {
-    const rates    = db.prepare(`SELECT currency, rate FROM assets_rates`).all();
-    const rateMap  = { TWD: 1 };
+    const rates   = db.prepare(`SELECT currency, rate FROM assets_rates`).all();
+    const rateMap = { TWD: 1 };
     rates.forEach(r => { rateMap[r.currency] = r.rate; });
 
+    // ── 手動帳戶（現金、定存等）
     const accounts = db.prepare(`SELECT * FROM assets_accounts ORDER BY sort_order, id`).all();
-    let totalTWD = 0;
+    let accountsTWD = 0;
     const rows = accounts.map(a => {
-      const rate     = rateMap[a.currency] ?? null;
-      const twdAmt   = rate !== null ? +(a.amount * rate).toFixed(0) : null;
-      if (twdAmt !== null) totalTWD += twdAmt;
+      const rate   = rateMap[a.currency] ?? null;
+      const twdAmt = rate !== null ? +(a.amount * rate).toFixed(0) : null;
+      if (twdAmt !== null) accountsTWD += twdAmt;
       return { ...a, rate: rate ?? '未設定', twdAmount: twdAmt };
     });
-    // 加上佔比
+
+    // ── 庫存即時市值（台股 TWD，美股/加密 × USD/TWD 匯率）
+    const holdings = db.prepare(`SELECT market, shares, avg_cost, current_price FROM investments`).all();
+    const usdRate  = rateMap['USD'] || 1;
+    let holdingsTWD = 0;
+    holdings.forEach(h => {
+      const price = h.current_price > 0 ? h.current_price : h.avg_cost;
+      const val   = h.shares * price;
+      holdingsTWD += h.market === 'tw' ? val : val * usdRate;
+    });
+
+    const totalTWD = accountsTWD + holdingsTWD;
+
+    // 佔比（基於總資產）
     rows.forEach(r => {
       r.percentage = (totalTWD > 0 && r.twdAmount !== null)
         ? ((r.twdAmount / totalTWD) * 100).toFixed(2) + '%'
         : '--';
     });
 
-    const invTWD  = rows.filter(r => r.category === '投資' && r.twdAmount !== null).reduce((s, r) => s + r.twdAmount, 0);
-    const cashTWD = totalTWD - invTWD;
-    const invPct  = totalTWD > 0 ? +((invTWD / totalTWD) * 100).toFixed(1) : 0;
+    const invPct = totalTWD > 0 ? +((holdingsTWD / totalTWD) * 100).toFixed(1) : 0;
 
     return {
-      accounts: rows,
+      accounts:      rows,
       totalTWD,
-      investmentTWD: invTWD,
-      cashTWD,
+      accountsTWD,
+      holdingsTWD,
+      investmentTWD: holdingsTWD,
+      cashTWD:       accountsTWD,
       investmentPct: invPct.toFixed(1),
       cashPct:       (100 - invPct).toFixed(1),
-      rates:         rates,
+      rates,
       history:       db.prepare(`SELECT * FROM assets_snapshots ORDER BY date ASC`).all(),
     };
   }

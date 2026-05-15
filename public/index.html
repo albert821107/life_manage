@@ -407,7 +407,7 @@
         <div class="inv-tab"        id="inv-tab-tw"     onclick="switchInvTab('tw')">🇹🇼 台股</div>
         <div class="inv-tab"        id="inv-tab-us"     onclick="switchInvTab('us')">🇺🇸 美股</div>
         <div class="inv-tab"        id="inv-tab-crypto" onclick="switchInvTab('crypto')">💎 加密貨幣</div>
-        <div class="inv-tab"        id="inv-tab-forex"  onclick="switchInvTab('forex')">💱 外匯</div>
+        <div class="inv-tab"        id="inv-tab-forex"  onclick="switchInvTab('forex')">💰 存款</div>
       </div>
 
       <!-- ── 資產總覽 ── -->
@@ -415,10 +415,10 @@
         <!-- 統計卡 -->
         <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px;">
           <div class="stat-card"><div class="lbl">總資產(TWD)</div><div class="val" id="ast-total">--</div></div>
-          <div class="stat-card"><div class="lbl">📈 投資資產</div><div class="val" id="ast-inv" style="color:var(--primary);">--</div><div class="sub" id="ast-inv-pct">佔 --%</div></div>
-          <div class="stat-card"><div class="lbl">💵 現金資產</div><div class="val" id="ast-cash" style="color:var(--success);">--</div><div class="sub" id="ast-cash-pct">佔 --%</div></div>
+          <div class="stat-card"><div class="lbl">📈 庫存市值</div><div class="val" id="ast-inv" style="color:var(--primary);">--</div><div class="sub" id="ast-inv-pct">佔 --%</div></div>
+          <div class="stat-card"><div class="lbl">💵 帳戶資產</div><div class="val" id="ast-cash" style="color:var(--success);">--</div><div class="sub" id="ast-cash-pct">佔 --%</div></div>
           <div class="stat-card">
-            <div class="lbl">投資 / 現金比</div>
+            <div class="lbl">庫存 / 帳戶比</div>
             <div style="font-size:14px;font-weight:700;margin:6px 0;" id="ast-ratio">-- / --</div>
             <div class="pct-bar-wrap"><div class="pct-bar-inv" id="ast-bar-inv" style="width:50%"></div><div class="pct-bar-cash" id="ast-bar-cash" style="width:50%"></div></div>
           </div>
@@ -476,10 +476,11 @@
       <div class="inv-sub" id="inv-sub-market">
         <div class="stats-grid" id="mkt-stats-grid" style="grid-template-columns:repeat(4,1fr);">
           <div class="stat-card"><div class="lbl">庫存成本</div><div class="val" id="mkt-cost">--</div></div>
-          <div class="stat-card"><div class="lbl">總市值</div><div class="val" id="mkt-value">--</div></div>
+          <div class="stat-card"><div class="lbl">庫存總市值</div><div class="val" id="mkt-value">--</div></div>
           <div class="stat-card"><div class="lbl">未實現損益</div><div class="val" id="mkt-pnl">--</div></div>
           <div class="stat-card"><div class="lbl">報酬率</div><div class="val" id="mkt-pct">--</div></div>
           <div class="stat-card" id="shorts-stat-card" style="display:none;"><div class="lbl">借券總市值</div><div class="val" id="shorts-total-val">--</div></div>
+          <div class="stat-card" id="mkt-combined-card" style="display:none;"><div class="lbl">總市值（含借券）</div><div class="val" id="mkt-combined-val">--</div></div>
         </div>
         <div class="card">
           <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
@@ -523,17 +524,17 @@
         </div>
       </div>
 
-      <!-- ── 外匯持倉 ── -->
+      <!-- ── 存款 ── -->
       <div class="inv-sub" id="inv-sub-forex">
         <div class="card">
           <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
-            <span>💱 外匯持倉</span>
-            <button class="btn btn-sm btn-primary" onclick="showAddForex()">＋ 新增外匯</button>
+            <span>💰 存款明細</span>
+            <button class="btn btn-sm btn-primary" onclick="showAddDeposit()">＋ 新增存款</button>
           </div>
           <div class="tbl-wrap">
             <table>
-              <thead><tr><th>貨幣對</th><th>基準貨幣</th><th>報價貨幣</th><th>金額</th><th>成本匯率</th><th>現值匯率</th><th>損益(報價幣)</th><th>日期</th><th>狀態</th><th></th></tr></thead>
-              <tbody id="forex-tbody"><tr><td colspan="10" style="text-align:center;color:var(--muted);padding:28px;">尚無外匯持倉記錄</td></tr></tbody>
+              <thead><tr><th>存款類型</th><th>機構/帳戶</th><th>幣種</th><th>金額</th><th>日期</th><th>備註</th><th></th></tr></thead>
+              <tbody id="forex-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:28px;">尚無存款記錄</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -1368,23 +1369,23 @@ async function loadMarket(market){
   if(chkAll){ chkAll.checked = false; chkAll.indeterminate = false; }
   _updateBulkDeleteBtn();
 
-  // 台股賣出預估費用（僅供 tooltip 參考，不影響損益計算）
-  const _sellFeeRate = market === 'tw' ? 0.000855 : 0;
-  const _sellTaxRate = market === 'tw' ? 0.003    : 0;
+  // 台股：賣出手續費 0.1425% + 證交稅 0.3%，納入未實現損益（模擬實際出場後淨損益）
+  const _isTw = market === 'tw';
 
   const hs = holdings.data||[];
   $('mkt-holdings-tbody').innerHTML = hs.length ? hs.map(h=>{
     const cost  = h.shares * h.avg_cost;
     const price = h.current_price>0 ? h.current_price : h.avg_cost;
     const val   = h.shares * price;
-    const p     = val - cost;
+    const fee   = _isTw ? Math.ceil(val * 0.001425) : 0;
+    const tax   = _isTw ? Math.ceil(val * 0.003)    : 0;
+    const p     = val - fee - tax - cost;
     const pp    = cost>0 ? ((p/cost)*100).toFixed(2) : 0;
     const sym   = h.symbol.replace(/'/g, '&#39;');
     const name  = (h.name||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     const note  = (h.note||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     const typeLbl = {stock:'股票',etf:'ETF',crypto:'加密',bond:'債券',other:'其他'}[h.type||'stock']||h.type;
-    const sellFee = market === 'tw' ? Math.ceil(val*_sellFeeRate) + Math.ceil(val*_sellTaxRate) : 0;
-    const feeTooltip = market === 'tw' ? ` title="實際賣出預估費+稅約 ${fmtMoney(sellFee)}"` : '';
+    const feeTooltip = _isTw ? ` title="含賣出手續費 ${fmtMoney(fee)} + 證交稅 ${fmtMoney(tax)}"` : '';
     return `<tr data-sym="${sym}" data-name="${name}" data-shares="${h.shares}" data-cost="${h.avg_cost}" data-price="${h.current_price}" data-note="${note}" data-type="${h.type||'stock'}" data-market="${h.market||market}">
       <td class="td-check"><input type="checkbox" class="mkt-row-chk" data-sym="${sym}" onchange="onRowCheck()"></td>
       <td><strong>${h.symbol}</strong></td>
@@ -1394,7 +1395,7 @@ async function loadMarket(market){
       <td>${fmtPrice(h.avg_cost)}</td>
       <td><span onclick="editPrice('${sym}',${h.current_price})" style="cursor:pointer;text-decoration:underline dotted;color:var(--primary);" title="點擊更新現價">${fmtPrice(price)}</span></td>
       <td>${fmtMoney(val)}</td>
-      <td class="${p>=0?'pnl-pos':'pnl-neg'}"${feeTooltip} style="cursor:${market==='tw'?'help':'default'};">${p>=0?'+':''}${fmtMoney(p)}</td>
+      <td class="${p>=0?'pnl-pos':'pnl-neg'}"${feeTooltip} style="cursor:${_isTw?'help':'default'};">${p>=0?'+':''}${fmtMoney(p)}</td>
       <td class="${pp>=0?'pnl-pos':'pnl-neg'}">${pp>=0?'+':''}${pp}%</td>
       <td style="white-space:nowrap;">
         <span class="drag-handle" title="拖曳排序">⠿</span>
@@ -1404,19 +1405,25 @@ async function loadMarket(market){
   }).join('') : `<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:28px;">尚無${_mktLabel(market)}庫存</td></tr>`;
   initHoldingsSortable();
 
-  // 台股借券區塊 + 借券總市值 stat card
-  const shortsSection = $('tw-shorts-section');
-  const shortsStatCard = $('shorts-stat-card');
-  const mktStatsGrid = $('mkt-stats-grid');
+  // 台股借券區塊 + stat cards 顯示控制
+  const shortsSection   = $('tw-shorts-section');
+  const shortsStatCard  = $('shorts-stat-card');
+  const combinedCard    = $('mkt-combined-card');
+  const mktStatsGrid    = $('mkt-stats-grid');
+  const holdingsVal     = parseFloat(sum.data?.totalValue || 0);
   if(market === 'tw'){
-    shortsSection.style.display = '';
+    shortsSection.style.display  = '';
     if(shortsStatCard) shortsStatCard.style.display = '';
-    if(mktStatsGrid) mktStatsGrid.style.gridTemplateColumns = 'repeat(5,1fr)';
-    loadShorts();
+    if(combinedCard)   combinedCard.style.display   = '';
+    if(mktStatsGrid)   mktStatsGrid.style.gridTemplateColumns = 'repeat(6,1fr)';
+    const shortsVal = await loadShorts();
+    const combinedEl = $('mkt-combined-val');
+    if(combinedEl) combinedEl.textContent = fmtMoney(holdingsVal + shortsVal);
   } else {
-    shortsSection.style.display = 'none';
+    shortsSection.style.display  = 'none';
     if(shortsStatCard) shortsStatCard.style.display = 'none';
-    if(mktStatsGrid) mktStatsGrid.style.gridTemplateColumns = 'repeat(4,1fr)';
+    if(combinedCard)   combinedCard.style.display   = 'none';
+    if(mktStatsGrid)   mktStatsGrid.style.gridTemplateColumns = 'repeat(4,1fr)';
   }
 }
 
@@ -1435,7 +1442,7 @@ async function loadShorts(){
   const valEl = $('shorts-total-val');
   if(valEl) valEl.textContent = fmtMoney(totalVal);
 
-  const chkAll = $('shorts-chk-all');
+  const chkAll = $('shorts-chk-all');  // return for combined total calculation
   if(chkAll){ chkAll.checked = false; chkAll.indeterminate = false; }
   _updateShortsBulkDeleteBtn();
 
@@ -1453,12 +1460,12 @@ async function loadShorts(){
       <td style="color:var(--muted);font-size:12px;">${s.note||'-'}</td>
       <td style="white-space:nowrap;">
         <span class="sh-drag-handle" title="拖曳排序" style="cursor:grab;padding:0 6px;color:var(--muted);">⠿</span>
-        <button class="btn btn-xs btn-danger" onclick="deleteShort('${sym}')">刪</button>
       </td>
     </tr>`;
   }).join('') : `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px;">尚無借券記錄</td></tr>`;
 
   initShortsSortable();
+  return totalVal;
 }
 
 let _shortsSortable = null;
@@ -1600,127 +1607,77 @@ async function deleteShort(symbol){
 }
 
 // ════════════════════════════════════════════════
-// 外匯持倉
+// 存款
 // ════════════════════════════════════════════════
+const _DEPOSIT_TYPES = ['活存','定存','現金','儲蓄','外幣存款'];
+const _DEPOSIT_CURRENCIES = ['TWD','USD','JPY','EUR','GBP','HKD','CNY','AUD','CAD','SGD','CHF','KRW','THB'];
+
 async function loadForex(){
   const r = await api('/api/investment/forex');
   const rows = r.data||[];
   $('forex-tbody').innerHTML = rows.length ? rows.map(f=>{
-    const pnl = parseFloat(f.pnl||0);
+    const typeLabel = f.pair || '—';
+    const institution = f.quote_currency || '—';
+    const currency = f.base_currency || '—';
     return `<tr>
-      <td><strong>${f.pair}</strong></td>
-      <td>${f.base_currency}</td>
-      <td>${f.quote_currency}</td>
-      <td>${Number(f.amount).toLocaleString('zh-TW',{maximumFractionDigits:4})}</td>
-      <td>${f.entry_rate}</td>
-      <td><span onclick="editForexRate(${f.id},${f.current_rate})" style="cursor:pointer;text-decoration:underline dotted;color:var(--primary);" title="點擊更新現值匯率">${f.current_rate}</span></td>
-      <td class="${pnl>=0?'pnl-pos':'pnl-neg'}">${pnl>=0?'+':''}${pnl.toFixed(4)}</td>
+      <td><span class="badge b-pending">${typeLabel}</span></td>
+      <td><strong>${institution}</strong></td>
+      <td><span class="badge b-low">${currency}</span></td>
+      <td style="text-align:right;">${Number(f.amount).toLocaleString('zh-TW',{minimumFractionDigits:0,maximumFractionDigits:2})}</td>
       <td style="color:var(--muted);">${f.date}</td>
-      <td><span class="badge ${f.status==='open'?'b-stock':'b-done'}">${f.status==='open'?'持倉中':'已平倉'}</span></td>
-      <td>
-        ${f.status==='open'?`<button class="btn btn-xs btn-outline" onclick="closeForex(${f.id},${f.current_rate})">平倉</button>`:''}
-        <button class="btn btn-xs btn-danger" onclick="deleteForex(${f.id})">刪</button>
-      </td>
+      <td style="color:var(--muted);font-size:13px;">${f.note||'—'}</td>
+      <td><button class="btn btn-xs btn-danger" onclick="deleteDeposit(${f.id})">刪</button></td>
     </tr>`;
-  }).join('') : `<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:28px;">尚無外匯持倉記錄</td></tr>`;
+  }).join('') : `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:28px;">尚無存款記錄</td></tr>`;
 }
 
-const _FX_PAIRS = [
-  ['USD/TWD','USD','TWD'],['JPY/TWD','JPY','TWD'],['EUR/TWD','EUR','TWD'],
-  ['GBP/TWD','GBP','TWD'],['HKD/TWD','HKD','TWD'],['CNY/TWD','CNY','TWD'],
-  ['AUD/TWD','AUD','TWD'],['CAD/TWD','CAD','TWD'],['SGD/TWD','SGD','TWD'],
-  ['CHF/TWD','CHF','TWD'],['KRW/TWD','KRW','TWD'],['THB/TWD','THB','TWD'],
-];
-function _onFxPairSelect(pair){
-  const found = _FX_PAIRS.find(p=>p[0]===pair.toUpperCase());
-  const base = found?found[1]:''; const quote = found?found[2]:'';
-  const bd=$('fx-base-display'),bh=$('fx-base'),qd=$('fx-quote-display'),qh=$('fx-quote');
-  if(bd)bd.textContent=base||'—'; if(bh)bh.value=base;
-  if(qd)qd.textContent=quote||'—'; if(qh)qh.value=quote;
-}
-function _initFxAutocomplete(){
-  const symEl = document.getElementById('fx-pair');
-  const listEl = document.getElementById('dl-fx-pair');
-  if(!symEl||!listEl) return;
-  function _show(q){
-    if(!q){ listEl.style.display='none'; return; }
-    const lower = q.toLowerCase();
-    const hits = _FX_PAIRS.filter(p=>p[0].toLowerCase().includes(lower)||p[1].toLowerCase().includes(lower)||p[2].toLowerCase().includes(lower)).slice(0,8);
-    if(!hits.length){ listEl.style.display='none'; return; }
-    listEl.innerHTML = hits.map(p=>`<div class="autocomplete-item" data-code="${p[0]}" data-name="${p[1]}→${p[2]}"><span class="ac-code">${p[0]}</span><span class="ac-name">${p[1]} → ${p[2]}</span></div>`).join('');
-    listEl.querySelectorAll('.autocomplete-item').forEach(el=>el.addEventListener('mousedown',e=>{ e.preventDefault(); symEl.value=el.dataset.code; _onFxPairSelect(el.dataset.code); listEl.style.display='none'; }));
-    listEl.style.display='block';
-  }
-  symEl.addEventListener('input',()=>{ const q=symEl.value.trim(); if(!q){ listEl.style.display='none'; _onFxPairSelect(''); return; } _show(q); });
-  symEl.addEventListener('blur',()=>{ setTimeout(()=>{ listEl.style.display='none'; _onFxPairSelect(symEl.value.trim()); },160); });
-}
-function showAddForex(){
-  const displayStyle='padding:8px 12px;background:#f8fafc;border:1px solid var(--border);border-radius:var(--radius);color:var(--muted);min-height:38px;font-size:15px;';
-  showModal('新增外匯持倉', `
+function showAddDeposit(){
+  showModal('新增存款', `
     <div class="form-row">
       <div class="form-group">
-        <label>貨幣對 *</label>
-        <div class="autocomplete-wrap">
-          <input type="text" id="fx-pair" class="form-control" placeholder="輸入貨幣對，如 USD/TWD" autocomplete="off">
-          <div class="autocomplete-list" id="dl-fx-pair"></div>
-        </div>
+        <label>存款類型 *</label>
+        <select id="dep-type" class="form-control">
+          ${_DEPOSIT_TYPES.map(t=>`<option value="${t}">${t}</option>`).join('')}
+        </select>
       </div>
-      <div class="form-group"><label>金額 *</label><input type="number" id="fx-amount" class="form-control" placeholder="1000" step="any"></div>
+      <div class="form-group"><label>機構/帳戶 *</label><input type="text" id="dep-inst" class="form-control" placeholder="台灣銀行、中信等"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>基準貨幣</label><div id="fx-base-display" style="${displayStyle}">—</div><input type="hidden" id="fx-base"></div>
-      <div class="form-group"><label>報價貨幣</label><div id="fx-quote-display" style="${displayStyle}">—</div><input type="hidden" id="fx-quote"></div>
+      <div class="form-group">
+        <label>幣種 *</label>
+        <select id="dep-currency" class="form-control">
+          ${_DEPOSIT_CURRENCIES.map(c=>`<option value="${c}">${c}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group"><label>金額 *</label><input type="number" id="dep-amount" class="form-control" placeholder="0" step="any"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>成本匯率 *</label><input type="number" id="fx-entry" class="form-control" placeholder="31.5" step="any"></div>
-      <div class="form-group"><label>日期 *</label><input type="date" id="fx-date" class="form-control" value="${new Date().toISOString().slice(0,10)}"></div>
+      <div class="form-group"><label>日期</label><input type="date" id="dep-date" class="form-control" value="${new Date().toISOString().slice(0,10)}"></div>
+      <div class="form-group"><label>備註</label><input type="text" id="dep-note" class="form-control"></div>
     </div>
-    <div class="form-group"><label>備註</label><input type="text" id="fx-note" class="form-control"></div>
   `,{
-    submitLabel:'新增外匯',
+    submitLabel:'新增存款',
     onSubmit: async ()=>{
-      const pair = ($('fx-pair')?.value||'').toUpperCase();
-      const base = ($('fx-base')?.value||'').toUpperCase();
-      const quote = ($('fx-quote')?.value||'').toUpperCase();
-      const amount = parseFloat($('fx-amount').value);
-      const entry = parseFloat($('fx-entry').value);
-      const date = $('fx-date').value;
-      if(!pair||!base||!quote||!amount||!entry||!date){ toast('請填寫所有必填欄位','err'); return; }
+      const type = $('dep-type').value;
+      const inst = $('dep-inst').value.trim();
+      const currency = $('dep-currency').value;
+      const amount = parseFloat($('dep-amount').value);
+      const date = $('dep-date').value;
+      if(!inst||!amount||!date){ toast('請填寫機構、金額與日期','err'); return; }
       const r = await api('/api/investment/forex','POST',{
-        pair, base_currency:base, quote_currency:quote, amount, entry_rate:entry,
-        current_rate:entry, date, note:$('fx-note').value
+        pair: type, base_currency: currency, quote_currency: inst,
+        amount, entry_rate: 1, current_rate: 1, date, note: $('dep-note').value
       });
-      if(r.success){ toast('外匯持倉已新增','ok'); closeModalForce(); loadForex(); }
+      if(r.success){ toast('存款已新增','ok'); closeModalForce(); loadForex(); }
       else toast(r.error||'新增失敗','err');
     }
   });
-  _initFxAutocomplete();
 }
 
-async function editForexRate(id, current){
-  const newRate = prompt(`更新現值匯率\n目前：${current}`, current);
-  if(newRate === null) return;
-  const p = parseFloat(newRate);
-  if(isNaN(p)||p<0){ toast('請輸入有效匯率','err'); return; }
-  const r = await api(`/api/investment/forex/${id}`,'PUT',{current_rate:p, status:'open'});
-  if(r.success){ toast('匯率已更新','ok'); loadForex(); }
-  else toast(r.error||'更新失敗','err');
-}
-
-async function closeForex(id, currentRate){
-  const newRate = prompt(`輸入平倉匯率（現值：${currentRate}）`, currentRate);
-  if(newRate === null) return;
-  const p = parseFloat(newRate);
-  if(isNaN(p)||p<0){ toast('請輸入有效匯率','err'); return; }
-  const r = await api(`/api/investment/forex/${id}`,'PUT',{current_rate:p, status:'closed'});
-  if(r.success){ toast('外匯持倉已平倉','ok'); loadForex(); }
-  else toast(r.error||'更新失敗','err');
-}
-
-async function deleteForex(id){
-  if(!confirm('確認刪除此外匯持倉？')) return;
+async function deleteDeposit(id){
+  if(!confirm('確認刪除此存款記錄？')) return;
   const r = await api(`/api/investment/forex/${id}`,'DELETE');
-  if(r.success){ toast('外匯持倉已刪除','ok'); loadForex(); }
+  if(r.success){ toast('已刪除','ok'); loadForex(); }
   else toast(r.error||'刪除失敗','err');
 }
 
@@ -1743,22 +1700,28 @@ async function loadAssets(){
   $('ast-bar-cash').style.flex  = '1';
 
   // ── 市場持倉摘要卡 ──
+  const rateMap = { TWD: 1 };
+  (d.rates || []).forEach(r => { rateMap[r.currency] = r.rate; });
+  const usdRate = rateMap['USD'] || 1;
+
   const [twSum, usSum, cryptoSum] = await Promise.all([
     api('/api/investment/summary?market=tw'),
     api('/api/investment/summary?market=us'),
     api('/api/investment/summary?market=crypto'),
   ]);
   $('ast-market-cards').innerHTML = [
-    { label:'🇹🇼 台股', tab:'tw',     sum:twSum.data },
-    { label:'🇺🇸 美股', tab:'us',     sum:usSum.data },
-    { label:'💎 加密貨幣', tab:'crypto', sum:cryptoSum.data },
-  ].map(({label, tab, sum}) => {
-    const pnl = parseFloat(sum?.pnl||0);
-    const hasData = parseFloat(sum?.count||0) > 0;
+    { label:'🇹🇼 台股',    tab:'tw',     sum:twSum.data,     rate:1       },
+    { label:'🇺🇸 美股',    tab:'us',     sum:usSum.data,     rate:usdRate },
+    { label:'💎 加密貨幣', tab:'crypto', sum:cryptoSum.data, rate:usdRate },
+  ].map(({label, tab, sum, rate}) => {
+    const pnl      = parseFloat(sum?.pnl||0) * rate;
+    const totalVal = parseFloat(sum?.totalValue||0) * rate;
+    const hasData  = parseFloat(sum?.count||0) > 0;
+    const curr     = rate === 1 ? '' : ' (TWD)';
     return `<div class="stat-card" style="cursor:pointer;transition:box-shadow .15s;" onclick="switchInvTab('${tab}')"
         onmouseover="this.style.boxShadow='0 4px 16px rgba(99,102,241,.18)'" onmouseout="this.style.boxShadow=''">
       <div class="lbl">${label}</div>
-      <div style="font-size:15px;font-weight:700;margin:6px 0;">${hasData ? fmtMoney(sum?.totalValue||0) : '<span style="color:var(--muted);font-size:13px;">尚無庫存</span>'}</div>
+      <div style="font-size:15px;font-weight:700;margin:6px 0;">${hasData ? fmtMoney(totalVal)+curr : '<span style="color:var(--muted);font-size:13px;">尚無庫存</span>'}</div>
       ${hasData ? `<div style="font-size:12px;" class="${pnl>=0?'pnl-pos':'pnl-neg'}">損益 ${pnl>=0?'+':''}${fmtMoney(pnl)} (${sum?.pnlPct||0}%)</div>` : ''}
       <div style="font-size:11px;color:var(--muted);margin-top:4px;">點擊進入 →</div>
     </div>`;
@@ -1794,16 +1757,16 @@ async function loadAssets(){
       <td colspan="2"></td>
     </tr>
     <tr style="background:#f8fafc;">
-      <td style="padding-left:16px;color:var(--primary);">\ud83d\udcc8 \u6295\u8cc7</td>
+      <td style="padding-left:16px;color:var(--primary);">\ud83d\udcc8 \u5eab\u5b58\u5e02\u503c</td>
       <td colspan="3"></td>
-      <td style="text-align:right;color:var(--primary);font-weight:600;">${fmtMoney(d.investmentTWD)}</td>
+      <td style="text-align:right;color:var(--primary);font-weight:600;">${fmtMoney(d.holdingsTWD)}</td>
       <td style="text-align:right;color:var(--primary);font-size:13px;">${d.investmentPct}%</td>
       <td colspan="2"></td>
     </tr>
     <tr style="background:#f8fafc;">
-      <td style="padding-left:16px;color:var(--success);">\ud83d\udcb5 \u73fe\u91d1</td>
+      <td style="padding-left:16px;color:var(--success);">\ud83d\udcb5 \u5e33\u6236\u8cc7\u7522</td>
       <td colspan="3"></td>
-      <td style="text-align:right;color:var(--success);font-weight:600;">${fmtMoney(d.cashTWD)}</td>
+      <td style="text-align:right;color:var(--success);font-weight:600;">${fmtMoney(d.accountsTWD)}</td>
       <td style="text-align:right;color:var(--success);font-size:13px;">${d.cashPct}%</td>
       <td colspan="2"></td>
     </tr>
