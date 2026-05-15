@@ -501,6 +501,10 @@
         </div>
         <!-- 台股借券賣出區塊（僅台股市場顯示） -->
         <div id="tw-shorts-section" style="display:none;">
+          <div class="stats-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:12px;">
+            <div class="stat-card"><div class="lbl">借券總市值</div><div class="val" id="shorts-total-val">--</div></div>
+            <div class="stat-card"><div class="lbl">借券總部位</div><div class="val" id="shorts-total-cnt" style="color:var(--muted);font-size:20px;">--</div></div>
+          </div>
           <div class="card">
             <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
               <span>📉 借券賣出記錄</span>
@@ -508,8 +512,8 @@
             </div>
             <div class="tbl-wrap">
               <table>
-                <thead><tr><th>代碼</th><th>名稱</th><th>空單股數</th><th>均賣出價</th><th>現價</th><th>未實現損益</th><th>損益%</th><th>備註</th><th></th></tr></thead>
-                <tbody id="shorts-tbody"><tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px;">載入中...</td></tr></tbody>
+                <thead><tr><th>代碼</th><th>名稱</th><th>空單股數</th><th>現價</th><th>市值</th><th>備註</th><th></th></tr></thead>
+                <tbody id="shorts-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;">載入中...</td></tr></tbody>
               </table>
             </div>
           </div>
@@ -1357,17 +1361,26 @@ async function loadMarket(market){
   if(chkAll){ chkAll.checked = false; chkAll.indeterminate = false; }
   _updateBulkDeleteBtn();
 
+  // 台股賣出費用率
+  const _feeRate = market === 'tw' ? 0.000855 : 0;
+  const _taxRate = market === 'tw' ? 0.003    : 0;
+  const _feeLabel = market === 'tw' ? '含手續費0.0855%+證交稅0.3%' : '';
+
   const hs = holdings.data||[];
   $('mkt-holdings-tbody').innerHTML = hs.length ? hs.map(h=>{
     const cost  = h.shares * h.avg_cost;
     const price = h.current_price>0 ? h.current_price : h.avg_cost;
     const val   = h.shares * price;
-    const p     = val - cost;
+    const fee   = Math.ceil(val * _feeRate);
+    const tax   = Math.ceil(val * _taxRate);
+    const net   = val - fee - tax;
+    const p     = net - cost;
     const pp    = cost>0 ? ((p/cost)*100).toFixed(2) : 0;
     const sym   = h.symbol.replace(/'/g, '&#39;');
     const name  = (h.name||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     const note  = (h.note||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     const typeLbl = {stock:'股票',etf:'ETF',crypto:'加密',bond:'債券',other:'其他'}[h.type||'stock']||h.type;
+    const feeTooltip = _feeLabel ? ` title="手續費$${fee} 稅$${tax}｜${_feeLabel}"` : '';
     return `<tr data-sym="${sym}" data-name="${name}" data-shares="${h.shares}" data-cost="${h.avg_cost}" data-price="${h.current_price}" data-note="${note}" data-type="${h.type||'stock'}" data-market="${h.market||market}">
       <td class="td-check"><input type="checkbox" class="mkt-row-chk" data-sym="${sym}" onchange="onRowCheck()"></td>
       <td><strong>${h.symbol}</strong></td>
@@ -1377,7 +1390,7 @@ async function loadMarket(market){
       <td>${fmtPrice(h.avg_cost)}</td>
       <td><span onclick="editPrice('${sym}',${h.current_price})" style="cursor:pointer;text-decoration:underline dotted;color:var(--primary);" title="點擊更新現價">${fmtPrice(price)}</span></td>
       <td>${fmtMoney(val)}</td>
-      <td class="${p>=0?'pnl-pos':'pnl-neg'}">${p>=0?'+':''}${fmtMoney(p)}</td>
+      <td class="${p>=0?'pnl-pos':'pnl-neg'}"${feeTooltip} style="cursor:${_feeLabel?'help':'default'};">${p>=0?'+':''}${fmtMoney(p)}</td>
       <td class="${pp>=0?'pnl-pos':'pnl-neg'}">${pp>=0?'+':''}${pp}%</td>
       <td style="white-space:nowrap;">
         <span class="drag-handle" title="拖曳排序">⠿</span>
@@ -1403,24 +1416,33 @@ async function loadMarket(market){
 async function loadShorts(){
   const r = await api('/api/investment/shorts');
   const rows = r.data||[];
+
+  // 統計
+  let totalVal = 0;
+  rows.forEach(s => {
+    const p = s.current_price > 0 ? s.current_price : s.avg_sell_price;
+    totalVal += s.short_shares * p;
+  });
+  const cntEl = $('shorts-total-cnt'), valEl = $('shorts-total-val');
+  if(cntEl) cntEl.textContent = rows.length + ' 檔';
+  if(valEl) valEl.textContent = fmtMoney(totalVal);
+
   $('shorts-tbody').innerHTML = rows.length ? rows.map(s=>{
-    const pnlVal = parseFloat(s.pnl||0);
-    const pnlPct = parseFloat(s.pnlPct||0);
+    const price = s.current_price > 0 ? s.current_price : s.avg_sell_price;
+    const mktVal = s.short_shares * price;
     return `<tr>
       <td><strong>${s.symbol}</strong></td>
       <td>${s.name}</td>
       <td>${Number(s.short_shares).toLocaleString('zh-TW',{maximumFractionDigits:4})}</td>
-      <td>${fmtMoney(s.avg_sell_price)}</td>
-      <td><span onclick="editShortPrice('${s.symbol}',${s.current_price})" style="cursor:pointer;text-decoration:underline dotted;color:var(--primary);" title="點擊更新現價">${fmtMoney(s.current_price>0?s.current_price:s.avg_sell_price)}</span></td>
-      <td class="${pnlVal>=0?'pnl-pos':'pnl-neg'}">${pnlVal>=0?'+':''}${fmtMoney(pnlVal)}</td>
-      <td class="${pnlPct>=0?'pnl-pos':'pnl-neg'}">${pnlPct>=0?'+':''}${pnlPct}%</td>
+      <td><span onclick="editShortPrice('${s.symbol}',${s.current_price})" style="cursor:pointer;text-decoration:underline dotted;color:var(--primary);" title="點擊更新現價">${fmtPrice(price)}</span></td>
+      <td>${fmtMoney(mktVal)}</td>
       <td style="color:var(--muted);font-size:12px;">${s.note||'-'}</td>
       <td>
-        <button class="btn btn-xs btn-outline" onclick="closeShort('${s.symbol}',${s.current_price>0?s.current_price:s.avg_sell_price})">回補</button>
+        <button class="btn btn-xs btn-outline" onclick="closeShort('${s.symbol}',${price})">回補</button>
         <button class="btn btn-xs btn-danger" onclick="deleteShort('${s.symbol}')">刪</button>
       </td>
     </tr>`;
-  }).join('') : `<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px;">尚無借券記錄</td></tr>`;
+  }).join('') : `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;">尚無借券記錄</td></tr>`;
 }
 
 async function _initShortAutocomplete(){
