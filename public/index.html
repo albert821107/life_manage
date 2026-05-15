@@ -215,9 +215,10 @@
 
     /* ── Investment Sub-tabs ── */
     .inv-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:18px;}
-    .inv-tab{padding:9px 22px;cursor:pointer;font-size:15px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:var(--tr);}
+    .inv-tab{padding:9px 22px;cursor:pointer;font-size:15px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:var(--tr);display:flex;align-items:center;gap:6px;}
     .inv-tab:hover{color:var(--text);}
     .inv-tab.active{color:var(--primary);border-bottom-color:var(--primary);}
+    .tab-flag{width:20px;height:15px;object-fit:cover;border-radius:2px;display:inline-block;vertical-align:middle;flex-shrink:0;}
     .inv-sub{display:none;}
     .inv-sub.active{display:block;}
     .assets-info-card{background:#fffbeb;border:1px solid #fcd34d;border-radius:var(--radius);padding:16px 20px;margin-bottom:16px;}
@@ -404,8 +405,8 @@
       <!-- 子頁籤 -->
       <div class="inv-tabs">
         <div class="inv-tab active" id="inv-tab-assets" onclick="switchInvTab('assets')">💰 資產總覽</div>
-        <div class="inv-tab"        id="inv-tab-tw"     onclick="switchInvTab('tw')">🇹🇼 台股</div>
-        <div class="inv-tab"        id="inv-tab-us"     onclick="switchInvTab('us')">🇺🇸 美股</div>
+        <div class="inv-tab"        id="inv-tab-tw"     onclick="switchInvTab('tw')"><img class="tab-flag" src="/flags/tw.svg" alt="TW"> 台股</div>
+        <div class="inv-tab"        id="inv-tab-us"     onclick="switchInvTab('us')"><img class="tab-flag" src="/flags/us.svg" alt="US"> 美股</div>
         <div class="inv-tab"        id="inv-tab-crypto" onclick="switchInvTab('crypto')">💎 加密貨幣</div>
         <div class="inv-tab"        id="inv-tab-forex"  onclick="switchInvTab('forex')">💰 存款</div>
       </div>
@@ -432,22 +433,26 @@
           <div class="card">
             <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
               <span>各單位資產明細</span>
+              <div style="display:flex;gap:8px;">
+                <button class="btn btn-sm btn-danger" id="btn-acc-bulk-delete" disabled onclick="deleteSelectedAccounts()">🗑 刪除</button>
+              </div>
             </div>
             <div class="tbl-wrap">
               <table id="ast-table">
                 <thead>
                   <tr>
+                    <th class="th-check"><input type="checkbox" id="acc-chk-all" onchange="toggleAccSelectAll(this)"></th>
                     <th>單位</th><th>幣種</th>
                     <th style="text-align:right;">金額</th>
                     <th style="text-align:right;">匯率</th>
                     <th style="text-align:right;">換算台幣</th>
                     <th style="text-align:right;">佔比</th>
                     <th>類別</th>
-                    <th style="width:70px;"></th>
+                    <th style="width:80px;"></th>
                   </tr>
                 </thead>
                 <tbody id="ast-tbody">
-                  <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px;">尚無帳戶，點擊「＋ 新增帳戶」開始建立</td></tr>
+                  <tr><td colspan="9" style="text-align:center;color:var(--muted);padding:32px;">尚無帳戶，點擊「＋ 新增帳戶」開始建立</td></tr>
                 </tbody>
                 <tfoot id="ast-tfoot"></tfoot>
               </table>
@@ -508,6 +513,7 @@
               <span>📉 借券</span>
               <div style="display:flex;gap:8px;">
                 <button class="btn btn-sm btn-danger" id="btn-shorts-bulk-delete" disabled onclick="deleteSelectedShorts()">🗑 刪除</button>
+                <button class="btn btn-sm btn-outline" id="btn-refresh-shorts" onclick="refreshShortPrices()">🔄 更新現價</button>
                 <button class="btn btn-sm btn-outline" onclick="showAddShort()">＋ 新增借券</button>
               </div>
             </div>
@@ -1195,7 +1201,10 @@ function showAddFitness(){
 // INVESTMENT
 // ════════════════════════════════════════════════
 async function loadInvestment(){
+  const saved = localStorage.getItem('invTab');
+  if(saved && saved !== _invTab){ switchInvTab(saved); return; }
   if(_invTab === 'assets') loadAssets();
+  else if(_invTab === 'forex') loadForex();
   else loadMarket(_invTab);
 }
 
@@ -1305,7 +1314,12 @@ let _invMarket = 'tw';
 let _assetsChart = null;
 
 function _mktLabel(m){ return {tw:'台股',us:'美股',crypto:'加密貨幣'}[m]||m; }
-function _mktIcon(m) { return {tw:'🇹🇼',us:'🇺🇸',crypto:'💎'}[m]||''; }
+function _mktIcon(m) {
+  if(m==='tw') return '<img class="tab-flag" src="/flags/tw.svg" alt="TW">';
+  if(m==='us') return '<img class="tab-flag" src="/flags/us.svg" alt="US">';
+  if(m==='crypto') return '💎';
+  return '';
+}
 
 // 股票代號靜態字典（lazy-load）
 let _twStocks = null, _cryptoCoins = null, _usStocks = null;
@@ -1324,6 +1338,7 @@ async function getUsStocks(){
 
 function switchInvTab(tab){
   _invTab = tab;
+  localStorage.setItem('invTab', tab);
   document.querySelectorAll('.inv-tab').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.inv-sub').forEach(el => el.classList.remove('active'));
   $(`inv-tab-${tab}`).classList.add('active');
@@ -1460,12 +1475,27 @@ async function loadShorts(){
       <td style="color:var(--muted);font-size:12px;">${s.note||'-'}</td>
       <td style="white-space:nowrap;">
         <span class="sh-drag-handle" title="拖曳排序" style="cursor:grab;padding:0 6px;color:var(--muted);">⠿</span>
+        <button class="btn btn-xs btn-outline" onclick="showEditShort('${sym}')">✏️</button>
       </td>
     </tr>`;
   }).join('') : `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px;">尚無借券記錄</td></tr>`;
 
   initShortsSortable();
   return totalVal;
+}
+
+async function refreshShortPrices(){
+  const btn = $('btn-refresh-shorts');
+  if(btn){ btn.disabled=true; btn.textContent='更新中…'; }
+  try {
+    const r = await api('/api/investment/shorts/refresh-prices', 'POST', {});
+    if(r.success) toast(`已更新 ${r.updated} 筆借券現價`, 'ok');
+    else toast('更新失敗：' + (r.error||''), 'err');
+  } catch(e) {
+    toast('更新現價失敗', 'err');
+  } finally {
+    if(btn){ btn.disabled=false; btn.textContent='🔄 更新現價'; }
+  }
 }
 
 let _shortsSortable = null;
@@ -1572,6 +1602,39 @@ async function showAddShort(){
     }
   });
   _initShortAutocomplete();
+}
+
+async function showEditShort(symbol){
+  const r = await api('/api/investment/shorts');
+  const s = (r.data||[]).find(x=>x.symbol===symbol);
+  if(!s){ toast('找不到借券部位','err'); return; }
+  showModal(`編輯借券 — ${symbol}`, `
+    <div class="form-row">
+      <div class="form-group"><label>代碼</label><input type="text" class="form-control" value="${s.symbol}" disabled style="background:#f8fafc;color:var(--muted);"></div>
+      <div class="form-group"><label>名稱</label><input type="text" id="es-name" class="form-control" value="${s.name||''}"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>借券股數</label><input type="number" id="es-shares" class="form-control" value="${s.short_shares}" step="1" min="0"></div>
+      <div class="form-group"><label>平均賣出價</label><input type="number" id="es-avgprice" class="form-control" value="${s.avg_sell_price}" step="any"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>現價</label><input type="number" id="es-curprice" class="form-control" value="${s.current_price||0}" step="any"></div>
+      <div class="form-group"><label>備註</label><input type="text" id="es-note" class="form-control" value="${s.note||''}"></div>
+    </div>
+  `,{
+    submitLabel:'儲存',
+    onSubmit: async ()=>{
+      const r2 = await api(`/api/investment/shorts/${symbol}`,'PUT',{
+        name: $('es-name').value.trim(),
+        short_shares: parseFloat($('es-shares').value)||0,
+        avg_sell_price: parseFloat($('es-avgprice').value)||0,
+        current_price: parseFloat($('es-curprice').value)||0,
+        note: $('es-note').value
+      });
+      if(r2.success){ toast('借券已更新','ok'); closeModalForce(); loadShorts(); }
+      else toast(r2.error||'更新失敗','err');
+    }
+  });
 }
 
 async function editShortPrice(symbol, current){
@@ -1710,8 +1773,8 @@ async function loadAssets(){
     api('/api/investment/summary?market=crypto'),
   ]);
   $('ast-market-cards').innerHTML = [
-    { label:'🇹🇼 台股',    tab:'tw',     sum:twSum.data,     rate:1       },
-    { label:'🇺🇸 美股',    tab:'us',     sum:usSum.data,     rate:usdRate },
+    { label:'<img class="tab-flag" src="/flags/tw.svg" alt="TW"> 台股',    tab:'tw',     sum:twSum.data,     rate:1       },
+    { label:'<img class="tab-flag" src="/flags/us.svg" alt="US"> 美股',    tab:'us',     sum:usSum.data,     rate:usdRate },
     { label:'💎 加密貨幣', tab:'crypto', sum:cryptoSum.data, rate:usdRate },
   ].map(({label, tab, sum, rate}) => {
     const pnl      = parseFloat(sum?.pnl||0) * rate;
@@ -1732,8 +1795,12 @@ async function loadAssets(){
     ? `<span class="badge b-stock">\ud83d\udcc8 \u6295\u8cc7</span>`
     : `<span class="badge b-pending">\ud83d\udcb5 \u73fe\u91d1</span>`;
 
+  const accChkAll = $('acc-chk-all');
+  if(accChkAll){ accChkAll.checked=false; accChkAll.indeterminate=false; }
+  _updateAccBulkDeleteBtn();
   $('ast-tbody').innerHTML = d.accounts.length ? d.accounts.map(a => `
-    <tr>
+    <tr data-id="${a.id}">
+      <td class="td-check"><input type="checkbox" class="acc-row-chk" data-id="${a.id}" onchange="onAccRowCheck()"></td>
       <td><strong>${a.unit}</strong></td>
       <td><span class="badge b-pending">${a.currency}</span></td>
       <td style="text-align:right;">${Number(a.amount).toLocaleString('zh-TW', {minimumFractionDigits:0,maximumFractionDigits:4})}</td>
@@ -1742,29 +1809,31 @@ async function loadAssets(){
       <td style="text-align:right;color:var(--primary);font-size:13px;">${a.percentage}</td>
       <td>${catBadge(a.category)}</td>
       <td style="white-space:nowrap;">
-        <button class="btn btn-xs btn-outline" onclick="showEditAccount(${a.id})">\u7de8\u8f2f</button>
-        <button class="btn btn-xs btn-danger"  onclick="deleteAccount(${a.id})">\u522a\u9664</button>
+        <span class="acc-drag-handle" title="\u62d6\u66f3\u6392\u5e8f" style="cursor:grab;padding:0 6px;color:var(--muted);">\u283f</span>
+        <button class="btn btn-xs btn-outline" onclick="showEditAccount(${a.id})">✏️</button>
       </td>
     </tr>
-  `).join('') : `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px;">\u5c1a\u7121\u5e33\u6236\uff0c\u9ede\u64ca\u300c\uff0b \u65b0\u589e\u5e33\u6236\u300d\u958b\u59cb\u5efa\u7acb</td></tr>`;
+  `).join('') : `<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:32px;">\u5c1a\u7121\u5e33\u6236\uff0c\u9ede\u64ca\u300c\uff0b \u65b0\u589e\u5e33\u6236\u300d\u958b\u59cb\u5efa\u7acb</td></tr>`;
+
+  initAssetsSortable();
 
   // 合計 + 投資/現金小計 in tfoot
   $('ast-tfoot').innerHTML = `
     <tr class="assets-tbl-row-total">
-      <td colspan="4"><strong>\u5408\u8a08</strong></td>
+      <td></td><td colspan="4"><strong>\u5408\u8a08</strong></td>
       <td style="text-align:right;"><strong>${fmtMoney(d.totalTWD)}</strong></td>
       <td style="text-align:right;font-weight:700;">100%</td>
       <td colspan="2"></td>
     </tr>
     <tr style="background:#f8fafc;">
-      <td style="padding-left:16px;color:var(--primary);">\ud83d\udcc8 \u5eab\u5b58\u5e02\u503c</td>
+      <td></td><td style="padding-left:8px;color:var(--primary);">\ud83d\udcc8 \u5eab\u5b58\u5e02\u503c</td>
       <td colspan="3"></td>
       <td style="text-align:right;color:var(--primary);font-weight:600;">${fmtMoney(d.holdingsTWD)}</td>
       <td style="text-align:right;color:var(--primary);font-size:13px;">${d.investmentPct}%</td>
       <td colspan="2"></td>
     </tr>
     <tr style="background:#f8fafc;">
-      <td style="padding-left:16px;color:var(--success);">\ud83d\udcb5 \u5e33\u6236\u8cc7\u7522</td>
+      <td></td><td style="padding-left:8px;color:var(--success);">\ud83d\udcb5 \u5e33\u6236\u8cc7\u7522</td>
       <td colspan="3"></td>
       <td style="text-align:right;color:var(--success);font-weight:600;">${fmtMoney(d.accountsTWD)}</td>
       <td style="text-align:right;color:var(--success);font-size:13px;">${d.cashPct}%</td>
@@ -1855,7 +1924,12 @@ function _accountForm(a = {}){
       <div class="form-group">
         <label>\u5e63\u7a2e *</label>
         <select id="acc-currency" class="form-control">
-          ${['TWD','USD','JPY','USDT','BTC','ETH'].map(c=>`<option value="${c}" ${a.currency===c?'selected':''}>${c}</option>`).join('')}
+          ${[
+            {c:'TWD',s:'NT$'},{c:'USD',s:'$'},{c:'JPY',s:'\u00a5'},{c:'EUR',s:'\u20ac'},{c:'GBP',s:'\u00a3'},
+            {c:'HKD',s:'HK$'},{c:'CNY',s:'CN\u00a5'},{c:'AUD',s:'A$'},{c:'CAD',s:'C$'},{c:'SGD',s:'S$'},
+            {c:'CHF',s:'Fr'},{c:'KRW',s:'\u20a9'},{c:'THB',s:'\u0e3f'},
+            {c:'USDT',s:'\u20ae'},{c:'BTC',s:'\u20bf'},{c:'ETH',s:'\u039e'}
+          ].map(({c,s})=>`<option value="${c}" ${a.currency===c?'selected':''}>${s} ${c}</option>`).join('')}
           <option value="__custom__">+ \u81ea\u8a02</option>
         </select>
       </div>
@@ -1905,6 +1979,54 @@ async function deleteAccount(id){
   const r = await api(`/api/investment/assets/accounts/${id}`, 'DELETE');
   if(r.success){ toast('\u5df2\u522a\u9664','ok'); loadAssets(); }
   else toast(r.error,'err');
+}
+
+let _accSortable = null;
+function initAssetsSortable(){
+  const tbody = $('ast-tbody');
+  if(!tbody) return;
+  if(_accSortable){ _accSortable.destroy(); _accSortable = null; }
+  if(!tbody.querySelector('tr[data-id]')) return;
+  _accSortable = Sortable.create(tbody, {
+    handle: '.acc-drag-handle',
+    animation: 120,
+    onEnd: async () => {
+      const ids = [...tbody.querySelectorAll('tr[data-id]')].map(r => +r.dataset.id);
+      await api('/api/investment/assets/accounts/sort-order', 'PATCH', { ids });
+    }
+  });
+}
+
+function _updateAccBulkDeleteBtn(){
+  const chkd = document.querySelectorAll('.acc-row-chk:checked');
+  const btn = $('btn-acc-bulk-delete');
+  if(!btn) return;
+  btn.disabled = chkd.length === 0;
+}
+
+function onAccRowCheck(){
+  _updateAccBulkDeleteBtn();
+  const all = document.querySelectorAll('.acc-row-chk');
+  const chkd = document.querySelectorAll('.acc-row-chk:checked');
+  const hdr = $('acc-chk-all');
+  if(!hdr) return;
+  if(chkd.length === 0){ hdr.checked=false; hdr.indeterminate=false; }
+  else if(chkd.length === all.length){ hdr.checked=true; hdr.indeterminate=false; }
+  else{ hdr.checked=false; hdr.indeterminate=true; }
+}
+
+function toggleAccSelectAll(chk){
+  document.querySelectorAll('.acc-row-chk').forEach(c => c.checked = chk.checked);
+  _updateAccBulkDeleteBtn();
+}
+
+async function deleteSelectedAccounts(){
+  const ids = [...document.querySelectorAll('.acc-row-chk:checked')].map(c => c.dataset.id);
+  if(!ids.length) return;
+  if(!confirm(`刪除 ${ids.length} 筆帳戶？`)) return;
+  for(const id of ids) await api(`/api/investment/assets/accounts/${id}`, 'DELETE');
+  toast('已刪除', 'ok');
+  loadAssets();
 }
 
 // ── 記錄快照 ──
@@ -2028,7 +2150,7 @@ async function _initHoldingAutocomplete(){
   function _showList(q){
     if(!q){ listEl.style.display='none'; return; }
     const lower = q.toLowerCase();
-    const hits = _acItems.filter(s=>s.code.toLowerCase().startsWith(lower)||s.name.includes(q)).slice(0,8);
+    const hits = _acItems.filter(s=>s.code.toLowerCase().startsWith(lower)||s.name.toLowerCase().includes(lower)).slice(0,8);
     if(!hits.length){ listEl.style.display='none'; return; }
     listEl.innerHTML = hits.map(s=>
       `<div class="autocomplete-item" data-code="${s.code}" data-name="${s.name}">
@@ -2076,7 +2198,6 @@ function _autoType(sym, name, market){
 function showAddHolding(existing=null){
   const isEdit = !!existing;
   const mktVal = isEdit ? existing.market : _invMarket;
-  const mktSel = ['tw','us','crypto'].map(v=>`<option value="${v}" ${mktVal===v?'selected':''}>${_mktIcon(v)} ${_mktLabel(v)}</option>`).join('');
   showModal(isEdit?'編輯庫存':'新增庫存', `
     <div class="form-row">
       <div class="form-group"><label>代碼 *</label>
@@ -2093,25 +2214,16 @@ function showAddHolding(existing=null){
       </div>
     </div>
     <div class="form-row">
-      <div class="form-group">
-        <label>市場</label>
-        <select id="h-market" class="form-control" ${isEdit?'disabled':''}>
-          ${mktSel}
-        </select>
-        ${isEdit?`<input type="hidden" id="h-market-hidden" value="${existing.market}">` : ''}
-      </div>
-      <div class="form-group"><label>備註</label><input type="text" id="h-note" class="form-control" value="${isEdit?existing.note:''}"></div>
-    </div>
-    <div class="form-row">
       <div class="form-group"><label>庫存數量</label><input type="number" id="h-shares" class="form-control" placeholder="0" step="0.0001" value="${isEdit?existing.shares:''}"></div>
       <div class="form-group"><label>均成本</label><input type="number" id="h-cost" class="form-control" placeholder="0" step="any" value="${isEdit?existing.avg_cost:''}"></div>
     </div>
+    <div class="form-group"><label>備註</label><input type="text" id="h-note" class="form-control" value="${isEdit?existing.note:''}"></div>
   `,{
     submitLabel:'儲存庫存',
     onSubmit: async ()=>{
       const sym = $('h-sym').value.trim().toUpperCase();
       if(!sym){ toast('請填寫代碼','err'); return; }
-      const mkt = $('h-market-hidden') ? $('h-market-hidden').value : $('h-market').value;
+      const mkt = mktVal;
       let name = $('h-name').value.trim();
       if(!name){
         if(mkt==='tw'){ const s=(await getTwStocks()).find(x=>x.code===sym); name=s?s.name:sym; }

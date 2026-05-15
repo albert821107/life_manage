@@ -350,10 +350,47 @@ module.exports = (io) => {
     res.json({ success: true });
   });
 
+  // POST /api/investment/shorts/refresh-prices — 即時撈取借券現價（台股 Yahoo Finance）
+  router.post('/shorts/refresh-prices', async (req, res) => {
+    try {
+      const shorts = db.prepare(`SELECT symbol FROM tw_shorts WHERE short_shares > 0.00001`).all();
+      if (!shorts.length) return res.json({ success: true, updated: 0 });
+
+      const stmt = db.prepare(`UPDATE tw_shorts SET current_price=?, updated_at=datetime('now','localtime') WHERE symbol=?`);
+      const updated = [];
+
+      for (const { symbol } of shorts) {
+        try {
+          const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}.TW?interval=1d&range=1d`;
+          const data = await fetchJSON(url);
+          const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
+          if (price && price > 0) { stmt.run(parseFloat(price.toFixed(4)), symbol); updated.push(symbol); }
+        } catch(e) { /* 個股失敗跳過 */ }
+      }
+
+      if (updated.length) io.emit('investment:update');
+      res.json({ success: true, updated: updated.length, symbols: updated });
+    } catch(e) {
+      res.json({ success: false, error: e.message });
+    }
+  });
+
   // PATCH /api/investment/shorts/:symbol/price — 更新借券部位現價
   router.patch('/shorts/:symbol/price', (req, res) => {
     db.prepare(`UPDATE tw_shorts SET current_price=?, updated_at=datetime('now','localtime') WHERE symbol=?`)
       .run(parseFloat(req.body.current_price) || 0, req.params.symbol.toUpperCase());
+    io.emit('investment:update');
+    res.json({ success: true });
+  });
+
+  // PUT /api/investment/shorts/:symbol — 編輯借券部位
+  router.put('/shorts/:symbol', (req, res) => {
+    const sym = req.params.symbol.toUpperCase();
+    const ex = db.prepare(`SELECT * FROM tw_shorts WHERE symbol=?`).get(sym);
+    if (!ex) return res.json({ success: false, error: '找不到借券部位' });
+    const { name, short_shares, avg_sell_price, current_price, note } = req.body;
+    db.prepare(`UPDATE tw_shorts SET name=?, short_shares=?, avg_sell_price=?, current_price=?, note=?, updated_at=datetime('now','localtime') WHERE symbol=?`)
+      .run(name || ex.name, parseFloat(short_shares) ?? ex.short_shares, parseFloat(avg_sell_price) ?? ex.avg_sell_price, parseFloat(current_price) ?? ex.current_price, note ?? ex.note ?? '', sym);
     io.emit('investment:update');
     res.json({ success: true });
   });
@@ -432,6 +469,15 @@ module.exports = (io) => {
     db.prepare(`INSERT INTO assets_accounts (unit, currency, amount, category, sort_order, note) VALUES (?,?,?,?,?,?)`)
       .run(unit, currency.toUpperCase(), parseFloat(amount)||0, category||'現金', maxOrder+1, note||'');
     io.emit('investment:update');
+    res.json({ success: true });
+  });
+
+  // PATCH /api/investment/assets/accounts/sort-order — 拖曳排序
+  router.patch('/assets/accounts/sort-order', (req, res) => {
+    const { ids } = req.body;
+    if (!Array.isArray(ids)) return res.json({ success: false, error: 'ids must be array' });
+    const stmt = db.prepare(`UPDATE assets_accounts SET sort_order=? WHERE id=?`);
+    ids.forEach((id, i) => stmt.run(i, id));
     res.json({ success: true });
   });
 
