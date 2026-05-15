@@ -97,6 +97,7 @@ async function init() {
   try { raw.run(`CREATE TABLE IF NOT EXISTS tw_shorts (id INTEGER PRIMARY KEY AUTOINCREMENT, symbol TEXT NOT NULL UNIQUE, name TEXT DEFAULT '', short_shares REAL DEFAULT 0, avg_sell_price REAL DEFAULT 0, current_price REAL DEFAULT 0, note TEXT DEFAULT '', updated_at TEXT DEFAULT (datetime('now','localtime')))`); } catch(e) { /* already exists */ }
   try { raw.run(`CREATE TABLE IF NOT EXISTS forex (id INTEGER PRIMARY KEY AUTOINCREMENT, pair TEXT NOT NULL, base_currency TEXT NOT NULL, quote_currency TEXT NOT NULL, amount REAL DEFAULT 0, entry_rate REAL DEFAULT 0, current_rate REAL DEFAULT 0, date TEXT NOT NULL, note TEXT DEFAULT '', status TEXT DEFAULT 'open', created_at TEXT DEFAULT (datetime('now','localtime')), updated_at TEXT DEFAULT (datetime('now','localtime')))`); } catch(e) { /* already exists */ }
   try { raw.run(`ALTER TABLE investments ADD COLUMN sort_order INTEGER DEFAULT 0`); } catch(e) { /* already exists */ }
+  try { raw.run(`ALTER TABLE tw_shorts ADD COLUMN sort_order INTEGER DEFAULT 0`); } catch(e) { /* already exists */ }
 
   _db.persist();
   console.log('\u2713 SQLite (sql.js) \u5df2\u8f09\u5165: ' + DB_PATH);

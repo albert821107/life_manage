@@ -284,7 +284,7 @@ module.exports = (io) => {
 
   // GET /api/investment/shorts — 查詢開倉中的借券部位
   router.get('/shorts', (req, res) => {
-    const rows = db.prepare(`SELECT * FROM tw_shorts WHERE short_shares > 0.00001 ORDER BY symbol`).all();
+    const rows = db.prepare(`SELECT * FROM tw_shorts WHERE short_shares > 0.00001 ORDER BY COALESCE(sort_order,0), symbol`).all();
     const withPnl = rows.map(s => {
       const curPrice = s.current_price > 0 ? s.current_price : s.avg_sell_price;
       const pnl = (s.avg_sell_price - curPrice) * s.short_shares;
@@ -317,8 +317,9 @@ module.exports = (io) => {
         db.prepare(`UPDATE tw_shorts SET short_shares=?, avg_sell_price=?, name=COALESCE(NULLIF(?,name),name), updated_at=datetime('now','localtime') WHERE symbol=?`)
           .run(+newShares.toFixed(4), +newAvgPrice.toFixed(4), name || ex.name, sym);
       } else {
-        db.prepare(`INSERT INTO tw_shorts (symbol, name, short_shares, avg_sell_price, current_price) VALUES (?,?,?,?,?)`)
-          .run(sym, name || sym, qty, prc, prc);
+        const nextShortOrd = (db.prepare(`SELECT COALESCE(MAX(sort_order),0) AS m FROM tw_shorts`).get().m || 0) + 1;
+        db.prepare(`INSERT INTO tw_shorts (symbol, name, short_shares, avg_sell_price, current_price, sort_order) VALUES (?,?,?,?,?,?)`)
+          .run(sym, name || sym, qty, prc, prc, nextShortOrd);
       }
     } else if (action === 'short_cover') {
       const ex = db.prepare(`SELECT * FROM tw_shorts WHERE symbol=?`).get(sym);
@@ -334,6 +335,15 @@ module.exports = (io) => {
     }
 
     io.emit('investment:update');
+    res.json({ success: true });
+  });
+
+  // PATCH /api/investment/shorts/sort-order — 拖曳排序
+  router.patch('/shorts/sort-order', (req, res) => {
+    const { symbols } = req.body;
+    if (!Array.isArray(symbols)) return res.json({ success: false, error: 'symbols must be array' });
+    const stmt = db.prepare(`UPDATE tw_shorts SET sort_order=? WHERE symbol=?`);
+    symbols.forEach((sym, i) => stmt.run(i, sym.toUpperCase()));
     res.json({ success: true });
   });
 

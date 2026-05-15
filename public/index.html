@@ -474,11 +474,12 @@
 
       <!-- ── 市場持倉（台股/美股/加密貨幣共用） ── -->
       <div class="inv-sub" id="inv-sub-market">
-        <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
+        <div class="stats-grid" id="mkt-stats-grid" style="grid-template-columns:repeat(4,1fr);">
           <div class="stat-card"><div class="lbl">庫存成本</div><div class="val" id="mkt-cost">--</div></div>
           <div class="stat-card"><div class="lbl">總市值</div><div class="val" id="mkt-value">--</div></div>
           <div class="stat-card"><div class="lbl">未實現損益</div><div class="val" id="mkt-pnl">--</div></div>
           <div class="stat-card"><div class="lbl">報酬率</div><div class="val" id="mkt-pct">--</div></div>
+          <div class="stat-card" id="shorts-stat-card" style="display:none;"><div class="lbl">借券總市值</div><div class="val" id="shorts-total-val">--</div></div>
         </div>
         <div class="card">
           <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
@@ -499,21 +500,23 @@
             </table>
           </div>
         </div>
-        <!-- 台股借券賣出區塊（僅台股市場顯示） -->
+        <!-- 台股借券區塊（僅台股市場顯示） -->
         <div id="tw-shorts-section" style="display:none;">
-          <div class="stats-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:12px;">
-            <div class="stat-card"><div class="lbl">借券總市值</div><div class="val" id="shorts-total-val">--</div></div>
-            <div class="stat-card"><div class="lbl">借券總部位</div><div class="val" id="shorts-total-cnt" style="color:var(--muted);font-size:20px;">--</div></div>
-          </div>
           <div class="card">
             <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
-              <span>📉 借券賣出記錄</span>
-              <button class="btn btn-sm btn-outline" onclick="showAddShort()">＋ 新增借券</button>
+              <span>📉 借券</span>
+              <div style="display:flex;gap:8px;">
+                <button class="btn btn-sm btn-danger" id="btn-shorts-bulk-delete" disabled onclick="deleteSelectedShorts()">🗑 刪除</button>
+                <button class="btn btn-sm btn-outline" onclick="showAddShort()">＋ 新增借券</button>
+              </div>
             </div>
             <div class="tbl-wrap">
               <table>
-                <thead><tr><th>代碼</th><th>名稱</th><th>空單股數</th><th>現價</th><th>市值</th><th>備註</th><th></th></tr></thead>
-                <tbody id="shorts-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;">載入中...</td></tr></tbody>
+                <thead><tr>
+                  <th class="th-check"><input type="checkbox" id="shorts-chk-all" onchange="toggleShortsSelectAll(this)"></th>
+                  <th>代碼</th><th>名稱</th><th>股數</th><th>現價</th><th>市值</th><th>備註</th><th></th>
+                </tr></thead>
+                <tbody id="shorts-tbody"><tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px;">載入中...</td></tr></tbody>
               </table>
             </div>
           </div>
@@ -1304,7 +1307,7 @@ function _mktLabel(m){ return {tw:'台股',us:'美股',crypto:'加密貨幣'}[m]
 function _mktIcon(m) { return {tw:'🇹🇼',us:'🇺🇸',crypto:'💎'}[m]||''; }
 
 // 股票代號靜態字典（lazy-load）
-let _twStocks = null, _cryptoCoins = null;
+let _twStocks = null, _cryptoCoins = null, _usStocks = null;
 async function getTwStocks(){
   if(!_twStocks) _twStocks = await fetch('/data/tw_stocks.json').then(r=>r.json()).catch(()=>[]);
   return _twStocks;
@@ -1312,6 +1315,10 @@ async function getTwStocks(){
 async function getCryptoCoins(){
   if(!_cryptoCoins) _cryptoCoins = await fetch('/data/crypto_coins.json').then(r=>r.json()).catch(()=>[]);
   return _cryptoCoins;
+}
+async function getUsStocks(){
+  if(!_usStocks) _usStocks = await fetch('/data/us_stocks.json').then(r=>r.json()).catch(()=>[]);
+  return _usStocks;
 }
 
 function switchInvTab(tab){
@@ -1400,49 +1407,108 @@ async function loadMarket(market){
   }).join('') : `<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:28px;">尚無${_mktLabel(market)}庫存</td></tr>`;
   initHoldingsSortable();
 
-  // 台股借券區塊
+  // 台股借券區塊 + 借券總市值 stat card
   const shortsSection = $('tw-shorts-section');
+  const shortsStatCard = $('shorts-stat-card');
+  const mktStatsGrid = $('mkt-stats-grid');
   if(market === 'tw'){
     shortsSection.style.display = '';
+    if(shortsStatCard) shortsStatCard.style.display = '';
+    if(mktStatsGrid) mktStatsGrid.style.gridTemplateColumns = 'repeat(5,1fr)';
     loadShorts();
   } else {
     shortsSection.style.display = 'none';
+    if(shortsStatCard) shortsStatCard.style.display = 'none';
+    if(mktStatsGrid) mktStatsGrid.style.gridTemplateColumns = 'repeat(4,1fr)';
   }
 }
 
 // ════════════════════════════════════════════════
-// 台股借券賣出
+// 台股借券
 // ════════════════════════════════════════════════
 async function loadShorts(){
   const r = await api('/api/investment/shorts');
   const rows = r.data||[];
 
-  // 統計
   let totalVal = 0;
   rows.forEach(s => {
     const p = s.current_price > 0 ? s.current_price : s.avg_sell_price;
     totalVal += s.short_shares * p;
   });
-  const cntEl = $('shorts-total-cnt'), valEl = $('shorts-total-val');
-  if(cntEl) cntEl.textContent = rows.length + ' 檔';
+  const valEl = $('shorts-total-val');
   if(valEl) valEl.textContent = fmtMoney(totalVal);
 
+  const chkAll = $('shorts-chk-all');
+  if(chkAll){ chkAll.checked = false; chkAll.indeterminate = false; }
+  _updateShortsBulkDeleteBtn();
+
   $('shorts-tbody').innerHTML = rows.length ? rows.map(s=>{
+    const sym = s.symbol.replace(/'/g,"&#39;");
     const price = s.current_price > 0 ? s.current_price : s.avg_sell_price;
     const mktVal = s.short_shares * price;
-    return `<tr>
+    return `<tr data-sym="${sym}">
+      <td class="td-check"><input type="checkbox" class="sh-row-chk" data-sym="${sym}" onchange="onShortRowCheck()"></td>
       <td><strong>${s.symbol}</strong></td>
       <td>${s.name}</td>
       <td>${Number(s.short_shares).toLocaleString('zh-TW',{maximumFractionDigits:4})}</td>
-      <td><span onclick="editShortPrice('${s.symbol}',${s.current_price})" style="cursor:pointer;text-decoration:underline dotted;color:var(--primary);" title="點擊更新現價">${fmtPrice(price)}</span></td>
+      <td><span onclick="editShortPrice('${sym}',${s.current_price})" style="cursor:pointer;text-decoration:underline dotted;color:var(--primary);" title="點擊更新現價">${fmtPrice(price)}</span></td>
       <td>${fmtMoney(mktVal)}</td>
       <td style="color:var(--muted);font-size:12px;">${s.note||'-'}</td>
-      <td>
-        <button class="btn btn-xs btn-outline" onclick="closeShort('${s.symbol}',${price})">回補</button>
-        <button class="btn btn-xs btn-danger" onclick="deleteShort('${s.symbol}')">刪</button>
+      <td style="white-space:nowrap;">
+        <span class="sh-drag-handle" title="拖曳排序" style="cursor:grab;padding:0 6px;color:var(--muted);">⠿</span>
+        <button class="btn btn-xs btn-danger" onclick="deleteShort('${sym}')">刪</button>
       </td>
     </tr>`;
-  }).join('') : `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;">尚無借券記錄</td></tr>`;
+  }).join('') : `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px;">尚無借券記錄</td></tr>`;
+
+  initShortsSortable();
+}
+
+let _shortsSortable = null;
+function initShortsSortable(){
+  const tbody = $('shorts-tbody');
+  if(!tbody) return;
+  if(_shortsSortable){ _shortsSortable.destroy(); _shortsSortable = null; }
+  if(!tbody.querySelector('tr[data-sym]')) return;
+  _shortsSortable = Sortable.create(tbody, {
+    handle: '.sh-drag-handle',
+    animation: 120,
+    onEnd: async () => {
+      const syms = [...tbody.querySelectorAll('tr[data-sym]')].map(r => r.dataset.sym);
+      await api('/api/investment/shorts/sort-order','PATCH',{symbols:syms});
+    }
+  });
+}
+
+function _updateShortsBulkDeleteBtn(){
+  const chkd = document.querySelectorAll('.sh-row-chk:checked');
+  const btn = $('btn-shorts-bulk-delete');
+  if(!btn) return;
+  btn.disabled = chkd.length === 0;
+  btn.textContent = chkd.length > 0 ? `🗑 刪除 (${chkd.length})` : '🗑 刪除';
+}
+
+function toggleShortsSelectAll(chk){
+  document.querySelectorAll('.sh-row-chk').forEach(c=>{ c.checked=chk.checked; });
+  _updateShortsBulkDeleteBtn();
+}
+
+function onShortRowCheck(){
+  const all  = document.querySelectorAll('.sh-row-chk');
+  const chkd = document.querySelectorAll('.sh-row-chk:checked');
+  const chkAll = $('shorts-chk-all');
+  if(chkAll){ chkAll.checked = chkd.length===all.length && all.length>0; chkAll.indeterminate = chkd.length>0 && chkd.length<all.length; }
+  _updateShortsBulkDeleteBtn();
+}
+
+async function deleteSelectedShorts(){
+  const chkd = [...document.querySelectorAll('.sh-row-chk:checked')];
+  if(!chkd.length) return;
+  const syms = chkd.map(c=>c.dataset.sym);
+  if(!confirm(`刪除 ${syms.join('、')} 的借券記錄？`)) return;
+  for(const sym of syms) await api(`/api/investment/shorts/${sym}`,'DELETE');
+  toast(`已刪除 ${syms.length} 筆`,'ok');
+  loadShorts();
 }
 
 async function _initShortAutocomplete(){
@@ -1465,7 +1531,7 @@ async function _initShortAutocomplete(){
 }
 
 async function showAddShort(){
-  showModal('新增借券賣出', `
+  showModal('新增借券', `
     <div class="form-row">
       <div class="form-group"><label>代碼 *</label>
         <div class="autocomplete-wrap">
@@ -1568,13 +1634,28 @@ const _FX_PAIRS = [
   ['AUD/TWD','AUD','TWD'],['CAD/TWD','CAD','TWD'],['SGD/TWD','SGD','TWD'],
   ['CHF/TWD','CHF','TWD'],['KRW/TWD','KRW','TWD'],['THB/TWD','THB','TWD'],
 ];
-function _onFxPairChange(){
-  const pair = ($('fx-pair')?.value||'').toUpperCase();
-  const found = _FX_PAIRS.find(p=>p[0]===pair);
+function _onFxPairSelect(pair){
+  const found = _FX_PAIRS.find(p=>p[0]===pair.toUpperCase());
   const base = found?found[1]:''; const quote = found?found[2]:'';
   const bd=$('fx-base-display'),bh=$('fx-base'),qd=$('fx-quote-display'),qh=$('fx-quote');
   if(bd)bd.textContent=base||'—'; if(bh)bh.value=base;
   if(qd)qd.textContent=quote||'—'; if(qh)qh.value=quote;
+}
+function _initFxAutocomplete(){
+  const symEl = document.getElementById('fx-pair');
+  const listEl = document.getElementById('dl-fx-pair');
+  if(!symEl||!listEl) return;
+  function _show(q){
+    if(!q){ listEl.style.display='none'; return; }
+    const lower = q.toLowerCase();
+    const hits = _FX_PAIRS.filter(p=>p[0].toLowerCase().includes(lower)||p[1].toLowerCase().includes(lower)||p[2].toLowerCase().includes(lower)).slice(0,8);
+    if(!hits.length){ listEl.style.display='none'; return; }
+    listEl.innerHTML = hits.map(p=>`<div class="autocomplete-item" data-code="${p[0]}" data-name="${p[1]}→${p[2]}"><span class="ac-code">${p[0]}</span><span class="ac-name">${p[1]} → ${p[2]}</span></div>`).join('');
+    listEl.querySelectorAll('.autocomplete-item').forEach(el=>el.addEventListener('mousedown',e=>{ e.preventDefault(); symEl.value=el.dataset.code; _onFxPairSelect(el.dataset.code); listEl.style.display='none'; }));
+    listEl.style.display='block';
+  }
+  symEl.addEventListener('input',()=>{ const q=symEl.value.trim(); if(!q){ listEl.style.display='none'; _onFxPairSelect(''); return; } _show(q); });
+  symEl.addEventListener('blur',()=>{ setTimeout(()=>{ listEl.style.display='none'; _onFxPairSelect(symEl.value.trim()); },160); });
 }
 function showAddForex(){
   const displayStyle='padding:8px 12px;background:#f8fafc;border:1px solid var(--border);border-radius:var(--radius);color:var(--muted);min-height:38px;font-size:15px;';
@@ -1582,10 +1663,10 @@ function showAddForex(){
     <div class="form-row">
       <div class="form-group">
         <label>貨幣對 *</label>
-        <select id="fx-pair" class="form-control" onchange="_onFxPairChange()">
-          <option value="">選擇貨幣對...</option>
-          ${_FX_PAIRS.map(p=>`<option value="${p[0]}">${p[0]}</option>`).join('')}
-        </select>
+        <div class="autocomplete-wrap">
+          <input type="text" id="fx-pair" class="form-control" placeholder="輸入貨幣對，如 USD/TWD" autocomplete="off">
+          <div class="autocomplete-list" id="dl-fx-pair"></div>
+        </div>
       </div>
       <div class="form-group"><label>金額 *</label><input type="number" id="fx-amount" class="form-control" placeholder="1000" step="any"></div>
     </div>
@@ -1616,6 +1697,7 @@ function showAddForex(){
       else toast(r.error||'新增失敗','err');
     }
   });
+  _initFxAutocomplete();
 }
 
 async function editForexRate(id, current){
@@ -1978,6 +2060,7 @@ async function _initHoldingAutocomplete(){
   async function _loadItems(){
     const mkt = mktEl?.value || _invMarket;
     if(mkt==='tw') _acItems = (await getTwStocks()).map(s=>({code:s.code,name:s.name}));
+    else if(mkt==='us') _acItems = (await getUsStocks()).map(s=>({code:s.code,name:s.name}));
     else if(mkt==='crypto') _acItems = (await getCryptoCoins()).map(c=>({code:c.symbol,name:c.name}));
     else _acItems = [];
   }
@@ -2072,6 +2155,7 @@ function showAddHolding(existing=null){
       let name = $('h-name').value.trim();
       if(!name){
         if(mkt==='tw'){ const s=(await getTwStocks()).find(x=>x.code===sym); name=s?s.name:sym; }
+        else if(mkt==='us'){ const s=(await getUsStocks()).find(x=>x.code===sym); name=s?s.name:sym; }
         else if(mkt==='crypto'){ const c=(await getCryptoCoins()).find(x=>x.symbol===sym); name=c?c.name:sym; }
         else name=sym;
       }
