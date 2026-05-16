@@ -592,7 +592,7 @@
       </div>
 
       <!-- 行程 sub -->
-      <div id="travel-sub-trips">
+      <div id="travel-sub-trips" style="display:none;">
         <!-- 行程卡片列表 -->
         <div id="trips-card-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:20px;"></div>
         <!-- 行程 Detail Panel -->
@@ -838,7 +838,7 @@
       </div>
 
       <!-- 年度損益 sub -->
-      <div id="investpro-sub-yearlypnl">
+      <div id="investpro-sub-yearlypnl" style="display:none;">
         <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
           <button class="btn btn-primary btn-sm" onclick="showAddYearlyPnlModal()">&#65291; 新增年度</button>
         </div>
@@ -871,7 +871,7 @@
       </div>
 
       <!-- Jira sub -->
-      <div id="work-sub-jira">
+      <div id="work-sub-jira" style="display:none;">
         <!-- 連線設定 (可折疊) -->
         <div class="card" style="padding:14px 18px;margin-bottom:16px;">
           <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleJiraConfigPanel()">
@@ -2878,10 +2878,7 @@ function switchTravelTab(tab) {
 }
 
 async function loadTravel() {
-  if (_travelTab === 'footprint') loadTravelFootprint();
-  else if (_travelTab === 'trips') loadTrips();
-  else if (_travelTab === 'memories') loadMemories();
-  else if (_travelTab === 'weekly') loadWeekly();
+  switchTravelTab(_travelTab);
 }
 
 async function loadTravelFootprint() {
