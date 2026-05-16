@@ -893,18 +893,13 @@
             <table style="width:100%;border-collapse:collapse;">
               <thead>
                 <tr style="background:var(--bg);border-bottom:2px solid var(--border);">
-                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">年份</th>
-                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">已實現損益</th>
-                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">未實現損益</th>
-                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">股利/利息</th>
-                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">稅費</th>
-                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);font-weight:700;">淨損益</th>
-                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">備註</th>
+                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);text-align:left;">年份</th>
+                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);text-align:right;">已實現損益 (TWD)</th>
                   <th style="padding:10px 14px;width:80px;"></th>
                 </tr>
               </thead>
               <tbody id="yearlypnl-tbody">
-                <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:40px;">尚無年度損益記錄</td></tr>
+                <tr><td colspan="3" style="text-align:center;color:var(--muted);padding:40px;">尚無年度損益記錄</td></tr>
               </tbody>
               <tfoot id="yearlypnl-tfoot"></tfoot>
             </table>
@@ -4098,79 +4093,47 @@ async function loadYearlyPnl() {
     const s = v >= 0 ? '+' : '';
     return `<span style="color:${v>=0?'var(--success)':'var(--danger)'};">${s}${fmtMoney(Math.abs(v))}</span>`;
   };
-  let totalRealized=0, totalUnreal=0, totalDiv=0, totalTax=0;
+  let totalRealized = 0;
   tbody.innerHTML = _yearlyPnlCache.map(r => {
-    const net = (r.realized_pnl||0) + (r.dividend_income||0) - (r.tax_paid||0);
-    totalRealized += r.realized_pnl||0;
-    totalUnreal   += r.unrealized_pnl||0;
-    totalDiv      += r.dividend_income||0;
-    totalTax      += r.tax_paid||0;
+    totalRealized += r.realized_pnl || 0;
     return `<tr style="border-bottom:1px solid var(--border);">
       <td style="padding:10px 14px;font-weight:700;">${r.year}</td>
-      <td style="padding:10px 14px;">${fmtPnl(r.realized_pnl)}</td>
-      <td style="padding:10px 14px;">${fmtPnl(r.unrealized_pnl)}</td>
-      <td style="padding:10px 14px;color:var(--success);">+${fmtMoney(r.dividend_income||0)}</td>
-      <td style="padding:10px 14px;color:var(--danger);">-${fmtMoney(r.tax_paid||0)}</td>
-      <td style="padding:10px 14px;font-weight:700;">${fmtPnl(net)}</td>
-      <td style="padding:10px 14px;font-size:13px;color:var(--muted);">${_escHtml(r.note||'')}</td>
+      <td style="padding:10px 14px;text-align:right;">${fmtPnl(r.realized_pnl)}</td>
       <td style="padding:10px 8px;text-align:center;white-space:nowrap;">
         <button onclick="showEditYearlyPnlModal(${r.year})" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--muted);" title="編輯">✏️</button>
         <button onclick="deleteYearlyPnl(${r.year})" style="background:none;border:none;cursor:pointer;font-size:17px;color:var(--muted);" title="刪除">×</button>
       </td>
     </tr>`;
   }).join('');
-  const totalNet = totalRealized + totalDiv - totalTax;
   if (tfoot) tfoot.innerHTML = `<tr style="background:var(--bg);font-weight:700;border-top:2px solid var(--border);">
     <td style="padding:10px 14px;">合計</td>
-    <td style="padding:10px 14px;">${fmtPnl(totalRealized)}</td>
-    <td style="padding:10px 14px;">${fmtPnl(totalUnreal)}</td>
-    <td style="padding:10px 14px;color:var(--success);">+${fmtMoney(totalDiv)}</td>
-    <td style="padding:10px 14px;color:var(--danger);">-${fmtMoney(totalTax)}</td>
-    <td style="padding:10px 14px;">${fmtPnl(totalNet)}</td>
-    <td colspan="2"></td>
+    <td style="padding:10px 14px;text-align:right;">${fmtPnl(totalRealized)}</td>
+    <td></td>
   </tr>`;
 }
 
 function _yearlyPnlForm(r = {}) {
   const currentYear = new Date().getFullYear();
-  return `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">年份 *</label>
-        <input id="yp-year" type="number" class="form-input" style="width:100%;box-sizing:border-box;" value="${r.year||currentYear}" min="2000" max="2099" ${r.year?'readonly':''}></div>
-      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">已實現損益 (TWD)</label>
-        <input id="yp-realized" type="number" class="form-input" style="width:100%;box-sizing:border-box;" value="${r.realized_pnl||0}" step="1" placeholder="0"></div>
+  return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+    <div>
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📅 年份 <span style="color:#ef4444;font-size:11px;">必填</span></label>
+      <input id="yp-year" type="number" class="form-input" style="width:100%;box-sizing:border-box;" value="${r.year||currentYear}" min="2000" max="2099" ${r.year?'readonly':''}>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">未實現損益 (TWD)</label>
-        <input id="yp-unrealized" type="number" class="form-input" style="width:100%;box-sizing:border-box;" value="${r.unrealized_pnl||0}" step="1" placeholder="0"></div>
-      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">股利/利息 (TWD)</label>
-        <input id="yp-dividend" type="number" class="form-input" style="width:100%;box-sizing:border-box;" value="${r.dividend_income||0}" step="1" placeholder="0"></div>
+    <div>
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">💰 已實現損益 (TWD)</label>
+      <input id="yp-realized" type="number" class="form-input" style="width:100%;box-sizing:border-box;" value="${r.realized_pnl||0}" step="1" placeholder="0">
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">稅費 (TWD)</label>
-        <input id="yp-tax" type="number" class="form-input" style="width:100%;box-sizing:border-box;" value="${r.tax_paid||0}" step="1" placeholder="0"></div>
-      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">備註</label>
-        <input id="yp-note" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(r.note||'')}"></div>
-    </div>`;
+  </div>`;
 }
 
 function showAddYearlyPnlModal() {
-  showModal(`<div style="padding:4px;">
-    <h3 style="font-size:18px;font-weight:700;margin-bottom:18px;">新增年度損益</h3>
-    ${_yearlyPnlForm()}
-    <div style="display:flex;gap:10px;margin-top:4px;justify-content:flex-end;">
-      <button class="btn btn-outline" onclick="closeModal()">取消</button>
-      <button class="btn btn-primary" onclick="submitAddYearlyPnl()">新增</button>
-    </div></div>`);
+  showModal('📊 新增年度損益', _yearlyPnlForm(), { onSubmit: submitAddYearlyPnl, submitLabel: '＋ 新增' });
 }
 
 async function submitAddYearlyPnl() {
   const year = parseInt($('yp-year')?.value);
   if (!year) { toast('請填寫年份','err'); return; }
-  const body = { year, realized_pnl:parseFloat($('yp-realized')?.value)||0,
-    unrealized_pnl:parseFloat($('yp-unrealized')?.value)||0,
-    dividend_income:parseFloat($('yp-dividend')?.value)||0,
-    tax_paid:parseFloat($('yp-tax')?.value)||0, note:$('yp-note')?.value?.trim()||'' };
+  const body = { year, realized_pnl: parseFloat($('yp-realized')?.value)||0 };
   const res = await api('/api/investment/yearly-pnl', 'POST', body);
   if (res.success) { closeModalForce(); loadYearlyPnl(); toast('已新增','ok'); }
   else toast(res.error||'新增失敗','err');
@@ -4179,20 +4142,11 @@ async function submitAddYearlyPnl() {
 function showEditYearlyPnlModal(year) {
   const r = _yearlyPnlCache.find(x => x.year === year);
   if (!r) return;
-  showModal(`<div style="padding:4px;">
-    <h3 style="font-size:18px;font-weight:700;margin-bottom:18px;">編輯 ${year} 年度損益</h3>
-    ${_yearlyPnlForm(r)}
-    <div style="display:flex;gap:10px;margin-top:4px;justify-content:flex-end;">
-      <button class="btn btn-outline" onclick="closeModal()">取消</button>
-      <button class="btn btn-primary" onclick="submitEditYearlyPnl(${year})">儲存</button>
-    </div></div>`);
+  showModal(`✏️ 編輯 ${year} 年度損益`, _yearlyPnlForm(r), { onSubmit: () => submitEditYearlyPnl(year), submitLabel: '儲存' });
 }
 
 async function submitEditYearlyPnl(year) {
-  const body = { realized_pnl:parseFloat($('yp-realized')?.value)||0,
-    unrealized_pnl:parseFloat($('yp-unrealized')?.value)||0,
-    dividend_income:parseFloat($('yp-dividend')?.value)||0,
-    tax_paid:parseFloat($('yp-tax')?.value)||0, note:$('yp-note')?.value?.trim()||'' };
+  const body = { realized_pnl: parseFloat($('yp-realized')?.value)||0 };
   const res = await api(`/api/investment/yearly-pnl/${year}`, 'PUT', body);
   if (res.success) { closeModalForce(); loadYearlyPnl(); toast('已更新','ok'); }
   else toast(res.error||'更新失敗','err');
