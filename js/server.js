@@ -61,9 +61,6 @@ app.post('/api/admin/reload', (req, res) => {
 (async () => {
   await require('./db').init();
 
-  const accountingRouter = require('./modules/accounting')(io);
-  const tasksRouter      = require('./modules/tasks')(io);
-  const fitnessRouter    = require('./modules/fitness')(io);
   const investmentRouter = require('./modules/investment')(io);
   const aiRouter         = require('./modules/ai')(io);
   const lineModule       = require('./modules/line_notify')(io);
@@ -72,9 +69,6 @@ app.post('/api/admin/reload', (req, res) => {
   const gamesRouter      = require('./modules/games')(io);
   const workRouter       = require('./modules/work')(io);
 
-  app.use('/api/accounting', accountingRouter);
-  app.use('/api/tasks',      tasksRouter);
-  app.use('/api/fitness',    fitnessRouter);
   app.use('/api/investment', investmentRouter);
   app.use('/api/ai',         aiRouter);
   app.use('/api/line',       lineModule.router);
@@ -125,12 +119,8 @@ app.post('/api/admin/reload', (req, res) => {
     cron.schedule(CRON_TIME, async () => {
       console.log('⏰ 發送每日摘要...');
       try {
-        const db      = require('./db').get();
-        const today   = new Date().toISOString().slice(0, 10);
-        const month   = today.slice(0, 7);
-        const expense = db.prepare(`SELECT COALESCE(SUM(amount),0) AS t FROM accounting WHERE type='expense' AND date LIKE ?`).get(`${month}%`);
-        const pending = db.prepare(`SELECT COUNT(*) AS c FROM tasks WHERE status='pending'`).get();
-        const msg = `\n📊 每日摘要 ${today}\n💰 本月支出 $${expense.t}\n✅ 待辦任務 ${pending.c} 件`;
+        const today = new Date().toISOString().slice(0, 10);
+        const msg = `\n📊 每日摘要 ${today}`;
         await lineModule.sendLineNotification(msg);
         console.log('✓ 摘要通知已發送');
       } catch (err) {
