@@ -2054,10 +2054,10 @@ function _depRenderRows(rows, cashTWD, catBadge){
       <td class="td-check"><input type="checkbox" class="acc-row-chk" data-id="${a.id}" onchange="onAccRowCheck()"></td>
       <td><strong>${a.unit}</strong></td>
       <td><span class="badge b-pending">${_CUR_DISPLAY[a.currency]||a.currency}</span></td>
-      <td>${Number(a.amount).toLocaleString('zh-TW',{minimumFractionDigits:0,maximumFractionDigits:4})}</td>
-      <td style="color:var(--muted);font-size:13px;">${a.rate}</td>
-      <td style="font-weight:600;">${a.twdAmount!==null?fmtMoney(a.twdAmount):'<span style="color:var(--warning);">未設匯率</span>'}</td>
-      <td style="color:var(--primary);font-size:13px;">${a.percentage}</td>
+      <td style="text-align:left;">${Number(a.amount).toLocaleString('zh-TW',{minimumFractionDigits:0,maximumFractionDigits:4})}</td>
+      <td style="text-align:left;color:var(--muted);font-size:13px;">${a.rate}</td>
+      <td style="text-align:left;font-weight:600;">${a.twdAmount!==null?fmtMoney(a.twdAmount):'<span style="color:var(--warning);">未設匯率</span>'}</td>
+      <td style="text-align:left;color:var(--primary);font-size:13px;">${a.percentage}</td>
       <td>${catBadge(a.category)}</td>
       <td style="white-space:nowrap;">
         <span class="acc-drag-handle" title="拖曳排序" style="cursor:grab;padding:0 6px;color:var(--muted);">⠿</span>
@@ -2068,8 +2068,8 @@ function _depRenderRows(rows, cashTWD, catBadge){
   $('ast-tfoot').innerHTML = rows.length ? `
     <tr class="assets-tbl-row-total">
       <td></td><td colspan="4"><strong>合計</strong></td>
-      <td><strong>${fmtMoney(cashTWD)}</strong></td>
-      <td style="font-weight:700;">100%</td>
+      <td style="text-align:left;"><strong>${fmtMoney(cashTWD)}</strong></td>
+      <td style="font-weight:700;text-align:left;">100%</td>
       <td colspan="2"></td>
     </tr>` : '';
 }
