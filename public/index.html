@@ -288,18 +288,18 @@
   <nav class="nav">
     <div class="nav-group-label">基本功能</div>
     <div id="nav-basic">
-      <div class="nav-item active" data-sec="dashboard"   onclick="nav('dashboard')">  <span class="ico">📊</span><span>概覽<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
+      <div class="nav-item active" data-sec="dashboard"   onclick="nav('dashboard')">  <span class="ico">📊</span><span>概覽</span></div>
       <div class="nav-item"        data-sec="investment"  onclick="nav('investment')"> <span class="ico">🏦</span><span>資產</span></div>
-      <div class="nav-item"        data-sec="ai"          onclick="nav('ai')">         <span class="ico">🤖</span><span>AI 助理<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
-      <div class="nav-item"        data-sec="line"        onclick="nav('line')">       <span class="ico">📣</span><span>通知<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
-      <div class="nav-item"        data-sec="travel"      onclick="nav('travel')">     <span class="ico">✈️</span><span>旅遊<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
-      <div class="nav-item"        data-sec="games"       onclick="nav('games')">      <span class="ico">🎮</span><span>遊戲<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
+      <div class="nav-item"        data-sec="ai"          onclick="nav('ai')">         <span class="ico">🤖</span><span>AI 助理</span></div>
+      <div class="nav-item"        data-sec="line"        onclick="nav('line')">       <span class="ico">📣</span><span>通知</span></div>
+      <div class="nav-item"        data-sec="travel"      onclick="nav('travel')">     <span class="ico">✈️</span><span>旅遊</span></div>
+      <div class="nav-item"        data-sec="games"       onclick="nav('games')">      <span class="ico">🎮</span><span>遊戲</span></div>
     </div>
     <div id="nav-advanced" style="display:none;">
       <div class="nav-group-label">進階功能</div>
-      <div class="nav-item" data-sec="work"      onclick="nav('work')">      <span class="ico">💼</span><span>工作<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
+      <div class="nav-item" data-sec="work"      onclick="nav('work')">      <span class="ico">💼</span><span>工作</span></div>
       <div class="nav-item" data-sec="analysis"  onclick="nav('analysis')">  <span class="ico">📄</span><span>文件閱讀</span></div>
-      <div class="nav-item" data-sec="investpro" onclick="nav('investpro')"> <span class="ico">💹</span><span>投資<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
+      <div class="nav-item" data-sec="investpro" onclick="nav('investpro')"> <span class="ico">💹</span><span>投資(進階)</span></div>
       <div class="nav-item" data-sec="trading"   onclick="nav('trading')">   <span class="ico">🎯</span><span>操盤<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
       <div class="nav-item" data-sec="resume"    onclick="nav('resume')">    <span class="ico">📋</span><span>履歷</span></div>
     </div>
@@ -1040,8 +1040,6 @@ socket.on('travel:update',      () => { if (state.sec==='travel')      loadTrave
 // ════════════════════════════════════════════════
 const state = {
   sec: 'dashboard',
-  acctMonth: new Date().toISOString().slice(0,7),
-  fitMonth:  new Date().toISOString().slice(0,7),
 };
 
 const PAGE_META = {
@@ -1113,9 +1111,6 @@ function toast(msg, type='ok'){
   },1000);
 })();
 
-// Initialise month inputs
-$('acct-month').value = state.acctMonth;
-$('fit-month').value  = state.fitMonth;
 
 // ════════════════════════════════════════════════
 // Navigation
