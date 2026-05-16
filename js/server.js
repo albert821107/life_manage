@@ -70,6 +70,7 @@ app.post('/api/admin/reload', (req, res) => {
   const telegramModule   = require('./modules/telegram')(io);
   const travelRouter     = require('./modules/travel')(io);
   const gamesRouter      = require('./modules/games')(io);
+  const workRouter       = require('./modules/work')(io);
 
   app.use('/api/accounting', accountingRouter);
   app.use('/api/tasks',      tasksRouter);
@@ -80,6 +81,7 @@ app.post('/api/admin/reload', (req, res) => {
   app.use('/api/telegram',   telegramModule.router);
   app.use('/api/travel',     travelRouter);
   app.use('/api/games',      gamesRouter);
+  app.use('/api/work',       workRouter);
 
   app.get('/api/health', (req, res) => {
     res.json({ success: true, version: '1.0.0', uptime: Math.floor(process.uptime()) });

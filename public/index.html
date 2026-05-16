@@ -889,10 +889,72 @@
 
     <!-- ════ WORK ════ -->
     <div class="section" id="section-work">
-      <div style="text-align:center;padding:80px 0;color:var(--muted);">
-        <div style="font-size:56px;margin-bottom:16px;">💼</div>
-        <div style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text);">工作管理</div>
-        <div style="font-size:14px;">開發中，敬請期待</div>
+      <div class="inv-tabs" id="work-tabs">
+        <div class="inv-tab active" id="work-tab-jira" onclick="switchWorkTab('jira')">📋 Jira 工單</div>
+      </div>
+
+      <!-- Jira sub -->
+      <div id="work-sub-jira">
+        <!-- 連線設定 (可折疊) -->
+        <div class="card" style="padding:14px 18px;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleJiraConfigPanel()">
+            <span style="font-weight:600;font-size:14px;">⚙️ Jira 連線設定</span>
+            <span id="jira-cfg-toggle" style="color:var(--muted);font-size:13px;">展開 ▼</span>
+          </div>
+          <div id="jira-config-form" style="display:none;margin-top:14px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div>
+                <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Jira 網域 *</label>
+                <input id="jira-base-url" type="text" class="form-input" placeholder="https://xxx.atlassian.net" style="width:100%;box-sizing:border-box;">
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Email *</label>
+                <input id="jira-email" type="email" class="form-input" placeholder="your@email.com" style="width:100%;box-sizing:border-box;">
+              </div>
+              <div style="grid-column:1/-1;">
+                <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">API Token * <a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank" style="color:var(--primary);font-size:11px;">（點此取得 Token）</a></label>
+                <input id="jira-api-token" type="password" class="form-input" placeholder="API Token" style="width:100%;box-sizing:border-box;">
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+              <button class="btn btn-primary btn-sm" onclick="saveJiraConfig()">💾 儲存</button>
+              <button class="btn btn-outline btn-sm" id="btn-test-jira" onclick="testJiraConfig()">🔌 測試連線</button>
+            </div>
+          </div>
+          <div id="jira-config-status" style="margin-top:8px;font-size:13px;color:var(--muted);"></div>
+        </div>
+
+        <!-- 查詢列 -->
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
+          <select id="jira-preset" class="form-input" style="width:200px;font-size:13px;" onchange="onJiraPresetChange()">
+            <option value="assignee = currentUser() ORDER BY updated DESC">📌 指派給我</option>
+            <option value="assignee = currentUser() AND status != Done ORDER BY updated DESC">⏳ 待完成</option>
+            <option value="assignee = currentUser() AND status = 'In Progress' ORDER BY updated DESC">🔄 進行中</option>
+            <option value="reporter = currentUser() ORDER BY created DESC">📝 我回報的</option>
+            <option value="custom">✏️ 自訂 JQL</option>
+          </select>
+          <input id="jira-jql-input" type="text" class="form-input" style="flex:1;min-width:200px;font-size:13px;display:none;" placeholder="輸入 JQL 查詢語法...">
+          <button class="btn btn-primary btn-sm" onclick="loadJiraIssues()">🔍 查詢</button>
+        </div>
+
+        <!-- 工單列表 -->
+        <div id="jira-issues-wrap" style="overflow-x:auto;">
+          <div id="jira-hint" style="text-align:center;padding:60px 0;color:var(--muted);">
+            <div style="font-size:40px;margin-bottom:12px;">📋</div>
+            <div>請先設定 Jira 連線，然後點擊查詢</div>
+          </div>
+          <table id="jira-table" style="display:none;width:100%;border-collapse:collapse;font-size:13px;">
+            <thead><tr>
+              <th style="text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);white-space:nowrap;">工單號</th>
+              <th style="text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);">標題</th>
+              <th style="text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);white-space:nowrap;">狀態</th>
+              <th style="text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);white-space:nowrap;">優先級</th>
+              <th style="text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);white-space:nowrap;">類型</th>
+              <th style="text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);white-space:nowrap;">更新時間</th>
+            </tr></thead>
+            <tbody id="jira-tbody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -974,7 +1036,7 @@ const PAGE_META = {
   line:       ['📣 通知管理','LINE & Telegram 通知'],
   travel:     ['✈️ 旅遊足跡','點擊國家展開地圖'],
   games:      ['🎮 遊戲','PS 成就獎盃與遊戲管理'],
-  work:       ['💼 工作','工作管理（開發中）'],
+  work:       ['💼 工作','Jira 工單管理'],
   analysis:   ['🔍 分析','進階分析（開發中）'],
   investpro:  ['💹 投資進階','投資進階（開發中）'],
   trading:    ['🎯 操盤','操盤記錄（開發中）'],
@@ -1041,7 +1103,7 @@ $('fit-month').value  = state.fitMonth;
 // ════════════════════════════════════════════════
 // Navigation
 // ════════════════════════════════════════════════
-const LOADERS = { dashboard:loadDashboard, accounting:loadAccounting, tasks:loadTasks, fitness:loadFitness, investment:loadInvestment, invest:loadInvest, ai:loadAI, line:loadLine, travel:loadTravel };
+const LOADERS = { dashboard:loadDashboard, accounting:loadAccounting, tasks:loadTasks, fitness:loadFitness, investment:loadInvestment, invest:loadInvest, ai:loadAI, line:loadLine, travel:loadTravel, work:loadWork };
 
 function nav(sec){
   state.sec = sec;
@@ -4060,6 +4122,132 @@ async function downloadMaps() {
 // ════════════════════════════════════════════════
 // 遊戲 / PSN 獎盃
 // ════════════════════════════════════════════════
+// ════════════════════════════════════════════════
+// WORK — Jira
+// ════════════════════════════════════════════════
+let _workTab = 'jira';
+let _jiraConfigLoaded = false;
+
+function loadWork() {
+  switchWorkTab(_workTab);
+}
+
+function switchWorkTab(tab) {
+  _workTab = tab;
+  document.querySelectorAll('#work-tabs .inv-tab').forEach(el => el.classList.remove('active'));
+  ['jira'].forEach(t => {
+    const el = $(`work-tab-${t}`);
+    const sub = $(`work-sub-${t}`);
+    if (el) el.classList.toggle('active', t === tab);
+    if (sub) sub.style.display = t === tab ? '' : 'none';
+  });
+  if (tab === 'jira') loadJiraConfig();
+}
+
+async function loadJiraConfig() {
+  if (_jiraConfigLoaded) return;
+  const res = await api('/api/work/jira/config');
+  if (res.success && res.data) {
+    $('jira-base-url').value = res.data.base_url || '';
+    $('jira-email').value    = res.data.email    || '';
+    $('jira-config-status').textContent = `已設定：${res.data.base_url}（${res.data.email}）`;
+    _jiraConfigLoaded = true;
+  }
+}
+
+function toggleJiraConfigPanel() {
+  const form = $('jira-config-form');
+  const lbl  = $('jira-cfg-toggle');
+  const show = form.style.display === 'none';
+  form.style.display = show ? '' : 'none';
+  lbl.textContent = show ? '收起 ▲' : '展開 ▼';
+  if (show) { _jiraConfigLoaded = false; loadJiraConfig(); }
+}
+
+async function saveJiraConfig() {
+  const base_url  = ($('jira-base-url').value  || '').trim();
+  const email     = ($('jira-email').value      || '').trim();
+  const api_token = ($('jira-api-token').value  || '').trim();
+  if (!base_url || !email || !api_token) { toast('請填寫完整設定', 'err'); return; }
+  const res = await api('/api/work/jira/config', 'POST', { base_url, email, api_token });
+  if (res.success) {
+    toast('設定已儲存', 'ok');
+    $('jira-config-status').textContent = `已設定：${base_url}（${email}）`;
+    $('jira-api-token').value = '';
+    _jiraConfigLoaded = false;
+  } else {
+    toast('儲存失敗：' + res.error, 'err');
+  }
+}
+
+async function testJiraConfig() {
+  const btn = $('btn-test-jira');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ 測試中...'; }
+  try {
+    const res = await api('/api/work/jira/issues?maxResults=1');
+    if (res.success) toast('✅ 連線成功！', 'ok');
+    else toast('連線失敗：' + res.error, 'err');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🔌 測試連線'; }
+  }
+}
+
+function onJiraPresetChange() {
+  const val   = $('jira-preset').value;
+  const input = $('jira-jql-input');
+  if (val === 'custom') { input.style.display = ''; input.focus(); }
+  else { input.style.display = 'none'; }
+}
+
+async function loadJiraIssues() {
+  const preset = $('jira-preset').value;
+  const jql = preset === 'custom'
+    ? ($('jira-jql-input').value || '').trim()
+    : preset;
+  if (!jql) { toast('請選擇或輸入查詢條件', 'err'); return; }
+
+  const hint  = $('jira-hint');
+  const table = $('jira-table');
+  const tbody = $('jira-tbody');
+  hint.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted);">⏳ 查詢中...</div>';
+  hint.style.display = '';
+  table.style.display = 'none';
+
+  const res = await api(`/api/work/jira/issues?jql=${encodeURIComponent(jql)}`);
+  if (!res.success) {
+    hint.innerHTML = `<div style="padding:40px;text-align:center;color:var(--danger);">❌ ${res.error}</div>`;
+    return;
+  }
+
+  const issues = res.data.issues || [];
+  if (!issues.length) {
+    hint.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted);">查無符合工單</div>';
+    return;
+  }
+
+  hint.style.display = 'none';
+  table.style.display = '';
+  const baseUrl = (res.data.issues?.[0]?.self || '').split('/rest/')[0];
+  tbody.innerHTML = issues.map(issue => {
+    const f = issue.fields;
+    const status   = f.status?.name    || '--';
+    const priority = f.priority?.name  || '--';
+    const itype    = f.issuetype?.name || '--';
+    const updated  = (f.updated || '').slice(0, 10);
+    const url = baseUrl ? `${baseUrl}/browse/${issue.key}` : '#';
+    const sColor = { 'To Do':'var(--muted)', 'In Progress':'var(--primary)', 'Done':'var(--success)', 'Resolved':'var(--success)' }[status] || 'var(--muted)';
+    const pColor = { 'Highest':'#ef4444', 'High':'#f97316', 'Medium':'#f59e0b', 'Low':'#6366f1', 'Lowest':'var(--muted)' }[priority] || 'var(--muted)';
+    return `<tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:8px 10px;white-space:nowrap;"><a href="${url}" target="_blank" style="color:var(--primary);font-weight:600;">${issue.key}</a></td>
+      <td style="padding:8px 10px;">${f.summary || ''}</td>
+      <td style="padding:8px 10px;white-space:nowrap;"><span style="font-size:12px;padding:2px 8px;border-radius:4px;background:${sColor}20;color:${sColor};">${status}</span></td>
+      <td style="padding:8px 10px;white-space:nowrap;font-size:12px;color:${pColor};">● ${priority}</td>
+      <td style="padding:8px 10px;white-space:nowrap;font-size:12px;color:var(--muted);">${itype}</td>
+      <td style="padding:8px 10px;white-space:nowrap;font-size:12px;color:var(--muted);">${updated}</td>
+    </tr>`;
+  }).join('');
+}
+
 async function fetchPsnProfile() {
   const username = ($('psn-username-input')?.value||'').trim();
   if (!username) { toast('請輸入 PSN ID','err'); return; }

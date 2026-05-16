@@ -6,3 +6,4 @@
 - [語言偏好](feedback_language.md) — 全程繁體中文（溝通、commit、UI）
 - [自動更新MD](feedback_auto_md.md) — CLAUDE.md 和 memory 檔直接更新，不需確認
 - [溝通風格](feedback_comms.md) — 完成後只給最終結果摘要，不列過程細節
+- [導航結構與新增SOP](project_nav_structure.md) — 左側大頁籤層級、子頁籤對應、新增功能步驟
