@@ -197,5 +197,91 @@ module.exports = (io) => {
     } catch(e) { res.json({ success: false, error: e.message }); }
   });
 
+  // ── Weekly Schedule (大小週) ──
+  router.get('/weekly', (req, res) => {
+    try {
+      const rows = db.prepare(`SELECT * FROM travel_weekly_schedule ORDER BY week_date ASC`).all();
+      res.json({ success: true, data: rows });
+    } catch(e) { res.json({ success: false, error: e.message }); }
+  });
+
+  router.post('/weekly', (req, res) => {
+    try {
+      const { week_date, return_date, week_type, location, transportation, tickets, accommodation, note } = req.body;
+      if (!week_date) return res.json({ success: false, error: '請填寫出發日期' });
+      const r = db.prepare(`INSERT INTO travel_weekly_schedule (week_date,return_date,week_type,location,transportation,tickets,accommodation,note) VALUES (?,?,?,?,?,?,?,?)`)
+        .run(week_date, return_date||null, week_type||'大', location||'', transportation||'', tickets||'', accommodation||'', note||'');
+      res.json({ success: true, id: r.lastInsertRowid });
+    } catch(e) { res.json({ success: false, error: e.message }); }
+  });
+
+  router.put('/weekly/:id', (req, res) => {
+    try {
+      const { week_date, return_date, week_type, location, transportation, tickets, accommodation, note } = req.body;
+      db.prepare(`UPDATE travel_weekly_schedule SET week_date=?,return_date=?,week_type=?,location=?,transportation=?,tickets=?,accommodation=?,note=? WHERE id=?`)
+        .run(week_date, return_date||null, week_type||'大', location||'', transportation||'', tickets||'', accommodation||'', note||'', req.params.id);
+      res.json({ success: true });
+    } catch(e) { res.json({ success: false, error: e.message }); }
+  });
+
+  router.delete('/weekly/:id', (req, res) => {
+    try {
+      db.prepare(`DELETE FROM travel_weekly_schedule WHERE id=?`).run(req.params.id);
+      res.json({ success: true });
+    } catch(e) { res.json({ success: false, error: e.message }); }
+  });
+
+  // POST /api/travel/weekly/generate — auto-generate schedule from params
+  router.post('/weekly/generate', (req, res) => {
+    try {
+      const { start_date, end_date, start_type = '小', small_duration = 1, big_duration = 2, small_to_big = 6, big_to_small = 8 } = req.body;
+      if (!start_date || !end_date) return res.json({ success: false, error: '請提供起訖日期' });
+
+      // Preserve entries that have any data filled
+      const existing = db.prepare(`SELECT * FROM travel_weekly_schedule WHERE location!='' OR transportation!='' OR tickets!='' OR accommodation!=''`).all();
+      const existingByDate = {};
+      existing.forEach(e => { existingByDate[e.week_date] = e; });
+
+      // Clear all
+      db.prepare(`DELETE FROM travel_weekly_schedule`).run();
+
+      // Generate new entries
+      const endDt = new Date(end_date);
+      let current = new Date(start_date);
+      let type = start_type;
+      const entries = [];
+
+      while (current <= endDt) {
+        const dateStr = current.toISOString().slice(0, 10);
+        const dur = type === '大' ? Number(big_duration) : Number(small_duration);
+        const retDate = new Date(current);
+        retDate.setDate(retDate.getDate() + dur - 1);
+        const retStr = retDate.toISOString().slice(0, 10);
+
+        const saved = existingByDate[dateStr] || {};
+        entries.push({ week_date: dateStr, return_date: retStr, week_type: type,
+          location: saved.location||'', transportation: saved.transportation||'',
+          tickets: saved.tickets||'', accommodation: saved.accommodation||'', note: saved.note||'' });
+
+        // Advance to next entry
+        if (type === '小') {
+          current.setDate(current.getDate() + Number(small_to_big));
+          type = '大';
+        } else {
+          current.setDate(current.getDate() + Number(big_to_small));
+          type = '小';
+        }
+      }
+
+      const raw = db._raw;
+      const stmt = raw.prepare(`INSERT INTO travel_weekly_schedule (week_date,return_date,week_type,location,transportation,tickets,accommodation,note) VALUES (?,?,?,?,?,?,?,?)`);
+      entries.forEach(e => { stmt.bind([e.week_date, e.return_date, e.week_type, e.location, e.transportation, e.tickets, e.accommodation, e.note]); stmt.step(); stmt.reset(); });
+      stmt.free();
+      db.persist();
+
+      res.json({ success: true, count: entries.length });
+    } catch(e) { res.json({ success: false, error: e.message }); }
+  });
+
   return router;
 };

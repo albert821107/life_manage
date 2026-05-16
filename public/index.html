@@ -652,41 +652,25 @@
     <div class="section" id="section-travel">
       <!-- Travel Sub-tabs -->
       <div class="inv-tabs" id="travel-tabs" style="margin-bottom:18px;">
-        <div class="inv-tab active" id="travel-tab-footprint" onclick="switchTravelTab('footprint')">🗺️ 足跡</div>
-        <div class="inv-tab" id="travel-tab-trips" onclick="switchTravelTab('trips')">🗓️ 行程</div>
+        <div class="inv-tab active" id="travel-tab-trips" onclick="switchTravelTab('trips')">🗓️ 行程</div>
+        <div class="inv-tab" id="travel-tab-weekly" onclick="switchTravelTab('weekly')">📆 大小週</div>
         <div class="inv-tab" id="travel-tab-memories" onclick="switchTravelTab('memories')">📸 回憶</div>
-      </div>
-
-      <!-- 足跡 sub -->
-      <div id="travel-sub-footprint">
-        <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:16px;gap:8px;">
-          <button id="travel-view-card" class="btn btn-primary btn-sm" onclick="setTravelView('card')">&#9646;&#9646; 卡片</button>
-          <button id="travel-view-list" class="btn btn-outline btn-sm" onclick="setTravelView('list')">&#9776; 列表</button>
-        </div>
-        <div id="travel-country-grid" style="display:flex;flex-wrap:wrap;gap:16px;padding:4px 0;"></div>
+        <div class="inv-tab" id="travel-tab-footprint" onclick="switchTravelTab('footprint')">🗺️ 足跡</div>
       </div>
 
       <!-- 行程 sub -->
-      <div id="travel-sub-trips" style="display:none;">
-        <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+      <div id="travel-sub-trips">
+        <!-- 行程卡片列表 -->
+        <div id="trips-card-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:20px;"></div>
+        <!-- 行程 Detail Panel -->
+        <div id="trip-header-bar" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:18px;font-weight:700;">行程規劃</span>
+            <span id="trips-count-badge" style="background:var(--primary);color:#fff;border-radius:20px;padding:2px 10px;font-size:13px;font-weight:600;"></span>
+          </div>
           <button class="btn btn-primary btn-sm" onclick="showAddTripModal()">&#65291; 新增行程</button>
         </div>
-        <div class="card" style="padding:0;overflow:hidden;">
-          <table style="width:100%;border-collapse:collapse;">
-            <thead>
-              <tr style="background:var(--bg);">
-                <th style="padding:10px 14px;text-align:left;font-size:13px;color:var(--muted);">行程名稱</th>
-                <th style="padding:10px 14px;text-align:left;font-size:13px;color:var(--muted);">目的地</th>
-                <th style="padding:10px 14px;text-align:center;font-size:13px;color:var(--muted);">出發日</th>
-                <th style="padding:10px 14px;text-align:center;font-size:13px;color:var(--muted);">回程日</th>
-                <th style="padding:10px 14px;text-align:center;font-size:13px;color:var(--muted);">天數</th>
-                <th style="padding:10px 14px;text-align:center;font-size:13px;color:var(--muted);">狀態</th>
-                <th style="padding:10px 14px;width:100px;"></th>
-              </tr>
-            </thead>
-            <tbody id="trips-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;">載入中...</td></tr></tbody>
-          </table>
-        </div>
+        <div id="trips-list-wrap"></div>
         <!-- Trip Detail Panel -->
         <div id="trip-detail-panel" style="display:none;margin-top:20px;">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
@@ -738,12 +722,53 @@
         </div>
       </div>
 
+      <!-- 大小週 sub -->
+      <div id="travel-sub-weekly" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span id="weekly-count-badge" style="font-size:14px;color:var(--muted);"></span>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-outline btn-sm" onclick="showWeeklySetupModal()">⚙️ 設定排程</button>
+            <button class="btn btn-primary btn-sm" onclick="showAddWeeklyModal()">&#65291; 手動新增</button>
+          </div>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table id="weekly-table" style="width:100%;border-collapse:collapse;min-width:700px;">
+              <thead>
+                <tr style="background:var(--bg);border-bottom:2px solid var(--border);">
+                  <th style="padding:10px 12px;text-align:center;font-size:13px;color:var(--muted);width:56px;">類型</th>
+                  <th style="padding:10px 12px;font-size:13px;color:var(--muted);width:110px;">出發日期</th>
+                  <th style="padding:10px 12px;font-size:13px;color:var(--muted);width:110px;">回程日期</th>
+                  <th style="padding:10px 12px;font-size:13px;color:var(--muted);">地點</th>
+                  <th style="padding:10px 12px;font-size:13px;color:var(--muted);">交通</th>
+                  <th style="padding:10px 12px;font-size:13px;color:var(--muted);">票券</th>
+                  <th style="padding:10px 12px;font-size:13px;color:var(--muted);">住宿</th>
+                  <th style="padding:10px 12px;width:60px;"></th>
+                </tr>
+              </thead>
+              <tbody id="weekly-tbody"><tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px;">載入中...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <!-- 回憶 sub -->
       <div id="travel-sub-memories" style="display:none;">
         <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
           <button class="btn btn-primary btn-sm" onclick="showAddMemoryModal()">&#65291; 新增回憶</button>
         </div>
         <div id="memories-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;"></div>
+      </div>
+
+      <!-- 足跡 sub -->
+      <div id="travel-sub-footprint" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:16px;gap:8px;">
+          <button id="travel-view-card" class="btn btn-primary btn-sm" onclick="setTravelView('card')">&#9646;&#9646; 卡片</button>
+          <button id="travel-view-list" class="btn btn-outline btn-sm" onclick="setTravelView('list')">&#9776; 列表</button>
+        </div>
+        <div id="travel-country-grid" style="display:flex;flex-wrap:wrap;gap:16px;padding:4px 0;"></div>
       </div>
     </div>
 
@@ -2929,10 +2954,11 @@ let _travelGeoData = null;
 let _travelCurrentConfig = null;
 
 let _travelView = 'card';
-let _travelTab = 'footprint';
+let _travelTab = 'trips';
 let _currentTripId = null;
 let _tripTab = 'checklist';
 let _tripsCache = [];
+let _weeklyCache = [];
 
 function toggleTravelLang() {
   _travelLangZh = !_travelLangZh;
@@ -2950,7 +2976,7 @@ function setTravelView(v) {
 
 function switchTravelTab(tab) {
   _travelTab = tab;
-  ['footprint','trips','memories'].forEach(t => {
+  ['trips','weekly','memories','footprint'].forEach(t => {
     const el = $(`travel-tab-${t}`);
     const sub = $(`travel-sub-${t}`);
     if (el) el.classList.toggle('active', t === tab);
@@ -2959,12 +2985,14 @@ function switchTravelTab(tab) {
   if (tab === 'footprint') loadTravelFootprint();
   else if (tab === 'trips') loadTrips();
   else if (tab === 'memories') loadMemories();
+  else if (tab === 'weekly') loadWeekly();
 }
 
 async function loadTravel() {
   if (_travelTab === 'footprint') loadTravelFootprint();
   else if (_travelTab === 'trips') loadTrips();
   else if (_travelTab === 'memories') loadMemories();
+  else if (_travelTab === 'weekly') loadWeekly();
 }
 
 async function loadTravelFootprint() {
@@ -3065,27 +3093,55 @@ async function openCountryMap(countryKey) {
 async function loadTrips() {
   const res = await api('/api/travel/trips');
   _tripsCache = res.data || [];
-  const tbody = $('trips-tbody');
-  if (!tbody) return;
+  const wrap = $('trips-list-wrap');
+  const badge = $('trips-count-badge');
+  if (!wrap) return;
+  if (badge) badge.textContent = _tripsCache.length ? `${_tripsCache.length} 個` : '';
   const statusLbl = {planning:'計畫中',ongoing:'進行中',completed:'已完成'};
-  const statusCls = {planning:'b-pending',ongoing:'b-in_progress',completed:'b-done'};
-  tbody.innerHTML = _tripsCache.length ? _tripsCache.map(t => {
+  const statusColor = {planning:'var(--primary)',ongoing:'var(--success)',completed:'var(--muted)'};
+  const statusIcon = {planning:'🗓️',ongoing:'✈️',completed:'✅'};
+  const today = new Date().toISOString().slice(0,10);
+  if (!_tripsCache.length) {
+    wrap.innerHTML = `<div style="text-align:center;padding:60px 20px;color:var(--muted);">
+      <div style="font-size:52px;margin-bottom:12px;">🗺️</div>
+      <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;">尚無行程</div>
+      <div style="font-size:14px;">點擊右上角「新增行程」開始規劃你的旅遊</div>
+    </div>`;
+    closeTripDetail(); return;
+  }
+  wrap.innerHTML = _tripsCache.map(t => {
     const days = t.start_date && t.end_date
-      ? Math.ceil((new Date(t.end_date) - new Date(t.start_date)) / 86400000) + 1
-      : '--';
-    return `<tr onclick="showTripDetail(${t.id})" style="cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
-      <td style="padding:12px 14px;font-weight:600;">${_escHtml(t.name)}</td>
-      <td style="padding:12px 14px;">${_escHtml(t.destination||'--')}</td>
-      <td style="padding:12px 14px;text-align:center;">${t.start_date||'--'}</td>
-      <td style="padding:12px 14px;text-align:center;">${t.end_date||'--'}</td>
-      <td style="padding:12px 14px;text-align:center;">${days}</td>
-      <td style="padding:12px 14px;text-align:center;"><span class="badge ${statusCls[t.status]||'b-pending'}">${statusLbl[t.status]||t.status}</span></td>
-      <td style="padding:12px 14px;" onclick="event.stopPropagation();">
-        <button class="btn btn-sm btn-outline" onclick="showEditTripModal(${t.id})" style="padding:4px 8px;">✏️</button>
-        <button class="btn btn-sm btn-danger" onclick="deleteTrip(${t.id})" style="padding:4px 8px;margin-left:4px;">🗑</button>
-      </td>
-    </tr>`;
-  }).join('') : `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px;">尚無行程，點擊右上角新增</td></tr>`;
+      ? Math.ceil((new Date(t.end_date) - new Date(t.start_date)) / 86400000) + 1 : null;
+    const isPast = t.end_date && t.end_date < today && t.status !== 'completed';
+    const isFuture = t.start_date && t.start_date > today;
+    const color = statusColor[t.status] || 'var(--muted)';
+    const dateStr = t.start_date
+      ? (t.end_date && t.end_date !== t.start_date
+          ? `${t.start_date} → ${t.end_date}` : t.start_date)
+      : '日期未定';
+    return `<div onclick="showTripDetail(${t.id})" style="background:var(--card);border:1px solid var(--border);border-left:4px solid ${color};border-radius:12px;padding:18px 20px;cursor:pointer;transition:box-shadow .15s,transform .15s;margin-bottom:12px;display:flex;align-items:center;gap:16px;"
+      onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,.10)';this.style.transform='translateY(-1px)'"
+      onmouseout="this.style.boxShadow='';this.style.transform=''">
+      <div style="font-size:36px;flex-shrink:0;">${statusIcon[t.status]||'🗓️'}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+          <span style="font-size:17px;font-weight:700;">${_escHtml(t.name)}</span>
+          ${t.destination?`<span style="background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:2px 10px;font-size:12px;color:var(--muted);">📍 ${_escHtml(t.destination)}</span>`:''}
+          <span class="badge ${t.status==='ongoing'?'b-done':t.status==='completed'?'b-pending':'b-in_progress'}" style="font-size:11px;">${statusLbl[t.status]||t.status}</span>
+        </div>
+        <div style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <span>🗓 ${dateStr}</span>
+          ${days?`<span>⏱ ${days} 天</span>`:''}
+          ${t.transportation?`<span>🚌 ${_escHtml(t.transportation)}</span>`:''}
+          ${t.accommodation?`<span>🏨 ${_escHtml(t.accommodation)}</span>`:''}
+        </div>
+      </div>
+      <div onclick="event.stopPropagation();" style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+        <button class="btn btn-sm btn-outline" onclick="showEditTripModal(${t.id})" style="padding:5px 10px;font-size:13px;">✏️ 編輯</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteTrip(${t.id})" style="padding:5px 10px;font-size:13px;">🗑 刪除</button>
+      </div>
+    </div>`;
+  }).join('');
   closeTripDetail();
 }
 
@@ -3094,18 +3150,20 @@ function showTripDetail(id) {
   const trip = _tripsCache.find(t => t.id === id);
   if (!trip) return;
   $('trip-detail-name').textContent = (trip.destination ? trip.destination + ' — ' : '') + trip.name;
-  $('trips-tbody').parentElement.parentElement.style.display = 'none';
-  document.querySelector('[onclick="showAddTripModal()"]').style.display = 'none';
+  const wrap = $('trips-list-wrap');
+  if (wrap) wrap.style.display = 'none';
+  const header = $('trip-header-bar');
+  if (header) header.style.display = 'none';
   $('trip-detail-panel').style.display = '';
   switchTripTab('checklist');
 }
 
 function closeTripDetail() {
   _currentTripId = null;
-  const card = $('trips-tbody')?.parentElement?.parentElement;
-  if (card) card.style.display = '';
-  const addBtn = document.querySelector('[onclick="showAddTripModal()"]');
-  if (addBtn) addBtn.style.display = '';
+  const wrap = $('trips-list-wrap');
+  if (wrap) wrap.style.display = '';
+  const header = $('trip-header-bar');
+  if (header) header.style.display = '';
   const panel = $('trip-detail-panel');
   if (panel) panel.style.display = 'none';
 }
@@ -3413,6 +3471,173 @@ async function deleteMemory(id) {
   if (!confirm('確認刪除此回憶？')) return;
   const res = await api(`/api/travel/memories/${id}`, 'DELETE');
   if (res.success) { toast('已刪除'); loadMemories(); }
+  else toast(res.error||'刪除失敗','err');
+}
+
+
+// ── 大小週 ──
+async function loadWeekly() {
+  const res = await api('/api/travel/weekly');
+  _weeklyCache = res.data || [];
+  const tbody = $('weekly-tbody');
+  const badge = $('weekly-count-badge');
+  if (!tbody) return;
+  if (badge) badge.textContent = _weeklyCache.length ? `共 ${_weeklyCache.length} 筆` : '';
+  const today = new Date().toISOString().slice(0,10);
+  if (!_weeklyCache.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:40px;">
+      <div style="font-size:40px;margin-bottom:10px;">📆</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:6px;">尚無大小週排程</div>
+      <div style="font-size:13px;">點擊「⚙️ 設定排程」自動產生，或「手動新增」逐筆建立</div>
+    </td></tr>`;
+    return;
+  }
+  tbody.innerHTML = _weeklyCache.map(w => {
+    const isBig   = w.week_type === '大';
+    const isPast  = w.week_date < today;
+    const hasData = w.location || w.transportation || w.tickets || w.accommodation;
+    const rowBg   = isPast ? 'opacity:.55;' : '';
+    const typeBg  = isBig ? 'background:#dbeafe;color:#1e40af;' : 'background:#f3f4f6;color:#374151;';
+    return `<tr style="${rowBg}border-bottom:1px solid var(--border);transition:background .1s;${hasData?'background:rgba(99,102,241,.04);':''}"
+      onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='${hasData?'rgba(99,102,241,.04)':''}'">
+      <td style="padding:9px 12px;text-align:center;">
+        <span style="display:inline-block;${typeBg}border-radius:6px;padding:2px 8px;font-size:13px;font-weight:700;">${w.week_type}</span>
+      </td>
+      <td style="padding:9px 12px;font-size:14px;${isBig?'font-weight:600;':''}">${w.week_date||'--'}</td>
+      <td style="padding:9px 12px;font-size:14px;color:var(--muted);">${w.return_date||'--'}</td>
+      <td style="padding:9px 12px;font-size:14px;">${_escHtml(w.location||'')}</td>
+      <td style="padding:9px 12px;font-size:13px;color:var(--muted);">${_escHtml(w.transportation||'')}</td>
+      <td style="padding:9px 12px;font-size:13px;color:var(--muted);">${_escHtml(w.tickets||'')}</td>
+      <td style="padding:9px 12px;font-size:13px;color:var(--muted);">${_escHtml(w.accommodation||'')}</td>
+      <td style="padding:9px 12px;">
+        <button onclick="showEditWeeklyModal(${w.id})" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);" title="編輯">✏️</button>
+        <button onclick="deleteWeekly(${w.id})" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);" title="刪除">×</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function showWeeklySetupModal() {
+  const today = new Date().toISOString().slice(0,10);
+  const nextYear = new Date(Date.now() + 365*86400000).toISOString().slice(0,10);
+  showModal(`<div style="padding:4px;">
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:6px;">設定大小週排程</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:18px;">系統會依設定自動產生排程，<strong style="color:var(--danger);">執行後會清除現有所有資料</strong>（地點/交通/票券/住宿有填寫的除外）</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">起始日期 *</label><input id="ws-start" type="date" class="form-input" style="width:100%;box-sizing:border-box;" value="${today}"></div>
+      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">結束日期 *</label><input id="ws-end" type="date" class="form-input" style="width:100%;box-sizing:border-box;" value="${nextYear}"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">起始週類型</label>
+        <select id="ws-type" class="form-input" style="width:100%;box-sizing:border-box;">
+          <option value="小">小週（單日）</option>
+          <option value="大">大週（兩天）</option>
+        </select>
+      </div>
+      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">起始日是星期幾</label>
+        <select id="ws-weekday" class="form-input" style="width:100%;box-sizing:border-box;">
+          <option value="0">日</option>
+          <option value="6" selected>六</option>
+          <option value="5">五</option>
+        </select>
+      </div>
+    </div>
+    <div style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;">
+      <div style="font-weight:600;margin-bottom:6px;">間隔設定（天數）</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><label style="color:var(--muted);display:block;margin-bottom:3px;">小週天數</label><input id="ws-small-dur" type="number" min="1" max="7" value="1" class="form-input" style="width:100%;box-sizing:border-box;"></div>
+        <div><label style="color:var(--muted);display:block;margin-bottom:3px;">大週天數</label><input id="ws-big-dur" type="number" min="1" max="7" value="2" class="form-input" style="width:100%;box-sizing:border-box;"></div>
+        <div><label style="color:var(--muted);display:block;margin-bottom:3px;">小→大（天）</label><input id="ws-s2b" type="number" min="1" max="14" value="6" class="form-input" style="width:100%;box-sizing:border-box;"></div>
+        <div><label style="color:var(--muted);display:block;margin-bottom:3px;">大→小（天）</label><input id="ws-b2s" type="number" min="1" max="14" value="8" class="form-input" style="width:100%;box-sizing:border-box;"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeModal()">取消</button>
+      <button class="btn btn-danger" onclick="submitWeeklySetup()">⚙️ 產生排程</button>
+    </div>
+  </div>`);
+}
+
+async function submitWeeklySetup() {
+  const start_date = $('ws-start')?.value;
+  const end_date   = $('ws-end')?.value;
+  const start_type = $('ws-type')?.value || '小';
+  const small_duration = parseInt($('ws-small-dur')?.value)||1;
+  const big_duration   = parseInt($('ws-big-dur')?.value)||2;
+  const small_to_big   = parseInt($('ws-s2b')?.value)||6;
+  const big_to_small   = parseInt($('ws-b2s')?.value)||8;
+  if (!start_date || !end_date) { toast('請填寫起訖日期','err'); return; }
+  const res = await api('/api/travel/weekly/generate', 'POST', { start_date, end_date, start_type, small_duration, big_duration, small_to_big, big_to_small });
+  if (res.success) { closeModal(); loadWeekly(); toast(`已產生 ${res.count} 筆排程`,'ok'); }
+  else toast(res.error||'產生失敗','err');
+}
+
+function _weeklyForm(w = {}) {
+  return `<div style="display:flex;flex-direction:column;gap:12px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">類型</label>
+        <select id="wf-type" class="form-input" style="width:100%;box-sizing:border-box;">
+          <option value="大" ${(w.week_type||'大')==='大'?'selected':''}>大週</option>
+          <option value="小" ${w.week_type==='小'?'selected':''}>小週</option>
+        </select>
+      </div>
+      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">出發日期 *</label><input id="wf-date" type="date" class="form-input" style="width:100%;box-sizing:border-box;" value="${w.week_date||''}"></div>
+      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">回程日期</label><input id="wf-return" type="date" class="form-input" style="width:100%;box-sizing:border-box;" value="${w.return_date||''}"></div>
+    </div>
+    <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">地點</label><input id="wf-location" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(w.location||'')}" placeholder="目的地或地區"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">交通</label><input id="wf-transport" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(w.transportation||'')}" placeholder="高鐵、捷運..."></div>
+      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">票券</label><input id="wf-tickets" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(w.tickets||'')}" placeholder="KKday、景點門票..."></div>
+    </div>
+    <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">住宿</label><textarea id="wf-accommodation" class="form-input" style="width:100%;box-sizing:border-box;height:70px;resize:vertical;" placeholder="飯店名稱...">${_escHtml(w.accommodation||'')}</textarea></div>
+    <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">備註</label><input id="wf-note" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(w.note||'')}"></div>
+  </div>`;
+}
+
+function showAddWeeklyModal() {
+  showModal(`<div style="padding:4px;"><h3 style="font-size:18px;font-weight:700;margin-bottom:18px;">手動新增排程</h3>${_weeklyForm()}
+    <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="submitAddWeekly()">新增</button>
+    </div></div>`);
+}
+
+async function submitAddWeekly() {
+  const week_date = $('wf-date')?.value;
+  if (!week_date) { toast('請填寫出發日期','err'); return; }
+  const body = { week_type:$('wf-type')?.value||'大', week_date, return_date:$('wf-return')?.value||null,
+    location:$('wf-location')?.value?.trim(), transportation:$('wf-transport')?.value?.trim(),
+    tickets:$('wf-tickets')?.value?.trim(), accommodation:$('wf-accommodation')?.value?.trim(), note:$('wf-note')?.value?.trim() };
+  const res = await api('/api/travel/weekly', 'POST', body);
+  if (res.success) { closeModal(); loadWeekly(); toast('已新增'); }
+  else toast(res.error||'新增失敗','err');
+}
+
+function showEditWeeklyModal(id) {
+  const w = _weeklyCache.find(x => x.id === id);
+  if (!w) return;
+  showModal(`<div style="padding:4px;"><h3 style="font-size:18px;font-weight:700;margin-bottom:18px;">編輯排程</h3>${_weeklyForm(w)}
+    <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="submitEditWeekly(${id})">儲存</button>
+    </div></div>`);
+}
+
+async function submitEditWeekly(id) {
+  const week_date = $('wf-date')?.value;
+  if (!week_date) { toast('請填寫出發日期','err'); return; }
+  const body = { week_type:$('wf-type')?.value||'大', week_date, return_date:$('wf-return')?.value||null,
+    location:$('wf-location')?.value?.trim(), transportation:$('wf-transport')?.value?.trim(),
+    tickets:$('wf-tickets')?.value?.trim(), accommodation:$('wf-accommodation')?.value?.trim(), note:$('wf-note')?.value?.trim() };
+  const res = await api(`/api/travel/weekly/${id}`, 'PUT', body);
+  if (res.success) { closeModal(); loadWeekly(); toast('已更新'); }
+  else toast(res.error||'更新失敗','err');
+}
+
+async function deleteWeekly(id) {
+  if (!confirm('確認刪除此筆排程？')) return;
+  const res = await api(`/api/travel/weekly/${id}`, 'DELETE');
+  if (res.success) { loadWeekly(); toast('已刪除'); }
   else toast(res.error||'刪除失敗','err');
 }
 
