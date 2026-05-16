@@ -107,6 +107,7 @@ async function init() {
   try { raw.run(`ALTER TABLE investments ADD COLUMN sort_order INTEGER DEFAULT 0`); } catch(e) { /* already exists */ }
   try { raw.run(`ALTER TABLE tw_shorts ADD COLUMN sort_order INTEGER DEFAULT 0`); } catch(e) { /* already exists */ }
   try { raw.run(`ALTER TABLE investments ADD COLUMN exchange TEXT DEFAULT ''`); } catch(e) { /* already exists */ }
+  try { raw.run(`CREATE TABLE IF NOT EXISTS psn_auth (id INTEGER PRIMARY KEY AUTOINCREMENT, access_token TEXT NOT NULL, refresh_token TEXT DEFAULT '', expires_at TEXT NOT NULL, created_at TEXT DEFAULT (datetime('now','localtime')))`); } catch(e) { /* already exists */ }
 
   _db.persist();
   console.log('\u2713 SQLite (sql.js) \u5df2\u8f09\u5165: ' + DB_PATH);

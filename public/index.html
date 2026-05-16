@@ -783,6 +783,33 @@
           <div class="sec-sub">PS 成就獎盃總覽</div>
         </div>
       </div>
+
+      <!-- PSN 授權設定 -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="togglePsnAuthPanel()">
+          <span>🔑 PSN 授權設定</span>
+          <span id="psn-auth-toggle" style="font-size:13px;color:var(--muted);">展開 ▼</span>
+        </div>
+        <div id="psn-auth-status-bar" style="font-size:13px;color:var(--muted);margin-top:4px;"></div>
+        <div id="psn-auth-panel" style="display:none;margin-top:12px;">
+          <div style="background:var(--bg2);border-radius:8px;padding:14px;margin-bottom:14px;font-size:13px;line-height:1.8;">
+            <div style="font-weight:700;margin-bottom:8px;">📋 如何取得 NPSSO？</div>
+            <ol style="margin:0;padding-left:20px;color:var(--text);">
+              <li>開啟瀏覽器並登入 <a href="https://www.playstation.com" target="_blank" style="color:var(--primary);">PlayStation 官網</a></li>
+              <li>開啟開發者工具（F12）→ 切換到 <strong>應用程式 / Application</strong> 分頁</li>
+              <li>展開 <strong>儲存空間 → Cookies → account.sony.com</strong></li>
+              <li>找到名為 <strong>npsso</strong> 的 Cookie，複製其值（約64字元）</li>
+              <li>貼到下方欄位並點擊「授權」</li>
+            </ol>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input id="psn-npsso-input" type="password" class="form-control" style="flex:1;min-width:200px;font-size:13px;" placeholder="貼上 NPSSO Cookie 值">
+            <button class="btn btn-primary btn-sm" onclick="submitPsnAuth()">🔑 授權</button>
+            <button class="btn btn-sm" style="background:var(--danger);color:#fff;" onclick="revokePsnAuth()">🗑 清除授權</button>
+          </div>
+        </div>
+      </div>
+
       <!-- PS 成就獎盃 -->
       <div class="card" style="margin-bottom:16px;">
         <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
@@ -835,7 +862,7 @@
         <div id="psn-empty" style="text-align:center;padding:40px 0;color:var(--muted);">
           <div style="font-size:40px;margin-bottom:8px;">🎮</div>
           <div style="font-size:15px;">輸入 PSN ID 查詢獎盃資料</div>
-          <div style="font-size:13px;margin-top:4px;">資料來源：<a href="https://psnprofiles.com" target="_blank" style="color:var(--primary);">PSNProfiles</a></div>
+          <div style="font-size:13px;margin-top:4px;">使用 PlayStation 官方 API</div>
         </div>
       </div>
     </div>
@@ -1102,7 +1129,7 @@ $('fit-month').value  = state.fitMonth;
 // ════════════════════════════════════════════════
 // Navigation
 // ════════════════════════════════════════════════
-const LOADERS = { dashboard:loadDashboard, accounting:loadAccounting, tasks:loadTasks, fitness:loadFitness, investment:loadInvestment, invest:loadInvest, ai:loadAI, line:loadLine, travel:loadTravel, work:loadWork, investpro:loadInvestpro };
+const LOADERS = { dashboard:loadDashboard, accounting:loadAccounting, tasks:loadTasks, fitness:loadFitness, investment:loadInvestment, invest:loadInvest, ai:loadAI, line:loadLine, travel:loadTravel, work:loadWork, investpro:loadInvestpro, games:loadGames };
 
 function nav(sec){
   state.sec = sec;
@@ -3290,6 +3317,8 @@ async function openCountryMap(countryKey) {
   $('map-overlay-flag').src = config.flag;
   $('map-overlay-flag').alt = config.name;
   $('map-overlay-name').textContent = config.name;
+  const langBtn = $('travel-lang-btn');
+  if (langBtn) langBtn.style.display = countryKey === 'taiwan' ? 'none' : '';
   $('map-overlay-sub').textContent = '載入地圖中...';
   $('map-visited-count').textContent = '';
 
@@ -3505,33 +3534,48 @@ async function deleteScheduleItem(id) {
 }
 
 function showAddTripModal() {
-  showModal(`<div style="padding:4px;">
-    <h3 style="font-size:18px;font-weight:700;margin-bottom:18px;">新增行程</h3>
-    <div style="display:flex;flex-direction:column;gap:12px;">
-      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">行程名稱 *</label><input id="trip-name" type="text" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="例：東京五日遊"></div>
-      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">目的地</label><input id="trip-dest" type="text" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="例：東京、大阪"></div>
+  showModal('✈️ 新增行程', `
+    <div style="display:flex;flex-direction:column;gap:14px;">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">出發日期</label><input id="trip-start" type="date" class="form-input" style="width:100%;box-sizing:border-box;"></div>
-        <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">回程日期</label><input id="trip-end" type="date" class="form-input" style="width:100%;box-sizing:border-box;"></div>
+        <div style="grid-column:1/-1;">
+          <label style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:4px;margin-bottom:6px;">行程名稱 <span style="color:#ef4444;font-size:11px;">必填</span></label>
+          <input id="trip-name" type="text" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="例：東京五日遊">
+        </div>
+        <div style="grid-column:1/-1;">
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📍 目的地</label>
+          <input id="trip-dest" type="text" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="例：東京、大阪">
+        </div>
+        <div>
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📅 出發日期</label>
+          <input id="trip-start" type="date" class="form-input" style="width:100%;box-sizing:border-box;">
+        </div>
+        <div>
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📅 回程日期</label>
+          <input id="trip-end" type="date" class="form-input" style="width:100%;box-sizing:border-box;">
+        </div>
+        <div>
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">🚌 交通方式</label>
+          <input id="trip-transport" type="text" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="台灣虎航、高鐵...">
+        </div>
+        <div>
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">🏨 住宿</label>
+          <input id="trip-accom" type="text" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="APA Hotel...">
+        </div>
+        <div>
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">狀態</label>
+          <select id="trip-status" class="form-input" style="width:100%;box-sizing:border-box;">
+            <option value="planning">📋 計畫中</option>
+            <option value="ongoing">🚀 進行中</option>
+            <option value="completed">✅ 已完成</option>
+          </select>
+        </div>
+        <div style="grid-column:1/-1;">
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📝 備註</label>
+          <textarea id="trip-notes" class="form-input" style="width:100%;box-sizing:border-box;height:72px;resize:vertical;" placeholder="其他說明..."></textarea>
+        </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">交通方式</label><input id="trip-transport" type="text" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="例：台灣虎航"></div>
-        <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">住宿</label><input id="trip-accom" type="text" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="例：APA Hotel"></div>
-      </div>
-      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">狀態</label>
-        <select id="trip-status" class="form-input" style="width:100%;box-sizing:border-box;">
-          <option value="planning">計畫中</option>
-          <option value="ongoing">進行中</option>
-          <option value="completed">已完成</option>
-        </select>
-      </div>
-      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">備註</label><textarea id="trip-notes" class="form-input" style="width:100%;box-sizing:border-box;height:70px;resize:vertical;" placeholder="其他說明..."></textarea></div>
     </div>
-    <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end;">
-      <button class="btn btn-outline" onclick="closeModal()">取消</button>
-      <button class="btn btn-primary" onclick="submitAddTrip()">新增</button>
-    </div>
-  </div>`);
+  `, { onSubmit: submitAddTrip, submitLabel: '＋ 建立行程' });
 }
 
 async function submitAddTrip() {
@@ -3553,35 +3597,49 @@ async function submitAddTrip() {
 function showEditTripModal(id) {
   const trip = _tripsCache.find(t => t.id === id);
   if (!trip) return;
-  showModal(`<div style="padding:4px;">
-    <h3 style="font-size:18px;font-weight:700;margin-bottom:18px;">編輯行程</h3>
-    <div style="display:flex;flex-direction:column;gap:12px;">
-      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">行程名稱 *</label><input id="etrip-name" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(trip.name)}"></div>
-      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">目的地</label><input id="etrip-dest" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(trip.destination||'')}"></div>
+  showModal('✏️ 編輯行程', `
+    <div style="display:flex;flex-direction:column;gap:14px;">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">出發日期</label><input id="etrip-start" type="date" class="form-input" style="width:100%;box-sizing:border-box;" value="${trip.start_date||''}"></div>
-        <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">回程日期</label><input id="etrip-end" type="date" class="form-input" style="width:100%;box-sizing:border-box;" value="${trip.end_date||''}"></div>
+        <div style="grid-column:1/-1;">
+          <label style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:4px;margin-bottom:6px;">行程名稱 <span style="color:#ef4444;font-size:11px;">必填</span></label>
+          <input id="etrip-name" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(trip.name)}">
+        </div>
+        <div style="grid-column:1/-1;">
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📍 目的地</label>
+          <input id="etrip-dest" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(trip.destination||'')}">
+        </div>
+        <div>
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📅 出發日期</label>
+          <input id="etrip-start" type="date" class="form-input" style="width:100%;box-sizing:border-box;" value="${trip.start_date||''}">
+        </div>
+        <div>
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📅 回程日期</label>
+          <input id="etrip-end" type="date" class="form-input" style="width:100%;box-sizing:border-box;" value="${trip.end_date||''}">
+        </div>
+        <div>
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">🚌 交通方式</label>
+          <input id="etrip-transport" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(trip.transportation||'')}">
+        </div>
+        <div>
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">🏨 住宿</label>
+          <input id="etrip-accom" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(trip.accommodation||'')}">
+        </div>
+        <div>
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">狀態</label>
+          <select id="etrip-status" class="form-input" style="width:100%;box-sizing:border-box;">
+            <option value="planning" ${trip.status==='planning'?'selected':''}>📋 計畫中</option>
+            <option value="ongoing"  ${trip.status==='ongoing'?'selected':''}>🚀 進行中</option>
+            <option value="completed" ${trip.status==='completed'?'selected':''}>✅ 已完成</option>
+          </select>
+        </div>
+        <div style="grid-column:1/-1;">
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📝 備註</label>
+          <textarea id="etrip-notes" class="form-input" style="width:100%;box-sizing:border-box;height:72px;resize:vertical;">${_escHtml(trip.notes||'')}</textarea>
+        </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">交通方式</label><input id="etrip-transport" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(trip.transportation||'')}"></div>
-        <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">住宿</label><input id="etrip-accom" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(trip.accommodation||'')}"></div>
-      </div>
-      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">狀態</label>
-        <select id="etrip-status" class="form-input" style="width:100%;box-sizing:border-box;">
-          <option value="planning" ${trip.status==='planning'?'selected':''}>計畫中</option>
-          <option value="ongoing" ${trip.status==='ongoing'?'selected':''}>進行中</option>
-          <option value="completed" ${trip.status==='completed'?'selected':''}>已完成</option>
-        </select>
-      </div>
-      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">備註</label><textarea id="etrip-notes" class="form-input" style="width:100%;box-sizing:border-box;height:70px;resize:vertical;">${_escHtml(trip.notes||'')}</textarea></div>
     </div>
-    <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end;">
-      <button class="btn btn-outline" onclick="closeModal()">取消</button>
-      <button class="btn btn-primary" onclick="submitEditTrip(${id})">儲存</button>
-    </div>
-  </div>`);
+  `, { onSubmit: () => submitEditTrip(id), submitLabel: '儲存變更' });
 }
-
 async function submitEditTrip(id) {
   const name = $('etrip-name')?.value?.trim();
   if (!name) { toast('請填寫行程名稱','err'); return; }
@@ -3639,25 +3697,34 @@ function _tripOptions(trips, selectedId) {
 function showAddMemoryModal() {
   api('/api/travel/trips').then(r => {
     const trips = r.data||[];
-    showModal(`<div style="padding:4px;">
-      <h3 style="font-size:18px;font-weight:700;margin-bottom:18px;">新增回憶</h3>
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">標題 *</label><input id="mem-title" type="text" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="這趟旅行的標題"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">日期</label><input id="mem-date" type="date" class="form-input" style="width:100%;box-sizing:border-box;"></div>
-          <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">關聯行程</label><select id="mem-trip" class="form-input" style="width:100%;box-sizing:border-box;">${_tripOptions(trips,null)}</select></div>
+    showModal('📸 新增回憶', `
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div>
+          <label style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:4px;margin-bottom:6px;">標題 <span style="color:#ef4444;font-size:11px;">必填</span></label>
+          <input id="mem-title" type="text" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="這趟旅行的標題">
         </div>
-        <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">內容</label><textarea id="mem-content" class="form-input" style="width:100%;box-sizing:border-box;height:100px;resize:vertical;" placeholder="寫下你的回憶..."></textarea></div>
-        <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">標籤（逗號分隔）</label><input id="mem-tags" type="text" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="例：美食,景點,夜市"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📅 日期</label>
+            <input id="mem-date" type="date" class="form-input" style="width:100%;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">✈️ 關聯行程</label>
+            <select id="mem-trip" class="form-input" style="width:100%;box-sizing:border-box;">${_tripOptions(trips,null)}</select>
+          </div>
+        </div>
+        <div>
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📝 內容</label>
+          <textarea id="mem-content" class="form-input" style="width:100%;box-sizing:border-box;height:100px;resize:vertical;" placeholder="寫下你的回憶..."></textarea>
+        </div>
+        <div>
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">🏷️ 標籤（逗號分隔）</label>
+          <input id="mem-tags" type="text" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="美食,景點,夜市">
+        </div>
       </div>
-      <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end;">
-        <button class="btn btn-outline" onclick="closeModal()">取消</button>
-        <button class="btn btn-primary" onclick="submitAddMemory()">新增</button>
-      </div>
-    </div>`);
+    `, { onSubmit: submitAddMemory, submitLabel: '＋ 新增回憶' });
   });
 }
-
 async function submitAddMemory() {
   const title = $('mem-title')?.value?.trim();
   if (!title) { toast('請填寫標題','err'); return; }
@@ -3673,26 +3740,35 @@ function showEditMemoryModal(id) {
     if (!m) return;
     api('/api/travel/trips').then(tr => {
       const trips = tr.data||[];
-      showModal(`<div style="padding:4px;">
-        <h3 style="font-size:18px;font-weight:700;margin-bottom:18px;">編輯回憶</h3>
-        <div style="display:flex;flex-direction:column;gap:12px;">
-          <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">標題 *</label><input id="emem-title" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(m.title)}"></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-            <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">日期</label><input id="emem-date" type="date" class="form-input" style="width:100%;box-sizing:border-box;" value="${m.date||''}"></div>
-            <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">關聯行程</label><select id="emem-trip" class="form-input" style="width:100%;box-sizing:border-box;">${_tripOptions(trips,m.trip_id)}</select></div>
+      showModal('✏️ 編輯回憶', `
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <label style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:4px;margin-bottom:6px;">標題 <span style="color:#ef4444;font-size:11px;">必填</span></label>
+            <input id="em-title" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(m.title)}">
           </div>
-          <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">內容</label><textarea id="emem-content" class="form-input" style="width:100%;box-sizing:border-box;height:100px;resize:vertical;">${_escHtml(m.content||'')}</textarea></div>
-          <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">標籤（逗號分隔）</label><input id="emem-tags" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(m.tags||'')}"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📅 日期</label>
+              <input id="em-date" type="date" class="form-input" style="width:100%;box-sizing:border-box;" value="${m.date||''}">
+            </div>
+            <div>
+              <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">✈️ 關聯行程</label>
+              <select id="em-trip" class="form-input" style="width:100%;box-sizing:border-box;">${_tripOptions(trips,m.trip_id)}</select>
+            </div>
+          </div>
+          <div>
+            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📝 內容</label>
+            <textarea id="em-content" class="form-input" style="width:100%;box-sizing:border-box;height:100px;resize:vertical;">${_escHtml(m.content||'')}</textarea>
+          </div>
+          <div>
+            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">🏷️ 標籤（逗號分隔）</label>
+            <input id="em-tags" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(m.tags||'')}">
+          </div>
         </div>
-        <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end;">
-          <button class="btn btn-outline" onclick="closeModal()">取消</button>
-          <button class="btn btn-primary" onclick="submitEditMemory(${id})">儲存</button>
-        </div>
-      </div>`);
+      `, { onSubmit: () => submitEditMemory(id), submitLabel: '儲存變更' });
     });
   });
 }
-
 async function submitEditMemory(id) {
   const title = $('emem-title')?.value?.trim();
   if (!title) { toast('請填寫標題','err'); return; }
@@ -3894,35 +3970,51 @@ async function submitWeeklySetup() {
 }
 
 function _weeklyForm(w = {}) {
-  return `<div style="display:flex;flex-direction:column;gap:12px;">
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
-      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">類型</label>
+  return `<div style="display:flex;flex-direction:column;gap:14px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+      <div>
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">類型</label>
         <select id="wf-type" class="form-input" style="width:100%;box-sizing:border-box;">
           <option value="大" ${(w.week_type||'大')==='大'?'selected':''}>大週</option>
           <option value="小" ${w.week_type==='小'?'selected':''}>小週</option>
         </select>
       </div>
-      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">出發日期 *</label><input id="wf-date" type="date" class="form-input" style="width:100%;box-sizing:border-box;" value="${w.week_date||''}"></div>
-      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">回程日期</label><input id="wf-return" type="date" class="form-input" style="width:100%;box-sizing:border-box;" value="${w.return_date||''}"></div>
+      <div>
+        <label style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:4px;margin-bottom:6px;">📅 出發日期 <span style="color:#ef4444;font-size:11px;">必填</span></label>
+        <input id="wf-date" type="date" class="form-input" style="width:100%;box-sizing:border-box;" value="${w.week_date||''}">
+      </div>
+      <div>
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📅 回程日期</label>
+        <input id="wf-return" type="date" class="form-input" style="width:100%;box-sizing:border-box;" value="${w.return_date||''}">
+      </div>
     </div>
-    <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">地點</label><input id="wf-location" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(w.location||'')}" placeholder="目的地或地區"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">交通</label><input id="wf-transport" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(w.transportation||'')}" placeholder="高鐵、捷運..."></div>
-      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">票券</label><input id="wf-tickets" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(w.tickets||'')}" placeholder="KKday、景點門票..."></div>
+    <div>
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📍 地點</label>
+      <input id="wf-location" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(w.location||'')}" placeholder="目的地或地區">
     </div>
-    <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">住宿</label><textarea id="wf-accommodation" class="form-input" style="width:100%;box-sizing:border-box;height:70px;resize:vertical;" placeholder="飯店名稱...">${_escHtml(w.accommodation||'')}</textarea></div>
-    <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">備註</label><input id="wf-note" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(w.note||'')}"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div>
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">🚌 交通</label>
+        <input id="wf-transport" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(w.transportation||'')}" placeholder="高鐵、捷運...">
+      </div>
+      <div>
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">🎫 票券</label>
+        <input id="wf-tickets" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(w.tickets||'')}" placeholder="KKday、景點門票...">
+      </div>
+    </div>
+    <div>
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">🏨 住宿</label>
+      <textarea id="wf-accommodation" class="form-input" style="width:100%;box-sizing:border-box;height:64px;resize:vertical;" placeholder="飯店名稱...">${_escHtml(w.accommodation||'')}</textarea>
+    </div>
+    <div>
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📝 備註</label>
+      <input id="wf-note" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(w.note||'')}">
+    </div>
   </div>`;
 }
-
 function showAddWeeklyModal() {
-  showModal(`<div style="padding:4px;"><h3 style="font-size:18px;font-weight:700;margin-bottom:18px;">手動新增排程</h3>${_weeklyForm()}
-    <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end;">
-      <button class="btn btn-outline" onclick="closeModal()">取消</button>
-      <button class="btn btn-primary" onclick="submitAddWeekly()">新增</button>
-    </div></div>`);
+  showModal('📋 手動新增排程', _weeklyForm(), { onSubmit: submitAddWeekly, submitLabel: '＋ 新增' });
 }
-
 async function submitAddWeekly() {
   const week_date = $('wf-date')?.value;
   if (!week_date) { toast('請填寫出發日期','err'); return; }
@@ -3937,13 +4029,8 @@ async function submitAddWeekly() {
 function showEditWeeklyModal(id) {
   const w = _weeklyCache.find(x => x.id === id);
   if (!w) return;
-  showModal(`<div style="padding:4px;"><h3 style="font-size:18px;font-weight:700;margin-bottom:18px;">編輯排程</h3>${_weeklyForm(w)}
-    <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end;">
-      <button class="btn btn-outline" onclick="closeModal()">取消</button>
-      <button class="btn btn-primary" onclick="submitEditWeekly(${id})">儲存</button>
-    </div></div>`);
+  showModal('✏️ 編輯排程', _weeklyForm(w), { onSubmit: () => submitEditWeekly(id), submitLabel: '儲存變更' });
 }
-
 async function submitEditWeekly(id) {
   const week_date = $('wf-date')?.value;
   if (!week_date) { toast('請填寫出發日期','err'); return; }
@@ -4265,6 +4352,57 @@ async function loadJiraIssues() {
   }).join('');
 }
 
+function loadGames() {
+  loadPsnAuthStatus();
+}
+
+function togglePsnAuthPanel() {
+  const panel = $('psn-auth-panel');
+  const lbl   = $('psn-auth-toggle');
+  const show  = panel.style.display === 'none';
+  panel.style.display = show ? '' : 'none';
+  lbl.textContent = show ? '收起 ▲' : '展開 ▼';
+}
+
+async function loadPsnAuthStatus() {
+  const res = await api('/api/games/psn/auth-status');
+  const bar = $('psn-auth-status-bar');
+  if (!bar) return;
+  if (res.success && res.authorized) {
+    const exp = res.expires_at ? new Date(res.expires_at).toLocaleString('zh-TW') : '';
+    bar.innerHTML = `<span style="color:var(--success);">✅ 已授權</span>${exp ? `<span style="margin-left:8px;font-size:12px;">Token 有效至 ${exp}</span>` : ''}`;
+  } else {
+    bar.innerHTML = `<span style="color:var(--danger);">⚠️ 尚未授權，請展開設定並輸入 NPSSO</span>`;
+  }
+}
+
+async function submitPsnAuth() {
+  const npsso = ($('psn-npsso-input')?.value||'').trim();
+  if (!npsso) { toast('請輸入 NPSSO','err'); return; }
+  const btn = document.querySelector('[onclick="submitPsnAuth()"]');
+  if (btn) { btn.disabled=true; btn.textContent='⏳ 授權中...'; }
+  try {
+    const res = await api('/api/games/psn/auth','POST',{ npsso });
+    if (res.success) {
+      toast('PSN 授權成功','ok');
+      $('psn-npsso-input').value = '';
+      $('psn-auth-panel').style.display = 'none';
+      $('psn-auth-toggle').textContent = '展開 ▼';
+      await loadPsnAuthStatus();
+    } else {
+      toast('授權失敗：'+res.error,'err');
+    }
+  } catch(e) { toast('授權失敗','err'); }
+  finally { if (btn) { btn.disabled=false; btn.textContent='🔑 授權'; } }
+}
+
+async function revokePsnAuth() {
+  if (!confirm('確定要清除 PSN 授權嗎？')) return;
+  await api('/api/games/psn/auth','DELETE');
+  toast('已清除授權','ok');
+  await loadPsnAuthStatus();
+}
+
 async function fetchPsnProfile() {
   const username = ($('psn-username-input')?.value||'').trim();
   if (!username) { toast('請輸入 PSN ID','err'); return; }
@@ -4273,12 +4411,10 @@ async function fetchPsnProfile() {
   try {
     const res = await api(`/api/games/psn/profile?username=${encodeURIComponent(username)}`);
     if (!res.success) {
-      if (res.blocked && res.profileUrl) {
-        toast('PSNProfiles 封鎖存取，請直接開啟網頁查看','err');
-        const noteEl = $('psn-cache-note');
-        if (noteEl) noteEl.innerHTML = `⚠️ ${res.error} <a href="${res.profileUrl}" target="_blank" style="color:var(--primary);">前往 PSNProfiles ↗</a>`;
-        $('psn-empty').style.display = 'none';
-        $('psn-overview').style.display = '';
+      if (res.needAuth) {
+        toast('請先完成 PSN 授權','err');
+        $('psn-auth-panel').style.display = '';
+        $('psn-auth-toggle').textContent = '收起 ▲';
       } else {
         toast('查詢失敗：'+res.error,'err');
       }
@@ -4428,6 +4564,8 @@ function _updateMapCount() {
 function closeMapOverlay() {
   $('map-overlay').style.display = 'none';
   if (_travelMap) { _travelMap.remove(); _travelMap = null; }
+  const langBtn = $('travel-lang-btn');
+  if (langBtn) langBtn.style.display = '';
 }
 // ════════════════════════════════════════════════
 // Init
