@@ -223,9 +223,9 @@
     /* ── Investment Sub-tabs ── */
     .inv-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:18px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-shrink:0;}
     .inv-tabs::-webkit-scrollbar{height:2px;}
-    .inv-tab{padding:9px 22px;cursor:pointer;font-size:15px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:var(--tr);display:flex;align-items:center;gap:6px;}
-    .inv-tab:hover{color:var(--text);}
-    .inv-tab.active{color:var(--primary);border-bottom-color:var(--primary);}
+    .inv-tab{padding:9px 22px;cursor:pointer;font-size:15px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-2px;transition:var(--tr);display:flex;align-items:center;gap:6px;border-radius:6px 6px 0 0;}
+    .inv-tab:hover{color:var(--text);background:rgba(99,102,241,.06);}
+    .inv-tab.active{color:var(--primary);border-bottom-color:var(--primary);background:rgba(99,102,241,.10);font-weight:700;}
     .tab-flag{width:20px;height:15px;object-fit:cover;border-radius:2px;display:inline-block;vertical-align:middle;flex-shrink:0;}
     .docs-layout{display:flex;}
     @media(max-width:640px){.docs-layout{flex-direction:column;} #docs-sidebar{max-width:100%!important;min-width:unset!important;}}
@@ -706,12 +706,6 @@
 
     <!-- ════ GAMES ════ -->
     <div class="section" id="section-games">
-      <div class="sec-header">
-        <div>
-          <div class="sec-title">🎮 遊戲</div>
-          <div class="sec-sub">PS 成就獎盃總覽</div>
-        </div>
-      </div>
 
       <!-- PSN 授權設定 -->
       <div class="card" style="margin-bottom:16px;">
@@ -798,44 +792,54 @@
 
     <!-- ════ ANALYSIS ════ -->
     <div class="section" id="section-analysis">
-      <div class="sec-header">
-        <div>
-          <div class="sec-title">🔍 分析</div>
-          <div class="sec-sub">加密保存重要文件，解密後閱讀</div>
-        </div>
-        <div class="sec-header-right">
-          <span id="enc-key-badge" style="font-size:12px;padding:3px 10px;border-radius:20px;background:var(--bg2);color:var(--muted);">⏳ 檢查金鑰...</span>
-          <button class="btn btn-primary btn-sm" onclick="encPickFile()">＋ 上傳加密</button>
-        </div>
-      </div>
       <input id="enc-file-input" type="file" multiple style="display:none;" onchange="encFileInputChange(event)">
 
       <!-- 拖曳上傳區 -->
       <div id="enc-dropzone"
-        style="border:2px dashed var(--border);border-radius:12px;padding:40px 24px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:20px;"
+        style="border:2px dashed var(--border);border-radius:12px;padding:36px 24px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:16px;"
         ondragover="encDragOver(event)" ondragleave="encDragLeave(event)" ondrop="encDrop(event)"
         onclick="encPickFile()">
-        <div style="font-size:36px;margin-bottom:10px;">🔒</div>
-        <div style="font-size:15px;font-weight:600;margin-bottom:4px;">拖曳檔案至此上傳加密</div>
-        <div style="font-size:13px;color:var(--muted);">或點擊選擇檔案（任意格式，加密後存入資料庫）</div>
+        <div style="font-size:34px;margin-bottom:8px;">📂</div>
+        <div style="font-size:15px;font-weight:600;margin-bottom:4px;">拖曳檔案至此</div>
+        <div style="font-size:13px;color:var(--muted);">或點擊選擇（任意格式），拖入後按儲存寫入版控</div>
       </div>
 
-      <!-- 檔案列表 -->
+      <!-- 待儲存暫存區 -->
+      <div id="enc-staging" style="display:none;margin-bottom:16px;">
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-weight:600;font-size:14px;">📋 待儲存（<span id="enc-staging-count">0</span> 個檔案）</span>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-outline btn-sm" onclick="encClearStaging()">✕ 清除</button>
+              <button class="btn btn-primary btn-sm" onclick="encSaveAll()">💾 儲存全部</button>
+            </div>
+          </div>
+          <div id="enc-staging-list"></div>
+        </div>
+      </div>
+
+      <!-- 已儲存檔案列表 -->
       <div class="card" style="padding:0;overflow:hidden;">
-        <div style="padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600;font-size:14px;">📁 已加密文件</div>
+        <div style="padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;font-weight:600;user-select:none;">
+            <input type="checkbox" id="enc-select-all" onchange="encToggleAll(this.checked)" style="width:15px;height:15px;">
+            📁 已儲存文件
+          </label>
+          <button id="enc-batch-del-btn" class="btn btn-sm" style="display:none;background:#ef4444;color:#fff;" onclick="encBatchDelete()">🗑 刪除選取（<span id="enc-sel-count">0</span>）</button>
+        </div>
         <div id="enc-file-list" style="min-height:80px;">
           <div style="text-align:center;padding:40px 0;color:var(--muted);">載入中...</div>
         </div>
       </div>
 
       <!-- 內容閱讀區 -->
-      <div id="enc-viewer" style="display:none;margin-top:20px;">
+      <div id="enc-viewer" style="display:none;margin-top:16px;">
         <div class="card" style="padding:0;overflow:hidden;">
           <div style="padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
             <span id="enc-viewer-title" style="font-weight:600;font-size:14px;"></span>
             <button class="btn btn-outline btn-sm" onclick="encCloseViewer()">✕ 關閉</button>
           </div>
-          <div id="enc-viewer-body" style="padding:24px 28px;min-height:200px;line-height:1.75;font-size:15px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;"></div>
+          <pre id="enc-viewer-body" style="padding:20px 24px;min-height:160px;line-height:1.75;font-size:14px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;margin:0;font-family:inherit;"></pre>
         </div>
       </div>
     </div>
@@ -843,10 +847,6 @@
     <!-- ════ INVESTPRO ════ -->
     <div class="section" id="section-investpro">
       <div class="sec-header">
-        <div>
-          <div class="sec-title">💹 投資</div>
-          <div class="sec-sub">未實現損益追蹤</div>
-        </div>
         <div class="sec-header-right">
           <button class="btn btn-primary btn-sm" onclick="showEditUnrealizedPnl()">✏️ 更新損益</button>
         </div>
@@ -948,10 +948,6 @@
     <!-- ════ TRADING ════ -->
     <div class="section" id="section-trading">
       <div class="sec-header">
-        <div>
-          <div class="sec-title">🎯 操盤</div>
-          <div class="sec-sub">Bybit 帳戶連動</div>
-        </div>
         <div class="sec-header-right">
           <span id="bybit-status-badge" style="font-size:12px;padding:3px 12px;border-radius:20px;background:var(--bg2);color:var(--muted);">⏳ 檢查連線...</span>
           <button class="btn btn-outline btn-sm" onclick="loadTrading()">↻ 重整</button>
@@ -998,10 +994,6 @@
     <!-- ════ RESUME ════ -->
     <div class="section" id="section-resume">
       <div class="sec-header">
-        <div>
-          <div class="sec-title">📋 履歷</div>
-          <div class="sec-sub">讀取與產生履歷檔案</div>
-        </div>
         <div id="resume-toolbar" style="display:none;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
           <span id="resume-file-badge" style="font-size:12px;padding:3px 10px;border-radius:12px;background:var(--primary)22;color:var(--primary);font-weight:600;"></span>
           <button class="btn btn-sm" onclick="resumeExport()" style="background:var(--success);color:#fff;">⬇ 產檔</button>
@@ -3769,20 +3761,11 @@ async function submitUnrealizedPnl() {
 }
 
 // ════════════════════════════════════════════════
-// 2-2 分析 - 加密文件管理
+// 2-2 分析 - 文件管理（保存至 data/docs/）
 // ════════════════════════════════════════════════
+let _encStaging = [];  // [{name, size, b64}]
+
 async function loadAnalysis() {
-  const res = await api('/api/analysis/key-status');
-  const badge = $('enc-key-badge');
-  if (badge) {
-    if (res.configured) {
-      badge.textContent = '🔑 金鑰已設定';
-      badge.style.color = 'var(--success)';
-    } else {
-      badge.textContent = '⚠️ 未設定 ENCRYPT_KEY';
-      badge.style.color = 'var(--danger)';
-    }
-  }
   await _encLoadList();
 }
 
@@ -3791,19 +3774,37 @@ async function _encLoadList() {
   const list = $('enc-file-list');
   if (!list) return;
   if (!res.success || !res.data?.length) {
-    list.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted);">尚無加密文件，點擊「上傳加密」新增</div>';
+    list.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted);">尚無文件，拖曳後按儲存新增</div>';
+    _encUpdateBatchBtn();
     return;
   }
   list.innerHTML = res.data.map(f => `
     <div style="display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid var(--border);">
-      <span style="font-size:18px;">${f.is_binary ? '📎' : '📄'}</span>
+      <input type="checkbox" class="enc-chk" data-name="${_escHtml(f.name)}" onchange="_encUpdateBatchBtn()"
+        style="width:15px;height:15px;flex-shrink:0;cursor:pointer;">
       <div style="flex:1;min-width:0;">
-        <div style="font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_escHtml(f.filename)}</div>
-        <div style="font-size:12px;color:var(--muted);">${_fmtSize(f.size_bytes)} · ${f.created_at?.slice(0,16) || '--'}</div>
+        <div style="font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${_escHtml(f.name)}">${_escHtml(f.name)}</div>
+        <div style="font-size:12px;color:var(--muted);">${_fmtSize(f.size)} · ${f.created_at}</div>
       </div>
-      <button class="btn btn-outline btn-sm" onclick="encReadFile(${f.id})">🔓 閱讀</button>
-      <button onclick="encDeleteFile(${f.id},'${_escHtml(f.filename)}')" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--muted);" title="刪除">×</button>
+      <button class="btn btn-outline btn-sm" onclick="encReadFile('${_escHtml(f.name)}')">📖 閱讀</button>
     </div>`).join('');
+  _encUpdateBatchBtn();
+}
+
+function _encUpdateBatchBtn() {
+  const checked = document.querySelectorAll('.enc-chk:checked');
+  const btn = $('enc-batch-del-btn');
+  const cnt = $('enc-sel-count');
+  const all = $('enc-select-all');
+  const total = document.querySelectorAll('.enc-chk').length;
+  if (cnt) cnt.textContent = checked.length;
+  if (btn) btn.style.display = checked.length ? '' : 'none';
+  if (all) all.checked = total > 0 && checked.length === total;
+}
+
+function encToggleAll(checked) {
+  document.querySelectorAll('.enc-chk').forEach(el => el.checked = checked);
+  _encUpdateBatchBtn();
 }
 
 function _fmtSize(bytes) {
@@ -3817,7 +3818,7 @@ function encPickFile() { $('enc-file-input').click(); }
 function encFileInputChange(e) {
   const files = [...e.target.files];
   e.target.value = '';
-  files.forEach(encUploadFile);
+  _encAddToStaging(files);
 }
 
 function encDragOver(e) { e.preventDefault(); $('enc-dropzone').style.borderColor = 'var(--primary)'; }
@@ -3825,58 +3826,92 @@ function encDragLeave(e) { $('enc-dropzone').style.borderColor = ''; }
 function encDrop(e) {
   e.preventDefault();
   $('enc-dropzone').style.borderColor = '';
-  [...e.dataTransfer.files].forEach(encUploadFile);
+  _encAddToStaging([...e.dataTransfer.files]);
 }
 
-function encUploadFile(file) {
-  const reader = new FileReader();
-  reader.onload = async ev => {
-    const arrayBuf = ev.target.result;
-    const b64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuf)));
-    const res = await api('/api/analysis/upload', 'POST', {
-      filename: file.name,
-      mimeType: file.type || 'application/octet-stream',
-      dataB64: b64,
-    });
-    if (res.success) { toast(`已加密保存：${file.name}`, 'ok'); _encLoadList(); }
-    else toast(res.error || '上傳失敗', 'err');
-  };
-  reader.readAsArrayBuffer(file);
+function _encAddToStaging(files) {
+  let pending = files.length;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const b64 = btoa(String.fromCharCode(...new Uint8Array(ev.target.result)));
+      if (!_encStaging.find(s => s.name === file.name)) {
+        _encStaging.push({ name: file.name, size: file.size, b64 });
+      }
+      pending--;
+      if (pending === 0) _encRenderStaging();
+    };
+    reader.readAsArrayBuffer(file);
+  });
 }
 
-async function encReadFile(id) {
-  const res = await api(`/api/analysis/file/${id}`);
-  if (!res.success) { toast(res.error || '解密失敗', 'err'); return; }
-  const { filename, mimeType, dataB64 } = res.data;
+function _encRenderStaging() {
+  const staging = $('enc-staging');
+  const list    = $('enc-staging-list');
+  const cnt     = $('enc-staging-count');
+  if (!staging || !list) return;
+  if (!_encStaging.length) { staging.style.display = 'none'; return; }
+  staging.style.display = '';
+  if (cnt) cnt.textContent = _encStaging.length;
+  list.innerHTML = _encStaging.map((f, i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 18px;border-bottom:1px solid var(--border);">
+      <span style="font-size:16px;">📄</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_escHtml(f.name)}</div>
+        <div style="font-size:12px;color:var(--muted);">${_fmtSize(f.size)}</div>
+      </div>
+      <button onclick="_encRemoveStaging(${i})" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--muted);">×</button>
+    </div>`).join('');
+}
 
-  // decode base64 → text
+function _encRemoveStaging(i) {
+  _encStaging.splice(i, 1);
+  _encRenderStaging();
+}
+
+function encClearStaging() {
+  _encStaging = [];
+  _encRenderStaging();
+}
+
+async function encSaveAll() {
+  if (!_encStaging.length) return;
+  let ok = 0, fail = 0;
+  for (const f of _encStaging) {
+    const res = await api('/api/analysis/upload', 'POST', { filename: f.name, dataB64: f.b64 });
+    if (res.success) ok++; else fail++;
+  }
+  if (ok) toast(`已儲存 ${ok} 個檔案`, 'ok');
+  if (fail) toast(`${fail} 個失敗`, 'err');
+  _encStaging = [];
+  _encRenderStaging();
+  _encLoadList();
+}
+
+async function encReadFile(name) {
+  const res = await api(`/api/analysis/file/${encodeURIComponent(name)}`);
+  if (!res.success) { toast(res.error || '讀取失敗', 'err'); return; }
+  const { dataB64 } = res.data;
   let text;
   try {
     const bin = atob(dataB64);
     text = decodeURIComponent(escape(bin));
-  } catch {
-    try { text = atob(dataB64); } catch { text = dataB64; }
-  }
+  } catch { try { text = atob(dataB64); } catch { text = '（二進位檔案，無法以文字顯示）'; } }
 
   const viewer = $('enc-viewer');
-  const title  = $('enc-viewer-title');
-  const body   = $('enc-viewer-body');
-  if (!viewer) return;
-  if (title) title.textContent = `🔓 ${filename}`;
-  if (body)  body.textContent = text;
-  viewer.style.display = '';
-  viewer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if ($('enc-viewer-title')) $('enc-viewer-title').textContent = `📖 ${name}`;
+  if ($('enc-viewer-body'))  $('enc-viewer-body').textContent  = text;
+  if (viewer) { viewer.style.display = ''; viewer.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 }
 
-function encCloseViewer() {
-  const viewer = $('enc-viewer');
-  if (viewer) viewer.style.display = 'none';
-}
+function encCloseViewer() { const v = $('enc-viewer'); if (v) v.style.display = 'none'; }
 
-async function encDeleteFile(id, name) {
-  if (!confirm(`確認刪除「${name}」？刪除後無法還原。`)) return;
-  const res = await api(`/api/analysis/file/${id}`, 'DELETE');
-  if (res.success) { toast('已刪除'); encCloseViewer(); _encLoadList(); }
+async function encBatchDelete() {
+  const checked = [...document.querySelectorAll('.enc-chk:checked')].map(el => el.dataset.name);
+  if (!checked.length) return;
+  if (!confirm(`確認刪除 ${checked.length} 個檔案？`)) return;
+  const res = await api('/api/analysis/files', 'DELETE', { names: checked });
+  if (res.success) { toast(`已刪除 ${res.deleted} 個檔案`); encCloseViewer(); _encLoadList(); }
   else toast(res.error || '刪除失敗', 'err');
 }
 
