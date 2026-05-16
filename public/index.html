@@ -43,9 +43,11 @@
     .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:grab;color:#c7d2fe;font-size:16px;transition:var(--tr);margin-bottom:2px;user-select:none;}
     .nav-item:hover{background:var(--sidebar-hover);}
     .nav-item.active{background:var(--sidebar-act);color:#fff;font-weight:600;}
-    .nav-item .ico{font-size:17px;width:22px;text-align:center;}
+    .nav-item .ico{font-size:18px;width:22px;text-align:center;display:inline-flex;align-items:center;justify-content:center;line-height:1;}
+    .nav-group-label{font-size:11px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.1em;padding:10px 14px 3px;margin-top:4px;}
     .nav-item.sortable-chosen{cursor:grabbing;opacity:.85;background:var(--sidebar-hover);}
     .nav-item.sortable-ghost{opacity:.3;}
+    .task-card.sortable-chosen{box-shadow:0 4px 20px rgba(99,102,241,.35);border-color:var(--primary);}
     .sidebar-footer{padding:16px;border-top:1px solid rgba(255,255,255,.1);}
     .sidebar-footer small{color:#6366f1;font-size:11px;}
 
@@ -59,7 +61,7 @@
     .content{flex:1;overflow-y:auto;padding:24px;}
 
     /* ── Sections ── */
-    .section{display:none;animation:fadeIn .2s ease;}
+    .section{display:none;animation:fadeIn .2s ease;max-width:1400px;margin:0 auto;}
     .section.active{display:block;}
     @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
@@ -73,6 +75,11 @@
     .stat-card .lbl{font-size:14px;color:var(--muted);font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
     .stat-card .val{font-size:32px;font-weight:800;}
     .stat-card .sub{font-size:12px;color:var(--muted);margin-top:4px;}
+    .stat-highlight .val{color:var(--primary);}
+    .mkt-th-sort{cursor:pointer;user-select:none;white-space:nowrap;}
+    .mkt-th-sort:hover{background:var(--hover,rgba(99,102,241,.07));}
+    .sort-ind,.dsort-ind{font-size:11px;color:var(--muted);margin-left:3px;}
+    .sort-ind.active,.dsort-ind.active{color:var(--primary);}
 
     /* ── Cards ── */
     .card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--sh);border:1px solid var(--border);margin-bottom:16px;}
@@ -89,7 +96,7 @@
     tbody tr:hover td{background:#f8fafc;}
 
     /* ── Badges ── */
-    .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+    .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;}
     .b-income{background:#d1fae5;color:#065f46;}
     .b-expense{background:#fee2e2;color:#991b1b;}
     .b-high{background:#fee2e2;color:#991b1b;}
@@ -150,12 +157,12 @@
     /* ── Kanban ── */
     .kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
     .kol{background:#f1f5f9;border-radius:10px;padding:14px;}
-    .kol-head{font-size:15px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+    .kol-head{font-size:16px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
     .kol-head .cnt{background:var(--primary);color:#fff;border-radius:20px;padding:1px 8px;font-size:11px;}
-    .task-card{background:var(--card);border-radius:8px;padding:12px;margin-bottom:8px;box-shadow:var(--sh);border:1px solid var(--border);cursor:pointer;transition:var(--tr);}
+    .task-card{background:var(--card);border-radius:8px;padding:14px;margin-bottom:10px;box-shadow:var(--sh);border:1px solid var(--border);cursor:grab;transition:var(--tr);}
     .task-card:hover{border-color:var(--primary);box-shadow:var(--sh-md);}
-    .task-title{font-size:16px;font-weight:600;margin-bottom:6px;line-height:1.4;}
-    .task-meta{font-size:11px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+    .task-title{font-size:17px;font-weight:600;margin-bottom:8px;line-height:1.4;}
+    .task-meta{font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
     .overdue{color:var(--danger)!important;font-weight:600;}
 
     /* ── Chat ── */
@@ -252,15 +259,23 @@
     <div class="ver">Personal Life Manager v1</div>
   </div>
   <nav class="nav">
-    <div class="nav-item active" data-sec="dashboard"   onclick="nav('dashboard')">  <span class="ico">📊</span><span>概覽</span></div>
-    <div class="nav-item"        data-sec="accounting"  onclick="nav('accounting')"> <span class="ico">💰</span><span>記帳</span></div>
-    <div class="nav-item"        data-sec="tasks"       onclick="nav('tasks')">      <span class="ico">✅</span><span>任務</span></div>
-    <div class="nav-item"        data-sec="fitness"     onclick="nav('fitness')">    <span class="ico">💪</span><span>健身</span></div>
-    <div class="nav-item"        data-sec="investment"  onclick="nav('investment')"> <span class="ico">🏦</span><span>資產管理</span></div>
-    <div class="nav-item"        data-sec="invest"      onclick="nav('invest')">     <span class="ico">📈</span><span>投資</span></div>
-    <div class="nav-item"        data-sec="ai"          onclick="nav('ai')">         <span class="ico">🤖</span><span>AI 助理</span></div>
-    <div class="nav-item"        data-sec="line"        onclick="nav('line')">       <span class="ico">📣</span><span>通知</span></div>
-    <div class="nav-item"        data-sec="travel"      onclick="nav('travel')">     <span class="ico">✈️</span><span>旅遊</span></div>
+    <div class="nav-group-label">基本功能</div>
+    <div id="nav-basic">
+      <div class="nav-item active" data-sec="dashboard"   onclick="nav('dashboard')">  <span class="ico">📊</span><span>概覽</span></div>
+      <div class="nav-item"        data-sec="accounting"  onclick="nav('accounting')"> <span class="ico">💰</span><span>記帳</span></div>
+      <div class="nav-item"        data-sec="tasks"       onclick="nav('tasks')">      <span class="ico">✅</span><span>任務</span></div>
+      <div class="nav-item"        data-sec="fitness"     onclick="nav('fitness')">    <span class="ico">💪</span><span>健身</span></div>
+      <div class="nav-item"        data-sec="investment"  onclick="nav('investment')"> <span class="ico">🏦</span><span>資產</span></div>
+      <div class="nav-item"        data-sec="ai"          onclick="nav('ai')">         <span class="ico">🤖</span><span>AI 助理</span></div>
+      <div class="nav-item"        data-sec="line"        onclick="nav('line')">       <span class="ico">📣</span><span>通知</span></div>
+      <div class="nav-item"        data-sec="travel"      onclick="nav('travel')">     <span class="ico">✈️</span><span>旅遊</span></div>
+    </div>
+    <div id="nav-advanced" style="display:none;">
+      <div class="nav-group-label">進階功能</div>
+      <div class="nav-item" data-sec="analysis"  onclick="nav('analysis')">  <span class="ico">🔍</span><span>分析</span></div>
+      <div class="nav-item" data-sec="investpro" onclick="nav('investpro')"> <span class="ico">💹</span><span>投資</span></div>
+      <div class="nav-item" data-sec="trading"   onclick="nav('trading')">   <span class="ico">🎯</span><span>操盤</span></div>
+    </div>
   </nav>
   <div class="sidebar-footer"><small id="db-status">● 已連線</small></div>
 </aside>
@@ -273,6 +288,7 @@
       <div class="sub" id="page-sub">生活數據一覽</div>
     </div>
     <div class="header-right">
+      <button id="btn-pm2-reload" style="display:none;" class="btn btn-outline btn-sm" onclick="doPm2Reload(this)" title="PM2 Reload">&#9851; Reload</button>
       <span id="clock">--:--:--</span>
       <span id="tz-badge" style="font-size:12px;color:var(--muted);padding:2px 8px;background:var(--border);border-radius:10px;margin-left:4px;"></span>
       <button class="btn btn-outline btn-sm" onclick="nav('line')">📣 通知</button>
@@ -283,7 +299,12 @@
 
     <!-- ════ DASHBOARD ════ -->
     <div class="section active" id="section-dashboard">
-      <div class="stats-grid">
+            <div class="stats-grid">
+        <div class="stat-card stat-highlight">
+          <div class="lbl">🏦 總資產</div>
+          <div class="val" id="d-total-assets">--</div>
+          <div class="sub" id="d-assets-sub" style="color:var(--muted);">-- TWD</div>
+        </div>
         <div class="stat-card">
           <div class="lbl">💰 本月支出</div>
           <div class="val" id="d-expense">--</div>
@@ -298,11 +319,6 @@
           <div class="lbl">💪 本週運動</div>
           <div class="val" id="d-fitness">--</div>
           <div class="sub" id="d-fmin">分鐘</div>
-        </div>
-        <div class="stat-card">
-          <div class="lbl">📈 投資組合</div>
-          <div class="val" id="d-invest">--</div>
-          <div class="sub" id="d-pnl">損益: --</div>
         </div>
       </div>
       <div class="grid-2">
@@ -320,7 +336,6 @@
     <!-- ════ ACCOUNTING ════ -->
     <div class="section" id="section-accounting">
       <div class="sec-header">
-        <h2>💰 記帳</h2>
         <div class="sec-header-right">
           <input type="month" id="acct-month" class="form-control" style="width:150px;" onchange="loadAccounting()">
           <button class="btn btn-primary" onclick="showAddAccounting()">＋ 新增</button>
@@ -347,7 +362,6 @@
     <!-- ════ TASKS ════ -->
     <div class="section" id="section-tasks">
       <div class="sec-header">
-        <h2>✅ 任務管理</h2>
         <button class="btn btn-primary" onclick="showAddTask()">＋ 新增任務</button>
       </div>
       <div class="kanban" id="kanban-board">
@@ -369,7 +383,6 @@
     <!-- ════ FITNESS ════ -->
     <div class="section" id="section-fitness">
       <div class="sec-header">
-        <h2>💪 健身記錄</h2>
         <div class="sec-header-right">
           <input type="month" id="fit-month" class="form-control" style="width:150px;" onchange="loadFitness()">
           <button class="btn btn-primary" onclick="showAddFitness()">＋ 記錄運動</button>
@@ -394,12 +407,8 @@
     <!-- ════ INVESTMENT (資產管理) ════ -->
     <div class="section" id="section-investment">
       <div class="sec-header">
-        <div></div>
         <div class="sec-header-right" id="inv-header-market" style="display:none;"></div>
-        <div class="sec-header-right" id="inv-header-assets" style="display:flex;">
-          <button class="btn btn-outline btn-sm" onclick="showAssetRates()">💱 匯率設定</button>
-          <button class="btn btn-outline btn-sm" onclick="saveAssetSnapshot()">📷 記錄快照</button>
-        </div>
+        <div class="sec-header-right" id="inv-header-assets" style="display:none;"></div>
       </div>
 
       <!-- 子頁籤 -->
@@ -414,22 +423,22 @@
       <!-- ── 資產總覽 ── -->
       <div class="inv-sub active" id="inv-sub-assets">
         <div class="stats-grid">
-          <div class="stat-card"><div class="lbl">總資產(TWD)</div><div class="val" id="ast-total">--</div></div>
+          <div class="stat-card stat-highlight"><div class="lbl">總資產(TWD)</div><div class="val" id="ast-total">--</div></div>
           <div class="stat-card"><div class="lbl">📈 庫存市值</div><div class="val" id="ast-inv" style="color:var(--primary);">--</div><div class="sub" id="ast-inv-pct">佔 --%</div></div>
-          <div class="stat-card"><div class="lbl">💵 存款總額</div><div class="val" id="ast-cash" style="color:var(--success);">--</div><div class="sub" id="ast-cash-pct">佔 --%</div></div>
+          <div class="stat-card stat-highlight"><div class="lbl">💵 存款總額</div><div class="val" id="ast-cash">--</div><div class="sub" id="ast-cash-pct">佔 --%</div></div>
         </div>
         <div id="ast-market-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px;"></div>
         <div class="grid-2">
           <div class="card">
             <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
               <span>總資產歷史走勢</span>
-              <small style="font-weight:400;color:var(--muted);font-size:12px;">點擊「📷 記錄快照」新增</small>
+              <small style="font-weight:400;color:var(--muted);font-size:12px;">點擊「📷 快照」自動記錄</small>
             </div>
             <canvas id="assets-chart" height="155"></canvas>
             <div id="assets-chart-empty" style="display:none;text-align:center;color:var(--muted);padding:28px;font-size:14px;">尚無快照記錄</div>
           </div>
           <div class="card">
-            <div class="card-title">快照紀錄</div>
+            <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">快照紀錄<div style="display:flex;gap:6px;"><button class="btn btn-sm btn-primary" onclick="autoSaveSnapshot()">📷 快照</button><button class="btn btn-sm btn-outline" onclick="saveAssetSnapshot()">✏️ 手動</button></div></div>
             <div id="ast-snapshots"><div style="color:var(--muted);font-size:14px;">載入中...</div></div>
           </div>
         </div>
@@ -438,8 +447,8 @@
       <!-- ── 市場持倉（台股/美股/加密貨幣共用） ── -->
       <div class="inv-sub" id="inv-sub-market">
         <div class="stats-grid" id="mkt-stats-grid" style="grid-template-columns:repeat(4,1fr);">
-          <div class="stat-card"><div class="lbl">庫存成本</div><div class="val" id="mkt-cost">--</div></div>
-          <div class="stat-card"><div class="lbl">庫存總市值</div><div class="val" id="mkt-value">--</div></div>
+          <div class="stat-card stat-highlight"><div class="lbl" id="mkt-lbl-val">庫存總市值</div><div class="val" id="mkt-value">--</div><div id="mkt-value-sub" style="display:none;font-size:12px;color:var(--muted);margin-top:2px;"></div></div>
+          <div class="stat-card"><div class="lbl" id="mkt-lbl-cost">庫存成本</div><div class="val" id="mkt-cost">--</div><div id="mkt-cost-sub" style="display:none;font-size:12px;color:var(--muted);margin-top:2px;"></div></div>
           <div class="stat-card"><div class="lbl">未實現損益</div><div class="val" id="mkt-pnl">--</div></div>
           <div class="stat-card"><div class="lbl">報酬率</div><div class="val" id="mkt-pct">--</div></div>
           <div class="stat-card" id="shorts-stat-card" style="display:none;"><div class="lbl">借券總市值</div><div class="val" id="shorts-total-val">--</div></div>
@@ -458,7 +467,16 @@
             <table>
               <thead><tr>
                 <th class="th-check"><input type="checkbox" id="mkt-chk-all" onchange="toggleSelectAll(this)"></th>
-                <th>代碼</th><th>名稱</th><th>類型</th><th>數量</th><th>均成本</th><th>現價</th><th>市值</th><th>損益</th><th>損益%</th><th></th>
+                <th class="mkt-th-sort" onclick="sortMktTable('symbol')">代碼<span class="sort-ind" id="si-symbol">⇅</span></th>
+                <th class="mkt-th-sort" onclick="sortMktTable('name')">名稱<span class="sort-ind" id="si-name">⇅</span></th>
+                <th id="mkt-th-type" class="mkt-th-sort" onclick="sortMktTable('type')">類型<span class="sort-ind" id="si-type">⇅</span></th>
+                <th class="mkt-th-sort" onclick="sortMktTable('_shares')">數量<span class="sort-ind" id="si-_shares">⇅</span></th>
+                <th id="mkt-th-cost" class="mkt-th-sort" onclick="sortMktTable('_cost')">均成本<span class="sort-ind" id="si-_cost">⇅</span></th>
+                <th id="mkt-th-price" class="mkt-th-sort" onclick="sortMktTable('_price')">現價<span class="sort-ind" id="si-_price">⇅</span></th>
+                <th id="mkt-th-val" class="mkt-th-sort" onclick="sortMktTable('_val')">市值<span class="sort-ind" id="si-_val">⇅</span></th>
+                <th id="mkt-th-pnl" class="mkt-th-sort" onclick="sortMktTable('_p')">損益<span class="sort-ind" id="si-_p">⇅</span></th>
+                <th id="mkt-th-pnlpct" class="mkt-th-sort" onclick="sortMktTable('_pp')">損益%<span class="sort-ind" id="si-_pp">⇅</span></th>
+                <th></th>
               </tr></thead>
               <tbody id="mkt-holdings-tbody"><tr><td colspan="11" style="text-align:center;color:var(--muted);padding:24px;">載入中...</td></tr></tbody>
             </table>
@@ -491,9 +509,12 @@
       <!-- ── 存款 ── -->
       <div class="inv-sub" id="inv-sub-forex">
         <div class="stats-grid">
-          <div class="stat-card"><div class="lbl">存款總額(TWD)</div><div class="val" id="dep-total">--</div></div>
+          <div class="stat-card stat-highlight"><div class="lbl">存款總額(TWD)</div><div class="val" id="dep-total">--</div></div>
           <div class="stat-card"><div class="lbl">帳戶數</div><div class="val" id="dep-count">--</div></div>
           <div class="stat-card"><div class="lbl">佔總資產</div><div class="val" id="dep-pct">--%</div></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+          <button class="btn btn-sm btn-outline" id="btn-rate-fetch" onclick="autoFetchRates(this)">🔄 更新匯率</button>
         </div>
         <div class="card">
           <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
@@ -508,12 +529,13 @@
               <thead>
                 <tr>
                   <th class="th-check"><input type="checkbox" id="acc-chk-all" onchange="toggleAccSelectAll(this)"></th>
-                  <th>帳戶</th><th>幣種</th>
-                  <th style="text-align:right;">金額</th>
-                  <th style="text-align:right;">匯率</th>
-                  <th style="text-align:right;">換算台幣</th>
-                  <th style="text-align:right;">佔比</th>
-                  <th>類別</th>
+                  <th class="mkt-th-sort" onclick="sortDepTable('unit')">帳戶<span class="dsort-ind" id="dsi-unit">⇅</span></th>
+                  <th class="mkt-th-sort" style="width:72px;" onclick="sortDepTable('currency')">幣種<span class="dsort-ind" id="dsi-currency">⇅</span></th>
+                  <th class="mkt-th-sort" style="text-align:right;" onclick="sortDepTable('_amount')">金額<span class="dsort-ind" id="dsi-_amount">⇅</span></th>
+                  <th class="mkt-th-sort" style="text-align:right;" onclick="sortDepTable('_rate')">匯率<span class="dsort-ind" id="dsi-_rate">⇅</span></th>
+                  <th class="mkt-th-sort" style="text-align:right;" onclick="sortDepTable('_twd')">換算台幣<span class="dsort-ind" id="dsi-_twd">⇅</span></th>
+                  <th class="mkt-th-sort" style="text-align:right;" onclick="sortDepTable('_pct')">佔比<span class="dsort-ind" id="dsi-_pct">⇅</span></th>
+                  <th class="mkt-th-sort" onclick="sortDepTable('category')">類別<span class="dsort-ind" id="dsi-category">⇅</span></th>
                   <th style="width:80px;"></th>
                 </tr>
               </thead>
@@ -529,9 +551,6 @@
 
     <!-- ════ INVEST (投資 - 開發中) ════ -->
     <div class="section" id="section-invest">
-      <div class="sec-header">
-        <h2>📈 投資</h2>
-      </div>
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;color:var(--muted);gap:16px;">
         <div style="font-size:64px;">🚧</div>
         <div style="font-size:20px;font-weight:700;color:var(--text);">投資模組開發中</div>
@@ -542,7 +561,6 @@
     <!-- ════ AI ════ -->
     <div class="section" id="section-ai">
       <div class="sec-header">
-        <h2>🤖 AI 助理</h2>
         <div class="sec-header-right">
           <span id="ai-mode-badge" class="badge b-pending" style="font-size:12px;">載入中...</span>
           <button class="btn btn-outline btn-sm" onclick="clearAIHistory()">🗑 清除對話</button>
@@ -562,7 +580,6 @@
     <!-- ════ LINE ════ -->
     <div class="section" id="section-line">
       <div class="sec-header">
-        <h2>� 通知管理</h2>
         <div id="notify-status-badges" style="display:flex;gap:8px;"></div>
       </div>
 
@@ -633,11 +650,128 @@
 
     <!-- ════ TRAVEL ════ -->
     <div class="section" id="section-travel">
-      <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:16px;gap:8px;">
-        <button id="travel-view-card" class="btn btn-primary btn-sm" onclick="setTravelView('card')">&#9646;&#9646; 卡片</button>
-        <button id="travel-view-list" class="btn btn-outline btn-sm" onclick="setTravelView('list')">&#9776; 列表</button>
+      <!-- Travel Sub-tabs -->
+      <div class="inv-tabs" id="travel-tabs" style="margin-bottom:18px;">
+        <div class="inv-tab active" id="travel-tab-footprint" onclick="switchTravelTab('footprint')">🗺️ 足跡</div>
+        <div class="inv-tab" id="travel-tab-trips" onclick="switchTravelTab('trips')">🗓️ 行程</div>
+        <div class="inv-tab" id="travel-tab-memories" onclick="switchTravelTab('memories')">📸 回憶</div>
       </div>
-      <div id="travel-country-grid" style="display:flex;flex-wrap:wrap;gap:16px;padding:4px 0;"></div>
+
+      <!-- 足跡 sub -->
+      <div id="travel-sub-footprint">
+        <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:16px;gap:8px;">
+          <button id="travel-view-card" class="btn btn-primary btn-sm" onclick="setTravelView('card')">&#9646;&#9646; 卡片</button>
+          <button id="travel-view-list" class="btn btn-outline btn-sm" onclick="setTravelView('list')">&#9776; 列表</button>
+        </div>
+        <div id="travel-country-grid" style="display:flex;flex-wrap:wrap;gap:16px;padding:4px 0;"></div>
+      </div>
+
+      <!-- 行程 sub -->
+      <div id="travel-sub-trips" style="display:none;">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+          <button class="btn btn-primary btn-sm" onclick="showAddTripModal()">&#65291; 新增行程</button>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <table style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr style="background:var(--bg);">
+                <th style="padding:10px 14px;text-align:left;font-size:13px;color:var(--muted);">行程名稱</th>
+                <th style="padding:10px 14px;text-align:left;font-size:13px;color:var(--muted);">目的地</th>
+                <th style="padding:10px 14px;text-align:center;font-size:13px;color:var(--muted);">出發日</th>
+                <th style="padding:10px 14px;text-align:center;font-size:13px;color:var(--muted);">回程日</th>
+                <th style="padding:10px 14px;text-align:center;font-size:13px;color:var(--muted);">天數</th>
+                <th style="padding:10px 14px;text-align:center;font-size:13px;color:var(--muted);">狀態</th>
+                <th style="padding:10px 14px;width:100px;"></th>
+              </tr>
+            </thead>
+            <tbody id="trips-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;">載入中...</td></tr></tbody>
+          </table>
+        </div>
+        <!-- Trip Detail Panel -->
+        <div id="trip-detail-panel" style="display:none;margin-top:20px;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <button onclick="closeTripDetail()" class="btn btn-outline btn-sm">← 返回</button>
+            <h3 id="trip-detail-name" style="font-weight:700;font-size:18px;margin:0;"></h3>
+            <div style="margin-left:auto;display:flex;gap:8px;">
+              <button class="btn btn-outline btn-sm" onclick="showEditTripModal(_currentTripId)">✏️ 編輯</button>
+            </div>
+          </div>
+          <div class="inv-tabs" style="margin-bottom:16px;">
+            <div class="inv-tab active" id="trip-tab-checklist" onclick="switchTripTab('checklist')">✅ 行前清單</div>
+            <div class="inv-tab" id="trip-tab-schedule" onclick="switchTripTab('schedule')">📅 詳細時程</div>
+          </div>
+          <!-- Checklist -->
+          <div id="trip-sub-checklist">
+            <div style="display:flex;gap:8px;margin-bottom:12px;">
+              <input id="checklist-input" type="text" class="form-input" placeholder="新增清單項目..." style="flex:1;" onkeydown="if(event.key==='Enter')addChecklistItem()">
+              <select id="checklist-cat" class="form-input" style="width:120px;">
+                <option value="證件">證件</option>
+                <option value="衣物">衣物</option>
+                <option value="電子設備">電子設備</option>
+                <option value="藥品">藥品</option>
+                <option value="盥洗用品">盥洗用品</option>
+                <option value="其他" selected>其他</option>
+              </select>
+              <button class="btn btn-primary btn-sm" onclick="addChecklistItem()">新增</button>
+            </div>
+            <div id="checklist-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+          </div>
+          <!-- Schedule -->
+          <div id="trip-sub-schedule" style="display:none;">
+            <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+              <input id="sch-day" type="number" min="1" value="1" class="form-input" placeholder="Day" style="width:70px;">
+              <input id="sch-time" type="time" class="form-input" style="width:120px;">
+              <select id="sch-type" class="form-input" style="width:110px;">
+                <option value="flight">✈️ 航班</option>
+                <option value="hotel">🏨 住宿</option>
+                <option value="activity" selected>🎯 活動</option>
+                <option value="meal">🍽️ 餐飲</option>
+                <option value="transport">🚌 交通</option>
+                <option value="other">📌 其他</option>
+              </select>
+              <input id="sch-title" type="text" class="form-input" placeholder="行程名稱" style="flex:1;min-width:120px;" onkeydown="if(event.key==='Enter')addScheduleItem()">
+              <input id="sch-desc" type="text" class="form-input" placeholder="備註" style="flex:1;min-width:100px;">
+              <button class="btn btn-primary btn-sm" onclick="addScheduleItem()">新增</button>
+            </div>
+            <div id="schedule-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 回憶 sub -->
+      <div id="travel-sub-memories" style="display:none;">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+          <button class="btn btn-primary btn-sm" onclick="showAddMemoryModal()">&#65291; 新增回憶</button>
+        </div>
+        <div id="memories-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;"></div>
+      </div>
+    </div>
+
+    <!-- ════ ANALYSIS ════ -->
+    <div class="section" id="section-analysis">
+            <div style="text-align:center;padding:80px 0;color:var(--muted);">
+        <div style="font-size:56px;margin-bottom:16px;">🔍</div>
+        <div style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text);">分析模組</div>
+        <div style="font-size:14px;">開發中，敬請期待</div>
+      </div>
+    </div>
+
+    <!-- ════ INVESTPRO ════ -->
+    <div class="section" id="section-investpro">
+            <div style="text-align:center;padding:80px 0;color:var(--muted);">
+        <div style="font-size:56px;margin-bottom:16px;">💹</div>
+        <div style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text);">投資進階</div>
+        <div style="font-size:14px;">開發中，敬請期待</div>
+      </div>
+    </div>
+
+    <!-- ════ TRADING ════ -->
+    <div class="section" id="section-trading">
+            <div style="text-align:center;padding:80px 0;color:var(--muted);">
+        <div style="font-size:56px;margin-bottom:16px;">🎯</div>
+        <div style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text);">操盤記錄</div>
+        <div style="font-size:14px;">開發中，敬請期待</div>
+      </div>
     </div>
 
   </div><!-- /content -->
@@ -703,11 +837,14 @@ const PAGE_META = {
   accounting: ['💰 記帳',   '收支記錄管理'],
   tasks:      ['✅ 任務管理','待辦事項追蹤'],
   fitness:    ['💪 健身記錄','運動日誌'],
-  investment: ['🏦 資產管理','資產庫存總覽'],
+  investment: ['🏦 資產','資產庫存總覽'],
   invest:     ['📈 投資','投資組合（開發中）'],
   ai:         ['🤖 AI 助理','智能生活分析'],
   line:       ['📣 通知管理','LINE & Telegram 通知'],
   travel:     ['✈️ 旅遊足跡','點擊國家展開地圖'],
+  analysis:   ['🔍 分析','進階分析（開發中）'],
+  investpro:  ['💹 投資進階','投資進階（開發中）'],
+  trading:    ['🎯 操盤','操盤記錄（開發中）'],
 };
 
 // ════════════════════════════════════════════════
@@ -722,12 +859,23 @@ async function api(path, method='GET', body){
   return r.json();
 }
 
+let _rateCache = {};
+let _mktSortCol = null, _mktSortDir = 1, _mktOrigData = [], _mktCurrentCtx = {};
+let _depSortCol = null, _depSortDir = 1, _depOrigData = [];
 function fmtMoney(n){ return '$'+Number(n||0).toLocaleString('zh-TW',{minimumFractionDigits:0,maximumFractionDigits:0}); }
 function fmtPrice(n){
   const v = Number(n||0);
   if(v===0) return '$0';
   const d = v < 0.001 ? 8 : v < 0.1 ? 6 : v < 10 ? 4 : v < 1000 ? 2 : 0;
   return '$'+v.toLocaleString('zh-TW',{minimumFractionDigits:d>0?2:0,maximumFractionDigits:d});
+}
+function fmtCryptoPrice(n){
+  const v = Number(n||0);
+  if(v===0) return '$0';
+  if(v>=1) return '$'+v.toLocaleString('zh-TW',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const prec = parseFloat(v.toPrecision(4));
+  const d = Math.max(4 - Math.floor(Math.log10(prec)) - 1, 4);
+  return '$'+prec.toLocaleString('zh-TW',{minimumFractionDigits:d,maximumFractionDigits:d});
 }
 function fmtDate(d){ return d ? d.slice(0,10) : '-'; }
 function today(){ return new Date().toISOString().slice(0,10); }
@@ -781,24 +929,53 @@ async function initNavSort(){
   // 從後端取得儲存的順序
   const res = await api('/api/settings/nav-order');
   if(res.order && res.order.length){
-    const navEl = document.querySelector('.nav');
+    const basicEl = document.getElementById('nav-basic');
+    const advEl   = document.getElementById('nav-advanced');
     res.order.forEach(sec => {
-      const item = navEl.querySelector(`[data-sec="${sec}"]`);
-      if(item) navEl.appendChild(item);
+      const item = document.querySelector(`[data-sec="${sec}"]`);
+      if(!item) return;
+      const isAdv = ['analysis','investpro','trading'].includes(sec);
+      if(isAdv && advEl) advEl.appendChild(item);
+      else if(!isAdv && basicEl) basicEl.appendChild(item);
     });
   }
-  // 初始化 SortableJS
-  Sortable.create(document.querySelector('.nav'), {
-    animation: 150,
-    ghostClass: 'sortable-ghost',
-    chosenClass: 'sortable-chosen',
-    onEnd() {
-      const order = [...document.querySelectorAll('.nav-item')].map(n => n.dataset.sec);
-      api('/api/settings/nav-order', 'POST', { order });
-    }
+  // 初始化 SortableJS（基本/進階各自排序，不互相干擾）
+  const _saveNavOrder = () => {
+    const order = [...document.querySelectorAll('.nav-item')].map(n => n.dataset.sec);
+    api('/api/settings/nav-order', 'POST', { order });
+  };
+  Sortable.create(document.getElementById('nav-basic'), {
+    animation: 150, ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen',
+    draggable: '.nav-item', onEnd: _saveNavOrder
+  });
+  Sortable.create(document.getElementById('nav-advanced'), {
+    animation: 150, ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen',
+    draggable: '.nav-item', onEnd: _saveNavOrder
   });
 }
+async function initAdvancedFeatures(){
+  try {
+    const cfg = await fetch('/api/config').then(r=>r.json());
+    const navAdv = document.getElementById('nav-advanced');
+    if(navAdv) navAdv.style.display = cfg.enableAdvanced ? '' : 'none';
+    const reloadBtn = document.getElementById('btn-pm2-reload');
+    if(reloadBtn) reloadBtn.style.display = cfg.enableReloadBtn ? '' : 'none';
+  } catch(e) {}
+}
+async function doPm2Reload(btn){
+  if(!confirm('確定重新載入伺服器？')) return;
+  btn.disabled = true; btn.textContent = '載入中...';
+  const r = await api('/api/admin/reload','POST',{});
+  if(r.success){
+    toast('伺服器重新載入中，3 秒後刷新頁面','ok');
+    setTimeout(()=>location.reload(), 3000);
+  } else {
+    btn.disabled = false; btn.textContent = '&#9851; Reload';
+    toast('Reload 失敗：'+r.error,'err');
+  }
+}
 initNavSort();
+initAdvancedFeatures();
 
 // ════════════════════════════════════════════════
 // Modal
@@ -847,12 +1024,12 @@ async function loadDashboard(){
   $('d-overdue').textContent = '逾期: ' + (taskSum.data?.overdue ?? '--') + ' 件';
   $('d-fitness').textContent = fitSum.data?.week?.count ?? '--';
   $('d-fmin').textContent    = (fitSum.data?.week?.duration ?? '--') + ' 分鐘';
-  const invVal = parseFloat(invSum.data?.totalValue||0);
-  const invPnl = parseFloat(invSum.data?.pnl||0);
-  $('d-invest').textContent = fmtMoney(invVal);
-  const pnlEl = $('d-pnl');
-  pnlEl.textContent = '損益: ' + (invPnl>=0?'+':'') + fmtMoney(invPnl);
-  pnlEl.style.color = invPnl>=0 ? 'var(--success)' : 'var(--danger)';
+  const assetsRes = await api('/api/investment/assets');
+  const totalTWD = parseFloat(assetsRes.data?.totalTWD||0);
+  const cashTWD  = parseFloat(assetsRes.data?.cashTWD||0);
+  const invTWD   = parseFloat(assetsRes.data?.holdingsTWD||0);
+  $('d-total-assets').textContent = fmtMoney(totalTWD);
+  $('d-assets-sub').textContent = '存款 ' + fmtMoney(cashTWD) + '　庫存 ' + fmtMoney(invTWD);
 
   // Recent transactions
   const rows = (recentAcct.data||[]).slice(0,6);
@@ -991,6 +1168,7 @@ async function loadTasks(){
     $(`col-${status}`).innerHTML = list.length ? list.map(t=>taskCardHTML(t)).join('') :
       `<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px 0;">無</div>`;
   });
+  initKanbanSort();
 }
 
 function taskCardHTML(t){
@@ -998,7 +1176,7 @@ function taskCardHTML(t){
   const nextStatus = {pending:'in_progress', in_progress:'done', done:'pending'}[t.status];
   const nextLabel  = {pending:'→ 進行中', in_progress:'→ 完成', done:'↩ 復原'}[t.status];
   return `
-    <div class="task-card">
+    <div class="task-card" data-id="${t.id}">
       <div class="task-title">${t.title}</div>
       ${t.description ? `<div style="font-size:12px;color:var(--muted);margin-bottom:6px;">${t.description}</div>` : ''}
       <div class="task-meta">
@@ -1012,6 +1190,26 @@ function taskCardHTML(t){
       </div>
     </div>
   `;
+}
+
+function initKanbanSort(){
+  const statusMap = {'col-pending':'pending','col-in_progress':'in_progress','col-done':'done'};
+  ['col-pending','col-in_progress','col-done'].forEach(colId => {
+    const el = document.getElementById(colId);
+    if(!el) return;
+    Sortable.create(el, {
+      group:'tasks', animation:150,
+      ghostClass:'sortable-ghost', chosenClass:'sortable-chosen',
+      draggable:'.task-card',
+      onEnd: async (evt) => {
+        if(evt.from === evt.to) return;
+        const id = evt.item.dataset.id;
+        const newStatus = statusMap[evt.to.id];
+        await api(`/api/tasks/${id}/status`,'PATCH',{status:newStatus});
+        loadTasks();
+      }
+    });
+  });
 }
 
 async function moveTask(id, status){
@@ -1278,6 +1476,7 @@ function editHolding(tr){
     note:   tr.dataset.note,
     type:   tr.dataset.type,
     market: tr.dataset.market,
+    exchange: tr.dataset.exchange || '',
   };
   showAddHolding(h);
 }
@@ -1343,15 +1542,58 @@ function switchInvTab(tab){
 
 async function loadMarket(market){
   _invMarket = market;
+  const isCrypto = market === 'crypto';
+  // 重置排序狀態
+  _mktSortCol = null; _mktSortDir = 1;
+  document.querySelectorAll('.sort-ind').forEach(el=>{ el.textContent='⇅'; el.classList.remove('active'); });
   const [holdings, sum] = await Promise.all([
     api(`/api/investment/holdings?market=${market}`),
     api(`/api/investment/summary?market=${market}`),
   ]);
 
+  // 匯率快取（加密 USDT / 美股 USD）
+  if (!_rateCache['USDT'] || !_rateCache['USD']) {
+    try {
+      const rr = await api('/api/investment/assets/rates');
+      if (rr.success) rr.data.forEach(r => { _rateCache[r.currency] = r.rate; });
+    } catch(e) {}
+  }
+  const usdtRate = _rateCache['USDT'] || _rateCache['USD'] || 31;
+  const usdRate  = _rateCache['USD']  || 31;
+
+  const rawCost = parseFloat(sum.data?.totalCost||0);
+  const rawVal  = parseFloat(sum.data?.totalValue||0);
+  const pct = parseFloat(sum.data?.pnlPct||0);
   const pnl = parseFloat(sum.data?.pnl||0);
-  const pct  = parseFloat(sum.data?.pnlPct||0);
-  $('mkt-cost').textContent  = fmtMoney(sum.data?.totalCost);
-  $('mkt-value').textContent = fmtMoney(sum.data?.totalValue);
+
+  const lblCostEl  = document.getElementById('mkt-lbl-cost');
+  const lblValEl   = document.getElementById('mkt-lbl-val');
+  const mktSub     = document.getElementById('mkt-value-sub');
+  const mktCostSub = document.getElementById('mkt-cost-sub');
+
+  if (isCrypto) {
+    if(lblCostEl) lblCostEl.textContent = '總成本(USDT)';
+    if(lblValEl)  lblValEl.textContent  = '總市值(USDT)';
+    $('mkt-cost').textContent  = fmtMoney(rawCost);
+    $('mkt-value').textContent = fmtMoney(rawVal);
+    if(mktSub){ mktSub.style.display=''; mktSub.textContent='≈ '+fmtMoney(rawVal*usdtRate)+' TWD'; }
+    if(mktCostSub){ mktCostSub.style.display=''; mktCostSub.textContent='≈ '+fmtMoney(rawCost*usdtRate)+' TWD'; }
+  } else if (market === 'us') {
+    if(lblCostEl) lblCostEl.textContent = '庫存成本(USD)';
+    if(lblValEl)  lblValEl.textContent  = '庫存總市值(USD)';
+    $('mkt-cost').textContent  = fmtMoney(rawCost);
+    $('mkt-value').textContent = fmtMoney(rawVal);
+    if(mktSub){ mktSub.style.display=''; mktSub.textContent='≈ '+fmtMoney(rawVal*usdRate)+' TWD'; }
+    if(mktCostSub){ mktCostSub.style.display=''; mktCostSub.textContent='≈ '+fmtMoney(rawCost*usdRate)+' TWD'; }
+  } else {
+    if(lblCostEl) lblCostEl.textContent = '庫存成本';
+    if(lblValEl)  lblValEl.textContent  = '庫存總市值';
+    $('mkt-cost').textContent  = fmtMoney(rawCost);
+    $('mkt-value').textContent = fmtMoney(rawVal);
+    if(mktSub) mktSub.style.display='none';
+    if(mktCostSub) mktCostSub.style.display='none';
+  }
+
   const pnlEl = $('mkt-pnl');
   pnlEl.textContent = (pnl>=0?'+':'')+fmtMoney(pnl);
   pnlEl.style.color = pnl>=0?'var(--success)':'var(--danger)';
@@ -1359,67 +1601,147 @@ async function loadMarket(market){
   pctEl.textContent = (pct>=0?'+':'')+pct+'%';
   pctEl.style.color = pct>=0?'var(--success)':'var(--danger)';
 
-  // 重設全選與批量刪除按鈕
   const chkAll = $('mkt-chk-all');
   if(chkAll){ chkAll.checked = false; chkAll.indeterminate = false; }
   _updateBulkDeleteBtn();
 
-  // 台股：賣出手續費 0.1425% + 證交稅 0.3%，納入未實現損益（模擬實際出場後淨損益）
+  // 類型欄：加密貨幣頁籤不顯示
+  const typeThEl = document.getElementById('mkt-th-type');
+  if(typeThEl) typeThEl.style.cssText = isCrypto ? 'width:0;max-width:0;padding:0;overflow:hidden;border:none;' : '';
+  const thCost = document.getElementById('mkt-th-cost');
+  const thVal  = document.getElementById('mkt-th-val');
+  const thPrx  = document.getElementById('mkt-th-price');
+  if(thCost) thCost.innerHTML = (isCrypto?'成本(USDT)':'均成本')+'<span class="sort-ind" id="si-_cost">⇅</span>';
+  if(thVal)  thVal.innerHTML  = (isCrypto?'市值(USDT)':'市值')+'<span class="sort-ind" id="si-_val">⇅</span>';
+  if(thPrx)  thPrx.innerHTML  = (isCrypto?'現價(USDT)':'現價')+'<span class="sort-ind" id="si-_price">⇅</span>';
+  const lblCost = document.getElementById('mkt-lbl-cost');
+  const lblVal  = document.getElementById('mkt-lbl-val');
+  if(lblCost) lblCost.textContent = isCrypto ? '總成本(USDT)' : '庫存成本';
+  if(lblVal)  lblVal.textContent  = isCrypto ? '總市值(USDT)' : '庫存總市值';
+  const thPnl    = document.getElementById('mkt-th-pnl');
+  const thPnlPct = document.getElementById('mkt-th-pnlpct');
+  if(thPnl)    thPnl.innerHTML    = (isCrypto?'損益(USDT)':'損益')+'<span class="sort-ind" id="si-_p">⇅</span>';
+  if(thPnlPct) thPnlPct.innerHTML = (isCrypto?'損益%(USDT)':'損益%')+'<span class="sort-ind" id="si-_pp">⇅</span>';
+
+  // 台股：賣出手續費 0.1425% + 證交稅 0.3%
   const _isTw = market === 'tw';
 
   const hs = holdings.data||[];
-  $('mkt-holdings-tbody').innerHTML = hs.length ? hs.map(h=>{
-    const cost  = h.shares * h.avg_cost;
-    const price = h.current_price>0 ? h.current_price : h.avg_cost;
-    const val   = h.shares * price;
-    const fee   = _isTw ? Math.ceil(val * 0.001425) : 0;
-    const tax   = _isTw ? Math.ceil(val * 0.003)    : 0;
-    const p     = val - fee - tax - cost;
-    const pp    = cost>0 ? ((p/cost)*100).toFixed(2) : 0;
-    const sym   = h.symbol.replace(/'/g, '&#39;');
-    const name  = (h.name||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-    const note  = (h.note||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-    const typeLbl = {stock:'股票',etf:'ETF',crypto:'加密',bond:'債券',other:'其他'}[h.type||'stock']||h.type;
-    const feeTooltip = _isTw ? ` title="含賣出手續費 ${fmtMoney(fee)} + 證交稅 ${fmtMoney(tax)}"` : '';
-    return `<tr data-sym="${sym}" data-name="${name}" data-shares="${h.shares}" data-cost="${h.avg_cost}" data-price="${h.current_price}" data-note="${note}" data-type="${h.type||'stock'}" data-market="${h.market||market}">
-      <td class="td-check"><input type="checkbox" class="mkt-row-chk" data-sym="${sym}" onchange="onRowCheck()"></td>
-      <td><strong>${h.symbol}</strong></td>
-      <td>${h.name}</td>
-      <td><span class="badge b-pending" style="font-size:11px;">${typeLbl}</span></td>
-      <td>${Number(h.shares).toLocaleString('zh-TW',{maximumFractionDigits:4})}</td>
-      <td>${fmtPrice(h.avg_cost)}</td>
-      <td><span onclick="editPrice('${sym}',${h.current_price})" style="cursor:pointer;text-decoration:underline dotted;color:var(--primary);" title="點擊更新現價">${fmtPrice(price)}</span></td>
-      <td>${fmtMoney(val)}</td>
-      <td class="${p>=0?'pnl-pos':'pnl-neg'}"${feeTooltip} style="cursor:${_isTw?'help':'default'};">${p>=0?'+':''}${fmtMoney(p)}</td>
-      <td class="${pp>=0?'pnl-pos':'pnl-neg'}">${pp>=0?'+':''}${pp}%</td>
-      <td style="white-space:nowrap;">
-        <span class="drag-handle" title="拖曳排序">⠿</span>
-        <button class="btn btn-xs btn-outline" onclick="editHolding(this.closest('tr'))">✏️</button>
-      </td>
-    </tr>`;
-  }).join('') : `<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:28px;">尚無${_mktLabel(market)}庫存</td></tr>`;
+  // 預計算排序欄位並存入 _mktOrigData
+  _mktCurrentCtx = { isCrypto, market, _isTw };
+  _mktOrigData = hs.map(h => {
+    const _shares = parseFloat(h.shares)||0;
+    const _cost   = isCrypto ? (h.avg_cost||0) : _shares * (h.avg_cost||0);
+    const _price  = h.current_price>0 ? h.current_price : (isCrypto ? 0 : (h.avg_cost||0));
+    const _val    = _shares * _price;
+    const _fee    = _isTw ? Math.ceil(_val * 0.001425) : 0;
+    const _tax    = _isTw ? Math.ceil(_val * 0.003)    : 0;
+    const _p      = _val - _fee - _tax - _cost;
+    const _pp     = _cost>0 ? parseFloat(((_p/_cost)*100).toFixed(2)) : 0;
+    return { h, symbol: h.symbol||'', name: h.name||'', type: h.type||'stock', _shares, _cost, _price, _val, _p, _pp, _fee, _tax };
+  });
+  _mktRenderRows(_mktOrigData, isCrypto, market, _isTw);
   initHoldingsSortable();
 
-  // 台股借券區塊 + stat cards 顯示控制
   const shortsSection   = $('tw-shorts-section');
   const shortsStatCard  = $('shorts-stat-card');
   const combinedCard    = $('mkt-combined-card');
   const mktStatsGrid    = $('mkt-stats-grid');
-  const holdingsVal     = parseFloat(sum.data?.totalValue || 0);
   if(market === 'tw'){
     shortsSection.style.display  = '';
     if(shortsStatCard) shortsStatCard.style.display = '';
-    if(combinedCard)   combinedCard.style.display   = '';
-    if(mktStatsGrid)   mktStatsGrid.style.gridTemplateColumns = 'repeat(6,1fr)';
+    if(combinedCard)   combinedCard.style.display   = 'none';
+    if(mktStatsGrid)   mktStatsGrid.style.gridTemplateColumns = 'repeat(5,1fr)';
+    // 更新 mkt-lbl-val 為「總市值（含借券）」
+    const lblValEl2 = document.getElementById('mkt-lbl-val');
+    if(lblValEl2) lblValEl2.textContent = '總市值（含借券）';
     const shortsVal = await loadShorts();
-    const combinedEl = $('mkt-combined-val');
-    if(combinedEl) combinedEl.textContent = fmtMoney(holdingsVal + shortsVal);
+    const combined = rawVal + shortsVal;
+    $('mkt-value').textContent = fmtMoney(combined);
+    if(shortsStatCard) $('shorts-total-val').textContent = fmtMoney(shortsVal);
   } else {
     shortsSection.style.display  = 'none';
     if(shortsStatCard) shortsStatCard.style.display = 'none';
     if(combinedCard)   combinedCard.style.display   = 'none';
     if(mktStatsGrid)   mktStatsGrid.style.gridTemplateColumns = 'repeat(4,1fr)';
   }
+}
+
+// ════════════════════════════════════════════════
+// 庫存表格排序
+// ════════════════════════════════════════════════
+function _mktRenderRows(rows, isCrypto, market, _isTw){
+  const tbody = document.getElementById('mkt-holdings-tbody');
+  if(!rows.length){
+    tbody.innerHTML = `<tr><td colspan="${isCrypto?10:11}" style="text-align:center;color:var(--muted);padding:28px;">尚無${_mktLabel(market)}庫存</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(({h,_cost,_price,_val,_p,_pp,_fee,_tax})=>{
+    const sym  = h.symbol.replace(/'/g,'&#39;');
+    const name = (h.name||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    const note = (h.note||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    const exch = (h.exchange||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    const typeLbl = {stock:'股票',etf:'ETF',crypto:'加密',bond:'債券',other:'其他'}[h.type||'stock']||h.type;
+    const feeTooltip = _isTw ? ` title="含賣出手續費 ${fmtMoney(_fee)} + 證交稅 ${fmtMoney(_tax)}"` : '';
+    const sharesDisp = isCrypto
+      ? (parseFloat(h.shares)%1===0 ? parseFloat(h.shares) : parseFloat(h.shares).toString())
+      : Number(h.shares).toLocaleString('zh-TW',{maximumFractionDigits:4});
+    return `<tr data-sym="${sym}" data-name="${name}" data-shares="${h.shares}" data-cost="${h.avg_cost}" data-price="${h.current_price}" data-note="${note}" data-type="${h.type||'stock'}" data-market="${h.market||market}" data-exchange="${exch}">
+      <td class="td-check"><input type="checkbox" class="mkt-row-chk" data-sym="${sym}" onchange="onRowCheck()"></td>
+      <td><strong>${h.symbol}</strong>${h.exchange?`<br><small style="color:var(--muted);font-size:11px;">${h.exchange}</small>`:''}</td>
+      <td>${isCrypto?`<img src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1.0.0/svg/color/${h.symbol.toLowerCase()}.svg" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;margin-right:4px;border-radius:50%;" onerror="this.style.display='none'">`+_exchTag(h.exchange):''}<span style="vertical-align:middle;">${h.name}</span></td>
+      <td style="${isCrypto?'width:0;max-width:0;padding:0;overflow:hidden;border:none;':''}"><span class="badge b-pending" style="font-size:11px;">${typeLbl}</span></td>
+      <td style="text-align:right;">${sharesDisp}</td>
+      <td style="text-align:right;">${fmtPrice(h.avg_cost)}</td>
+      <td style="text-align:right;"><span onclick="editPrice('${sym}',${h.current_price})" style="cursor:pointer;text-decoration:underline dotted;color:var(--primary);" title="點擊更新現價">${isCrypto?fmtCryptoPrice(_price):fmtPrice(_price)}</span></td>
+      <td style="text-align:right;">${fmtMoney(_val)}</td>
+      <td class="${_p>=0?'pnl-pos':'pnl-neg'}"${feeTooltip} style="text-align:right;cursor:${_isTw?'help':'default'};">${_p>=0?'+':''}${fmtMoney(_p)}</td>
+      <td class="${_pp>=0?'pnl-pos':'pnl-neg'}" style="text-align:right;">${_pp>=0?'+':''}${_pp}%</td>
+      <td style="white-space:nowrap;">
+        <span class="drag-handle" title="拖曳排序">⠿</span>
+        <button class="btn btn-xs btn-outline" onclick="editHolding(this.closest('tr'))">✏️</button>
+      </td>
+    </tr>`;
+  }).join('');
+  // 合計列（始終用全量資料 _mktOrigData）
+  const all = _mktOrigData;
+  const totCost = all.reduce((s,r)=>s+r._cost,0);
+  const totVal  = all.reduce((s,r)=>s+r._val,0);
+  const totFee  = all.reduce((s,r)=>s+(r._fee||0),0);
+  const totTax  = all.reduce((s,r)=>s+(r._tax||0),0);
+  const totP    = totVal - totFee - totTax - totCost;
+  const totPP   = totCost>0 ? ((totP/totCost)*100).toFixed(2) : 0;
+  tbody.insertAdjacentHTML('beforeend',`<tr class="assets-tbl-row-total">
+    <td></td>
+    <td colspan="2"><strong>合計</strong></td>
+    <td style="${isCrypto?'width:0;max-width:0;padding:0;overflow:hidden;border:none;':''}"></td>
+    <td></td>
+    <td style="text-align:right;"><strong>${fmtMoney(totCost)}</strong></td>
+    <td></td>
+    <td style="text-align:right;"><strong>${fmtMoney(totVal)}</strong></td>
+    <td style="text-align:right;" class="${totP>=0?'pnl-pos':'pnl-neg'}"><strong>${totP>=0?'+':''}${fmtMoney(totP)}</strong></td>
+    <td style="text-align:right;" class="${totPP>=0?'pnl-pos':'pnl-neg'}"><strong>${totPP>=0?'+':''}${totPP}%</strong></td>
+    <td></td>
+  </tr>`);
+}
+
+function sortMktTable(col){
+  if(!_mktOrigData.length) return;
+  if(_mktSortCol===col){ _mktSortDir*=-1; } else { _mktSortCol=col; _mktSortDir=1; }
+  // 更新排序指示器
+  document.querySelectorAll('.sort-ind').forEach(el=>{ el.textContent='⇅'; el.classList.remove('active'); });
+  const siEl = document.getElementById('si-'+col);
+  if(siEl){ siEl.textContent=_mktSortDir>0?'▲':'▼'; siEl.classList.add('active'); }
+  // 排序
+  const strCols = ['symbol','name','type'];
+  const sorted = [..._mktOrigData].sort((a,b)=>{
+    const av = strCols.includes(col) ? (a[col]||'') : (a[col]||0);
+    const bv = strCols.includes(col) ? (b[col]||'') : (b[col]||0);
+    if(typeof av==='string') return _mktSortDir * av.localeCompare(bv,'zh-TW');
+    return _mktSortDir * (av-bv);
+  });
+  const {isCrypto,market,_isTw} = _mktCurrentCtx;
+  _mktRenderRows(sorted, isCrypto, market, _isTw);
 }
 
 // ════════════════════════════════════════════════
@@ -1561,22 +1883,19 @@ async function showAddShort(){
     </div>
     <div class="form-row">
       <div class="form-group"><label>股數 *</label><input type="number" id="sh-shares" class="form-control" placeholder="1000" step="1" min="1"></div>
-      <div class="form-group"><label>賣出價格 *</label><input type="number" id="sh-price" class="form-control" placeholder="0" step="any"></div>
+      <div class="form-group"><label>日期 *</label><input type="date" id="sh-date-top" class="form-control" value="${new Date().toISOString().slice(0,10)}"></div>
     </div>
-    <div class="form-row">
-      <div class="form-group"><label>日期 *</label><input type="date" id="sh-date" class="form-control" value="${new Date().toISOString().slice(0,10)}"></div>
-      <div class="form-group"><label>備註</label><input type="text" id="sh-note" class="form-control"></div>
-    </div>
+    <div class="form-group"><label>備註</label><input type="text" id="sh-note" class="form-control"></div>
   `,{
     submitLabel:'確認借券',
     onSubmit: async ()=>{
       const sym = $('sh-sym').value.trim().toUpperCase();
       const shares = parseFloat($('sh-shares').value);
-      const price = parseFloat($('sh-price').value);
-      const date = $('sh-date').value;
-      if(!sym||!shares||!price||!date){ toast('請填寫所有必填欄位','err'); return; }
+      const dateEl = document.getElementById('sh-date-top');
+      const date = dateEl ? dateEl.value : new Date().toISOString().slice(0,10);
+      if(!sym||!shares||!date){ toast('請填寫代碼、股數','err'); return; }
       let name = $('sh-name').value.trim() || sym;
-      const r = await api('/api/investment/shorts/txn','POST',{symbol:sym, name, action:'short_sell', shares, price, date, note:$('sh-note').value});
+      const r = await api('/api/investment/shorts/txn','POST',{symbol:sym, name, action:'short_sell', shares, price:0, date, note:$('sh-note').value});
       if(r.success){ toast('借券部位已新增','ok'); closeModalForce(); loadShorts(); }
       else toast(r.error||'新增失敗','err');
     }
@@ -1595,20 +1914,16 @@ async function showEditShort(symbol){
     </div>
     <div class="form-row">
       <div class="form-group"><label>借券股數</label><input type="number" id="es-shares" class="form-control" value="${s.short_shares}" step="1" min="0"></div>
-      <div class="form-group"><label>平均賣出價</label><input type="number" id="es-avgprice" class="form-control" value="${s.avg_sell_price}" step="any"></div>
+      <div class="form-group"><label>現價</label><input type="number" id="es-curprice2" class="form-control" value="${s.current_price||0}" step="any"></div>
     </div>
-    <div class="form-row">
-      <div class="form-group"><label>現價</label><input type="number" id="es-curprice" class="form-control" value="${s.current_price||0}" step="any"></div>
-      <div class="form-group"><label>備註</label><input type="text" id="es-note" class="form-control" value="${s.note||''}"></div>
-    </div>
+    <div class="form-group"><label>備註</label><input type="text" id="es-note" class="form-control" value="${s.note||''}"></div>
   `,{
     submitLabel:'儲存',
     onSubmit: async ()=>{
       const r2 = await api(`/api/investment/shorts/${symbol}`,'PUT',{
         name: $('es-name').value.trim(),
         short_shares: parseFloat($('es-shares').value)||0,
-        avg_sell_price: parseFloat($('es-avgprice').value)||0,
-        current_price: parseFloat($('es-curprice').value)||0,
+        current_price: parseFloat(document.getElementById('es-curprice2')?.value)||0,
         note: $('es-note').value
       });
       if(r2.success){ toast('借券已更新','ok'); closeModalForce(); loadShorts(); }
@@ -1652,28 +1967,47 @@ async function deleteShort(symbol){
 // ════════════════════════════════════════════════
 // 存款
 // ════════════════════════════════════════════════
-const _DEPOSIT_TYPES = ['活存','定存','現金','儲蓄','外幣存款'];
+const _DEPOSIT_TYPES = ['活存','定存','現金','法幣'];
 const _DEPOSIT_CURRENCIES = ['TWD','USD','JPY','EUR','GBP','HKD','CNY','AUD','CAD','SGD','CHF','KRW','THB'];
 
 async function loadForex(){
   const r = await api('/api/investment/assets');
   if(!r.success){ toast('存款載入失敗：'+r.error,'err'); return; }
   const d = r.data;
+  _rateCache = {}; (d.rates||[]).forEach(rt=>{ _rateCache[rt.currency]=rt.rate; });
   const depEl = $('dep-total'), cntEl = $('dep-count'), pctEl = $('dep-pct');
   if(depEl) depEl.textContent = fmtMoney(d.cashTWD||0);
   if(cntEl) cntEl.textContent = (d.accounts||[]).length;
   if(pctEl) pctEl.textContent = (d.cashPct||0)+'%';
-  const catBadge = c => c==='投資'
-    ? `<span class="badge b-stock">📈 投資</span>`
-    : `<span class="badge b-pending">💵 現金</span>`;
+  const catBadge = c => ({'活存':'<span class="badge b-pending">🐷 活存</span>','定存':'<span class="badge b-pending">🔐 定存</span>','現金':'<span class="badge b-pending">💵 現金</span>','法幣':'<span class="badge b-pending">💱 法幣</span>'}[c] || `<span class="badge b-pending">${c}</span>`);
   const accChkAll = $('acc-chk-all');
   if(accChkAll){ accChkAll.checked=false; accChkAll.indeterminate=false; }
   _updateAccBulkDeleteBtn();
-  $('ast-tbody').innerHTML = (d.accounts||[]).length ? (d.accounts).map(a => `
+  // 重置排序狀態
+  _depSortCol = null; _depSortDir = 1;
+  document.querySelectorAll('.dsort-ind').forEach(el=>{ el.textContent='⇅'; el.classList.remove('active'); });
+  // 預計算排序欄位
+  _depOrigData = (d.accounts||[]).map(a=>({
+    a,
+    unit: a.unit||'',
+    currency: a.currency||'',
+    category: a.category||'',
+    _amount: parseFloat(a.amount)||0,
+    _rate: parseFloat(a.rate)||0,
+    _twd: a.twdAmount!==null ? (parseFloat(a.twdAmount)||0) : -1,
+    _pct: parseFloat(a.percentage)||0,
+  }));
+  _depRenderRows(_depOrigData, d.cashTWD||0, catBadge);
+  initAssetsSortable();
+}
+
+// ── 存款表格排序 ──
+function _depRenderRows(rows, cashTWD, catBadge){
+  $('ast-tbody').innerHTML = rows.length ? rows.map(({a})=>`
     <tr data-id="${a.id}">
       <td class="td-check"><input type="checkbox" class="acc-row-chk" data-id="${a.id}" onchange="onAccRowCheck()"></td>
       <td><strong>${a.unit}</strong></td>
-      <td><span class="badge b-pending">${a.currency}</span></td>
+      <td><span class="badge b-pending">${_CUR_DISPLAY[a.currency]||a.currency}</span></td>
       <td style="text-align:right;">${Number(a.amount).toLocaleString('zh-TW',{minimumFractionDigits:0,maximumFractionDigits:4})}</td>
       <td style="text-align:right;color:var(--muted);font-size:13px;">${a.rate}</td>
       <td style="text-align:right;font-weight:600;">${a.twdAmount!==null?fmtMoney(a.twdAmount):'<span style="color:var(--warning);">未設匯率</span>'}</td>
@@ -1685,14 +2019,31 @@ async function loadForex(){
       </td>
     </tr>
   `).join('') : `<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:32px;">尚無存款記錄，點擊「＋ 新增存款」開始建立</td></tr>`;
-  $('ast-tfoot').innerHTML = (d.accounts||[]).length ? `
+  $('ast-tfoot').innerHTML = rows.length ? `
     <tr class="assets-tbl-row-total">
       <td></td><td colspan="4"><strong>合計</strong></td>
-      <td style="text-align:right;"><strong>${fmtMoney(d.cashTWD||0)}</strong></td>
+      <td style="text-align:right;"><strong>${fmtMoney(cashTWD)}</strong></td>
       <td style="text-align:right;font-weight:700;">100%</td>
       <td colspan="2"></td>
     </tr>` : '';
-  initAssetsSortable();
+}
+
+function sortDepTable(col){
+  if(!_depOrigData.length) return;
+  if(_depSortCol===col){ _depSortDir*=-1; } else { _depSortCol=col; _depSortDir=1; }
+  document.querySelectorAll('.dsort-ind').forEach(el=>{ el.textContent='⇅'; el.classList.remove('active'); });
+  const siEl = document.getElementById('dsi-'+col);
+  if(siEl){ siEl.textContent=_depSortDir>0?'▲':'▼'; siEl.classList.add('active'); }
+  const strCols = ['unit','currency','category'];
+  const sorted = [..._depOrigData].sort((a,b)=>{
+    const av = strCols.includes(col) ? (a[col]||'') : (a[col]||0);
+    const bv = strCols.includes(col) ? (b[col]||'') : (b[col]||0);
+    if(typeof av==='string') return _depSortDir * av.localeCompare(bv,'zh-TW');
+    return _depSortDir * (av-bv);
+  });
+  const cashTWD = parseFloat(($('dep-total').textContent||'').replace(/[^0-9.-]/g,''))||0;
+  const catBadge = c => ({'活存':'<span class="badge b-pending">🐷 活存</span>','定存':'<span class="badge b-pending">🔐 定存</span>','現金':'<span class="badge b-pending">💵 現金</span>','法幣':'<span class="badge b-pending">💱 法幣</span>'}[c] || `<span class="badge b-pending">${c}</span>`);
+  _depRenderRows(sorted, cashTWD, catBadge);
 }
 
 function showAddDeposit(){
@@ -1772,6 +2123,7 @@ async function loadAssets(){
     api('/api/investment/shorts'),
   ]);
   const shortsTWD = (shortsData.data||[]).reduce((s,x)=>s+(x.short_shares*(x.current_price||x.avg_sell_price||0)),0);
+  const _totalTWD = d.totalTWD || 0;
   $('ast-market-cards').innerHTML = [
     { label:'<img class="tab-flag" src="/flags/tw.svg" alt="TW"> 台股', tab:'tw', sum:twSum.data, rate:1, extra:shortsTWD, extraLabel:'借券' },
     { label:'<img class="tab-flag" src="/flags/us.svg" alt="US"> 美股', tab:'us', sum:usSum.data, rate:usdRate },
@@ -1794,12 +2146,14 @@ async function loadAssets(){
     const totalVal=holdVal+extraVal;
     const hasData=parseFloat(sum?.count||0)>0||extraVal>0;
     const curr=rate===1?'':' (TWD)';
+    const totPct = _totalTWD>0 ? ((totalVal/_totalTWD)*100).toFixed(1) : 0;
     return `<div class="stat-card" style="cursor:pointer;transition:box-shadow .15s;" onclick="switchInvTab('${tab}')"
         onmouseover="this.style.boxShadow='0 4px 16px rgba(99,102,241,.18)'" onmouseout="this.style.boxShadow=''">
       <div class="lbl">${label}</div>
       <div style="font-size:15px;font-weight:700;margin:6px 0;">${hasData ? fmtMoney(totalVal)+curr : '<span style="color:var(--muted);font-size:13px;">尚無庫存</span>'}</div>
       ${parseFloat(sum?.count||0)>0?`<div style="font-size:12px;" class="${pnl>=0?'pnl-pos':'pnl-neg'}">損益 ${pnl>=0?'+':''}${fmtMoney(pnl)} (${sum?.pnlPct||0}%)</div>`:''}
       ${extraVal>0?`<div style="font-size:11px;color:var(--muted);">含${extraLabel} ${fmtMoney(extraVal)}</div>`:''}
+      ${hasData?`<div style="font-size:12px;color:var(--muted);">佔比 ${totPct}%</div>`:''}
       <div style="font-size:11px;color:var(--muted);margin-top:4px;">點擊進入 →</div>
     </div>`;
   }).join('');
@@ -1821,13 +2175,13 @@ async function loadAssets(){
           data: d.history.map(h => h.total_twd),
           borderColor: '#6366f1',
           backgroundColor: 'rgba(99,102,241,.12)',
-          borderWidth: 2, fill: true, tension: 0.3, pointRadius: 4,
+          borderWidth: 2, fill: true, tension: 0, pointRadius: 4,
         }]
       },
       options: {
         responsive: true,
         plugins: { legend: { display: false },
-          tooltip: { callbacks: { label: ctx => '$'+Number(ctx.parsed.y).toLocaleString('zh-TW') }}
+          tooltip: { callbacks: { label: ctx => '$'+Math.round(ctx.parsed.y).toLocaleString('zh-TW') }}
         },
         scales: { y: { ticks: { callback: v => '$'+Number(v/10000).toFixed(0)+'\u842c' } } }
       }
@@ -1860,6 +2214,7 @@ function showAddAccount(){
       else toast(r.error,'err');
     }
   });
+  _initAccountUnitAutocomplete();
 }
 
 // ── 編輯帳戶 ──
@@ -1877,6 +2232,7 @@ async function showEditAccount(id){
       else toast(rr.error,'err');
     }
   });
+  _initAccountUnitAutocomplete();
 }
 
 function _accountForm(a = {}){
@@ -1884,17 +2240,20 @@ function _accountForm(a = {}){
     <div class="form-row">
       <div class="form-group">
         <label>\u55ae\u4f4d\u540d\u7a31 *</label>
-        <input type="text" id="acc-unit" class="form-control" value="${a.unit||''}" placeholder="\u4e2d\u4fe1\u6d3b\u5b58\u3001bybit\u2026">
+        <div class="autocomplete-wrap">
+          <input type="text" id="acc-unit" class="form-control" value="${a.unit||''}" placeholder="\u4e2d\u4fe1\u6d3b\u5b58\u3001bybit\u2026" autocomplete="off">
+          <div class="autocomplete-list" id="dl-acc-unit"></div>
+        </div>
       </div>
       <div class="form-group">
         <label>\u5e63\u7a2e *</label>
         <select id="acc-currency" class="form-control">
           ${[
-            {c:'TWD',s:'NT$'},{c:'USD',s:'$'},{c:'JPY',s:'\u00a5'},{c:'EUR',s:'\u20ac'},{c:'GBP',s:'\u00a3'},
-            {c:'HKD',s:'HK$'},{c:'CNY',s:'CN\u00a5'},{c:'AUD',s:'A$'},{c:'CAD',s:'C$'},{c:'SGD',s:'S$'},
-            {c:'CHF',s:'Fr'},{c:'KRW',s:'\u20a9'},{c:'THB',s:'\u0e3f'},
-            {c:'USDT',s:'\u20ae'},{c:'BTC',s:'\u20bf'},{c:'ETH',s:'\u039e'}
-          ].map(({c,s})=>`<option value="${c}" ${a.currency===c?'selected':''}>${s} ${c}</option>`).join('')}
+            {c:'TWD',s:'NT$'},{c:'USD',s:'$'},{c:'JPY',s:'¥'},{c:'EUR',s:'€'},{c:'GBP',s:'£'},
+            {c:'HKD',s:'HK$'},{c:'CNY',s:'CN¥'},{c:'AUD',s:'A$'},{c:'CAD',s:'C$'},{c:'SGD',s:'S$'},
+            {c:'CHF',s:'Fr'},{c:'KRW',s:'₩'},{c:'THB',s:'฿'},
+            {c:'USDT',s:'💵 USDT'},{c:'USDC',s:'💵 USDC'}
+          ].map(({c,s})=>`<option value="${c}" ${a.currency===c?'selected':''}>${s}</option>`).join('')}
           <option value="__custom__">+ \u81ea\u8a02</option>
         </select>
       </div>
@@ -1911,8 +2270,10 @@ function _accountForm(a = {}){
       <div class="form-group">
         <label>\u985e\u5225</label>
         <select id="acc-category" class="form-control">
-          <option value="\u73fe\u91d1" ${(a.category||'\u73fe\u91d1')==='\u73fe\u91d1'?'selected':''}>\ud83d\udcb5 \u73fe\u91d1</option>
-          <option value="\u6295\u8cc7" ${a.category==='\u6295\u8cc7'?'selected':''}>\ud83d\udcc8 \u6295\u8cc7</option>
+          <option value="活存" ${(a.category||'活存')==='活存'?'selected':''}>🐷 活存</option>
+          <option value="定存" ${a.category==='定存'?'selected':''}>🔐 定存</option>
+          <option value="現金" ${a.category==='現金'?'selected':''}>💵 現金</option>
+          <option value="法幣" ${a.category==='法幣'?'selected':''}>💱 法幣</option>
         </select>
       </div>
     </div>
@@ -1937,6 +2298,61 @@ function _readAccountForm(){
   if(!currency){ toast('\u8acb\u9078\u64c7\u5e63\u7a2e','err'); return null; }
   if(isNaN(amount)){ toast('\u8acb\u586b\u5165\u91d1\u984d','err'); return null; }
   return { unit, currency, amount, category: $('acc-category').value, note: $('acc-note').value };
+}
+
+const _CUR_DISPLAY = {
+  TWD:  '<img src="/flags/tw.svg" style="width:20px;height:14px;border-radius:2px;vertical-align:middle;object-fit:cover;margin-right:5px;">TWD',
+  USD:  '<img src="/flags/us.svg" style="width:20px;height:14px;border-radius:2px;vertical-align:middle;object-fit:cover;margin-right:5px;">USD',
+  JPY:  '<img src="/flags/jp.svg" style="width:20px;height:14px;border-radius:2px;vertical-align:middle;object-fit:cover;margin-right:5px;">JPY',
+  EUR:  '<img src="/flags/eu.png" style="width:20px;height:14px;border-radius:2px;vertical-align:middle;object-fit:cover;margin-right:5px;">EUR',
+  GBP:  '<img src="/flags/gb.png" style="width:20px;height:14px;border-radius:2px;vertical-align:middle;object-fit:cover;margin-right:5px;">GBP',
+  HKD:  '<img src="/flags/hk.svg" style="width:20px;height:14px;border-radius:2px;vertical-align:middle;object-fit:cover;margin-right:5px;">HKD',
+  CNY:  '<img src="/flags/cn.png" style="width:20px;height:14px;border-radius:2px;vertical-align:middle;object-fit:cover;margin-right:5px;">CNY',
+  AUD:  '<img src="/flags/au.png" style="width:20px;height:14px;border-radius:2px;vertical-align:middle;object-fit:cover;margin-right:5px;">AUD',
+  CAD:  '<img src="/flags/ca.png" style="width:20px;height:14px;border-radius:2px;vertical-align:middle;object-fit:cover;margin-right:5px;">CAD',
+  SGD:  '<img src="/flags/sg.png" style="width:20px;height:14px;border-radius:2px;vertical-align:middle;object-fit:cover;margin-right:5px;">SGD',
+  CHF:  '<img src="/flags/ch.png" style="width:20px;height:14px;border-radius:2px;vertical-align:middle;object-fit:cover;margin-right:5px;">CHF',
+  KRW:  '<img src="/flags/kr.svg" style="width:20px;height:14px;border-radius:2px;vertical-align:middle;object-fit:cover;margin-right:5px;">KRW',
+  THB:  '<img src="/flags/th.svg" style="width:20px;height:14px;border-radius:2px;vertical-align:middle;object-fit:cover;margin-right:5px;">THB',
+  USDT: '<span style="display:inline-flex;width:20px;height:14px;border-radius:2px;background:#26a17b;color:#fff;font-size:8px;font-weight:700;align-items:center;justify-content:center;vertical-align:middle;margin-right:5px;">\u20ae</span>USDT',
+  USDC: '<span style="display:inline-flex;width:20px;height:14px;border-radius:2px;background:#2775ca;color:#fff;font-size:8px;font-weight:700;align-items:center;justify-content:center;vertical-align:middle;margin-right:5px;">$</span>USDC',
+};
+const _INST_LIST = [
+  '台灣銀行','合作金庫','土地銀行','兆豐銀行','台灣企銀',
+  '中國信託','富邦銀行','台北富邦','國泰世華','玉山銀行',
+  '第一銀行','華南銀行','彰化銀行','台新銀行','遠東銀行',
+  '永豐銀行','星展銀行','匯豐銀行','花旗銀行','元大銀行',
+  '郵局','中華郵政','台中銀行','三信商銀','京城銀行',
+  'Binance','Bybit','OKX','Coinbase','Kraken','MAX','ACE','BitoPro','Gate.io','Polymarket',
+];
+
+async function _initAccountUnitAutocomplete(){
+  const inp = document.getElementById('acc-unit');
+  const lst = document.getElementById('dl-acc-unit');
+  if(!inp || !lst) return;
+
+  let _items = [..._INST_LIST];
+  try {
+    const r = await api('/api/investment/assets');
+    if(r.success && r.data.accounts){
+      const existing = r.data.accounts.map(a=>a.unit).filter(u=>u && !_items.includes(u));
+      _items = [...existing, ..._items];
+    }
+  } catch(e){}
+
+  function _show(q){
+    const lower = q.toLowerCase();
+    const hits = _items.filter(s=>s.toLowerCase().includes(lower)).slice(0,8);
+    if(!hits.length){ lst.style.display='none'; return; }
+    lst.innerHTML = hits.map(s=>`<div class="autocomplete-item" data-name="${s}">${s}</div>`).join('');
+    lst.querySelectorAll('.autocomplete-item').forEach(el=>{
+      el.addEventListener('mousedown', e=>{ e.preventDefault(); inp.value=el.dataset.name; lst.style.display='none'; });
+    });
+    lst.style.display='block';
+  }
+
+  inp.addEventListener('input', ()=>{ const q=inp.value.trim(); q ? _show(q) : (lst.style.display='none'); });
+  inp.addEventListener('blur', ()=>{ setTimeout(()=>lst.style.display='none', 160); });
 }
 
 async function deleteAccount(id){
@@ -1994,11 +2410,42 @@ async function deleteSelectedAccounts(){
   loadForex();
 }
 
-// ── 記錄快照 ──
-async function saveAssetSnapshot(){
-  const r = await api('/api/investment/assets/snapshots', 'POST', {});
-  if(r.success){ toast(`\u5df2\u8a18\u9304 ${r.date} \u5feb\u7167\uff1a${fmtMoney(r.total_twd)}`, 'ok'); loadAssets(); }
+// ── 自動快照（直接記錄當前資產）──
+async function autoSaveSnapshot(){
+  const today = new Date().toISOString().slice(0,10);
+  const r = await api('/api/investment/assets/snapshots','POST',{date:today,amount:null,note:''});
+  if(r.success){ toast(`已記錄 ${r.date} 快照：${fmtMoney(r.total_twd)}`,'ok'); loadAssets(); }
   else toast(r.error,'err');
+}
+
+// ── 手動快照（自訂日期/金額）──
+function saveAssetSnapshot(){
+  const today = new Date().toISOString().slice(0,10);
+  showModal('\ud83d\udcf7 \u8a18\u9304\u8cc7\u7522\u5feb\u7167', `
+    <div class="form-group">
+      <label>\u65e5\u671f</label>
+      <input type="date" id="snap-date" class="form-control" value="${today}">
+    </div>
+    <div class="form-group">
+      <label>\u7e3d\u8cc7\u7522(TWD) <small style="color:var(--muted);font-weight:400;">\u7559\u7a7a\u5247\u81ea\u52d5\u8a08\u7b97</small></label>
+      <input type="number" id="snap-amount" class="form-control" placeholder="\u81ea\u52d5\u8a08\u7b97" min="0" step="1">
+    </div>
+    <div class="form-group">
+      <label>\u5099\u8a3b</label>
+      <input type="text" id="snap-note" class="form-control" placeholder="\u9078\u586b">
+    </div>
+  `, {
+    submitLabel: '\u5132\u5b58\u5feb\u7167',
+    onSubmit: async () => {
+      const date   = document.getElementById('snap-date').value;
+      const rawAmt = document.getElementById('snap-amount').value.trim();
+      const note   = document.getElementById('snap-note').value.trim();
+      const amount = rawAmt ? parseFloat(rawAmt) : null;
+      const r = await api('/api/investment/assets/snapshots','POST',{date,amount,note});
+      if(r.success){ toast(`\u5df2\u8a18\u9304 ${r.date} \u5feb\u7167\uff1a${fmtMoney(r.total_twd)}`,'ok'); closeModalForce(); loadAssets(); }
+      else toast(r.error,'err');
+    }
+  });
 }
 
 async function deleteSnapshot(id){
@@ -2050,18 +2497,15 @@ async function showAssetRates(){
 
 async function autoFetchRates(btn){
   if(btn){ btn.disabled = true; btn.textContent = '\u6293\u53d6\u4e2d\u2026'; }
-  const info = document.getElementById('auto-fetch-info');
-  if(info) info.style.display = 'block';
   const r = await api('/api/investment/assets/rates/fetch', 'POST', {});
-  if(btn){ btn.disabled = false; btn.textContent = '\ud83d\udd04 \u81ea\u52d5\u6293\u53d6\u532f\u7387'; }
+  if(btn){ btn.disabled = false; btn.textContent = '\ud83d\udd04 \u66f4\u65b0\u532f\u7387'; }
   if(r.success){
     const count = Object.keys(r.rates).length;
     toast(`\u5df2\u66f4\u65b0 ${count} \u500b\u532f\u7387`, 'ok');
     closeModalForce();
-    showAssetRates();
-    loadAssets();
+    if(_invTab==='forex') loadForex(); else loadAssets();
   } else {
-    toast('\u6293\u53d6\u5931\u6557\uff1a'+r.error, 'err');
+    toast('\u66f4\u65b0\u5931\u6557\uff1a'+r.error, 'err');
   }
 }
 
@@ -2077,7 +2521,7 @@ async function saveRate(currency){
 async function deleteRate(currency){
   if(!confirm(`\u522a\u9664 ${currency} \u7684\u532f\u7387\u8a2d\u5b9a\uff1f`)) return;
   const r = await api(`/api/investment/assets/rates/${currency}`,'DELETE');
-  if(r.success){ toast('\u5df2\u522a\u9664','ok'); closeModalForce(); showAssetRates(); loadAssets(); }
+  if(r.success){ toast('\u5df2\u522a\u9664','ok'); loadAssets(); }
 }
 
 async function addRate(){
@@ -2085,7 +2529,7 @@ async function addRate(){
   const val      = parseFloat($('rate-new-val').value);
   if(!currency||isNaN(val)||val<=0){ toast('\u8acb\u586b\u5165\u5e63\u7a2e\u548c\u532f\u7387','err'); return; }
   const r = await api('/api/investment/assets/rates','PUT',{currency,rate:val});
-  if(r.success){ toast(`${currency} \u5df2\u52a0\u5165`,'ok'); closeModalForce(); showAssetRates(); loadAssets(); }
+  if(r.success){ toast(`${currency} \u5df2\u52a0\u5165`,'ok'); loadAssets(); }
   else toast(r.error,'err');
 }
 
@@ -2096,21 +2540,61 @@ function _setHoldingName(name){
   if(hidden) hidden.value = name || '';
 }
 
+const _EXCH_COLOR = {
+  binance:'#F0B90B', bybit:'#F7A600', okx:'#111', 'gate.io':'#2354e6',
+  mexc:'#2663FF', kucoin:'#23AF91', coinbase:'#0052FF', kraken:'#5741d9',
+  max:'#2754B5', bitget:'#00C78C', pionex:'#1B8CFF', bitfinex:'#16B157',
+};
+function _exchTag(exchange){
+  if(!exchange) return '';
+  const bg = _EXCH_COLOR[exchange.toLowerCase()] || 'var(--primary)';
+  const abbr = exchange.slice(0,3).toUpperCase();
+  return `<span style="display:inline-flex;align-items:center;padding:1px 5px;border-radius:3px;background:${bg};color:#fff;font-size:9px;font-weight:700;margin-right:4px;vertical-align:middle;letter-spacing:.3px;">${abbr}</span>`;
+}
+const _EXCHANGE_LIST = [
+  'Binance','Bybit','OKX','Coinbase','Kraken','MAX','ACE','BitoPro','Gate.io',
+  'Bitget','MEXC','KuCoin','Phemex','Bitfinex','Gemini','HTX','Pionex',
+];
+
+function _initExchangeAutocomplete(){
+  const inp = document.getElementById('h-exchange');
+  const lst = document.getElementById('dl-h-exchange');
+  if(!inp || !lst) return;
+  function _show(q){
+    const lower = q.toLowerCase();
+    const hits = _EXCHANGE_LIST.filter(s=>s.toLowerCase().includes(lower)).slice(0,8);
+    if(!hits.length){ lst.style.display='none'; return; }
+    lst.innerHTML = hits.map(s=>`<div class="autocomplete-item" data-name="${s}">${s}</div>`).join('');
+    lst.querySelectorAll('.autocomplete-item').forEach(el=>{
+      el.addEventListener('mousedown', e=>{ e.preventDefault(); inp.value=el.dataset.name; lst.style.display='none'; });
+    });
+    lst.style.display='block';
+  }
+  inp.addEventListener('input', ()=>{ const q=inp.value.trim(); q?_show(q):(lst.style.display='none'); });
+  inp.addEventListener('blur', ()=>{ setTimeout(()=>lst.style.display='none', 160); });
+}
+
 async function _initHoldingAutocomplete(){
   const symEl = document.getElementById('h-sym');
   const listEl = document.getElementById('dl-h-sym');
   const mktEl  = document.getElementById('h-market');
   if(!symEl||!listEl) return;
 
+  const _capturedMkt = mktEl?.value || _invMarket;
   let _acItems = [];
+  let _loadPromise = null;
 
-  async function _loadItems(){
-    const mkt = mktEl?.value || _invMarket;
-    if(mkt==='tw') _acItems = (await getTwStocks()).map(s=>({code:s.code,name:s.name}));
-    else if(mkt==='us') _acItems = (await getUsStocks()).map(s=>({code:s.code,name:s.name}));
-    else if(mkt==='crypto') _acItems = (await getCryptoCoins()).map(c=>({code:c.symbol,name:c.name}));
-    else _acItems = [];
+  function _loadItems(){
+    if(_loadPromise) return _loadPromise;
+    _loadPromise = (async ()=>{
+      if(_capturedMkt==='tw') _acItems = (await getTwStocks()).map(s=>({code:s.code,name:s.name}));
+      else if(_capturedMkt==='us') _acItems = (await getUsStocks()).map(s=>({code:s.code,name:s.name}));
+      else if(_capturedMkt==='crypto') _acItems = (await getCryptoCoins()).map(c=>({code:c.symbol,name:c.name}));
+      else _acItems = [];
+    })();
+    return _loadPromise;
   }
+  _loadItems(); // 預先載入（背景）
 
   function _showList(q){
     if(!q){ listEl.style.display='none'; return; }
@@ -2178,9 +2662,10 @@ function showAddHolding(existing=null){
         <input type="hidden" id="h-name" value="${isEdit?existing.name:''}">
       </div>
     </div>
+    ${mktVal==='crypto'?`<div class="form-group"><label>交易所</label><div class="autocomplete-wrap"><input type="text" id="h-exchange" class="form-control" placeholder="Binance、Bybit、OKX…" value="${isEdit?(existing.exchange||''):''}"><div class="autocomplete-list" id="dl-h-exchange"></div></div></div>`:''}
     <div class="form-row">
       <div class="form-group"><label>庫存數量</label><input type="number" id="h-shares" class="form-control" placeholder="0" step="0.0001" value="${isEdit?existing.shares:''}"></div>
-      <div class="form-group"><label>均成本</label><input type="number" id="h-cost" class="form-control" placeholder="0" step="any" value="${isEdit?existing.avg_cost:''}"></div>
+      <div class="form-group"><label>${mktVal==='crypto'?'投入成本 (USDT)':'均成本'}</label><input type="number" id="h-cost" class="form-control" placeholder="0" step="any" value="${isEdit?existing.avg_cost:''}"></div>
     </div>
     <div class="form-group"><label>備註</label><input type="text" id="h-note" class="form-control" value="${isEdit?existing.note:''}"></div>
   `,{
@@ -2197,11 +2682,13 @@ function showAddHolding(existing=null){
         else name=sym;
       }
       const type = isEdit ? existing.type : _autoType(sym, name, mkt);
+      const exchangeEl = document.getElementById('h-exchange');
       const r = await api(`/api/investment/holdings/${sym}`,'PUT',{
         name, type, market:mkt,
         shares:$('h-shares').value||0, avg_cost:$('h-cost').value||0,
         current_price: isEdit ? (existing.current_price||0) : 0,
-        note:$('h-note').value
+        note:$('h-note').value,
+        exchange: exchangeEl ? exchangeEl.value.trim() : ''
       });
       if(r.success){
         toast('庫存已更新','ok');
@@ -2212,6 +2699,7 @@ function showAddHolding(existing=null){
     }
   });
   if(!isEdit) _initHoldingAutocomplete();
+  if(mktVal==='crypto') _initExchangeAutocomplete();
 }
 
 // ════════════════════════════════════════════════
@@ -2426,6 +2914,10 @@ let _travelGeoData = null;
 let _travelCurrentConfig = null;
 
 let _travelView = 'card';
+let _travelTab = 'footprint';
+let _currentTripId = null;
+let _tripTab = 'checklist';
+let _tripsCache = [];
 
 function toggleTravelLang() {
   _travelLangZh = !_travelLangZh;
@@ -2438,10 +2930,29 @@ function setTravelView(v) {
   _travelView = v;
   $('travel-view-card').className = 'btn btn-sm ' + (v==='card' ? 'btn-primary' : 'btn-outline');
   $('travel-view-list').className  = 'btn btn-sm ' + (v==='list' ? 'btn-primary' : 'btn-outline');
-  loadTravel();
+  loadTravelFootprint();
+}
+
+function switchTravelTab(tab) {
+  _travelTab = tab;
+  ['footprint','trips','memories'].forEach(t => {
+    const el = $(`travel-tab-${t}`);
+    const sub = $(`travel-sub-${t}`);
+    if (el) el.classList.toggle('active', t === tab);
+    if (sub) sub.style.display = t === tab ? '' : 'none';
+  });
+  if (tab === 'footprint') loadTravelFootprint();
+  else if (tab === 'trips') loadTrips();
+  else if (tab === 'memories') loadMemories();
 }
 
 async function loadTravel() {
+  if (_travelTab === 'footprint') loadTravelFootprint();
+  else if (_travelTab === 'trips') loadTrips();
+  else if (_travelTab === 'memories') loadMemories();
+}
+
+async function loadTravelFootprint() {
   const summary = await api('/api/travel/summary');
   const counts = {};
   (summary.data || []).forEach(r => counts[r.country] = Number(r.visited));
@@ -2533,6 +3044,361 @@ async function openCountryMap(countryKey) {
     $('map-overlay-sub').textContent = '地圖載入失敗：' + e.message;
     toast(e.message, 'err');
   }
+}
+
+// ── Trips ──
+async function loadTrips() {
+  const res = await api('/api/travel/trips');
+  _tripsCache = res.data || [];
+  const tbody = $('trips-tbody');
+  if (!tbody) return;
+  const statusLbl = {planning:'計畫中',ongoing:'進行中',completed:'已完成'};
+  const statusCls = {planning:'b-pending',ongoing:'b-in_progress',completed:'b-done'};
+  tbody.innerHTML = _tripsCache.length ? _tripsCache.map(t => {
+    const days = t.start_date && t.end_date
+      ? Math.ceil((new Date(t.end_date) - new Date(t.start_date)) / 86400000) + 1
+      : '--';
+    return `<tr onclick="showTripDetail(${t.id})" style="cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+      <td style="padding:12px 14px;font-weight:600;">${_escHtml(t.name)}</td>
+      <td style="padding:12px 14px;">${_escHtml(t.destination||'--')}</td>
+      <td style="padding:12px 14px;text-align:center;">${t.start_date||'--'}</td>
+      <td style="padding:12px 14px;text-align:center;">${t.end_date||'--'}</td>
+      <td style="padding:12px 14px;text-align:center;">${days}</td>
+      <td style="padding:12px 14px;text-align:center;"><span class="badge ${statusCls[t.status]||'b-pending'}">${statusLbl[t.status]||t.status}</span></td>
+      <td style="padding:12px 14px;" onclick="event.stopPropagation();">
+        <button class="btn btn-sm btn-outline" onclick="showEditTripModal(${t.id})" style="padding:4px 8px;">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteTrip(${t.id})" style="padding:4px 8px;margin-left:4px;">🗑</button>
+      </td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px;">尚無行程，點擊右上角新增</td></tr>`;
+  closeTripDetail();
+}
+
+function showTripDetail(id) {
+  _currentTripId = id;
+  const trip = _tripsCache.find(t => t.id === id);
+  if (!trip) return;
+  $('trip-detail-name').textContent = (trip.destination ? trip.destination + ' — ' : '') + trip.name;
+  $('trips-tbody').parentElement.parentElement.style.display = 'none';
+  document.querySelector('[onclick="showAddTripModal()"]').style.display = 'none';
+  $('trip-detail-panel').style.display = '';
+  switchTripTab('checklist');
+}
+
+function closeTripDetail() {
+  _currentTripId = null;
+  const card = $('trips-tbody')?.parentElement?.parentElement;
+  if (card) card.style.display = '';
+  const addBtn = document.querySelector('[onclick="showAddTripModal()"]');
+  if (addBtn) addBtn.style.display = '';
+  const panel = $('trip-detail-panel');
+  if (panel) panel.style.display = 'none';
+}
+
+function switchTripTab(tab) {
+  _tripTab = tab;
+  ['checklist','schedule'].forEach(t => {
+    const el = $(`trip-tab-${t}`);
+    const sub = $(`trip-sub-${t}`);
+    if (el) el.classList.toggle('active', t === tab);
+    if (sub) sub.style.display = t === tab ? '' : 'none';
+  });
+  if (tab === 'checklist') loadChecklist();
+  else if (tab === 'schedule') loadSchedule();
+}
+
+async function loadChecklist() {
+  if (!_currentTripId) return;
+  const res = await api(`/api/travel/trips/${_currentTripId}/checklist`);
+  const items = res.data || [];
+  const container = $('checklist-list');
+  if (!container) return;
+  const cats = {};
+  items.forEach(i => { (cats[i.category] = cats[i.category]||[]).push(i); });
+  container.innerHTML = Object.entries(cats).map(([cat, list]) =>
+    `<div style="margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">${_escHtml(cat)}</div>
+      ${list.map(item => `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:4px;">
+        <input type="checkbox" ${item.checked?'checked':''} onchange="toggleChecklist(${item.id},this.checked)" style="width:16px;height:16px;cursor:pointer;">
+        <span style="${item.checked?'text-decoration:line-through;color:var(--muted);':''};flex:1;">${_escHtml(item.item)}</span>
+        <button onclick="deleteChecklistItem(${item.id})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:0;">×</button>
+      </div>`).join('')}
+    </div>`
+  ).join('') || '<div style="color:var(--muted);text-align:center;padding:20px;">尚無清單項目</div>';
+}
+
+async function addChecklistItem() {
+  const item = $('checklist-input')?.value?.trim();
+  const category = $('checklist-cat')?.value || '其他';
+  if (!item || !_currentTripId) return;
+  await api(`/api/travel/trips/${_currentTripId}/checklist`, 'POST', { item, category });
+  $('checklist-input').value = '';
+  loadChecklist();
+}
+
+async function toggleChecklist(id, checked) {
+  await api(`/api/travel/checklist/${id}`, 'PATCH', { checked });
+  loadChecklist();
+}
+
+async function deleteChecklistItem(id) {
+  await api(`/api/travel/checklist/${id}`, 'DELETE');
+  loadChecklist();
+}
+
+async function loadSchedule() {
+  if (!_currentTripId) return;
+  const res = await api(`/api/travel/trips/${_currentTripId}/schedule`);
+  const items = res.data || [];
+  const container = $('schedule-list');
+  if (!container) return;
+  const typeIcon = {flight:'✈️',hotel:'🏨',activity:'🎯',meal:'🍽️',transport:'🚌',other:'📌'};
+  const days = {};
+  items.forEach(i => { (days[i.day_offset] = days[i.day_offset]||[]).push(i); });
+  const trip = _tripsCache.find(t => t.id === _currentTripId);
+  const baseDate = trip?.start_date ? new Date(trip.start_date) : null;
+  container.innerHTML = Object.entries(days).sort((a,b)=>Number(a[0])-Number(b[0])).map(([day, list]) => {
+    let dayLabel = `Day ${day}`;
+    if (baseDate) {
+      const d = new Date(baseDate); d.setDate(d.getDate() + Number(day) - 1);
+      dayLabel += ` (${d.toLocaleDateString('zh-TW',{month:'numeric',day:'numeric'})})`;
+    }
+    return `<div style="margin-bottom:16px;">
+      <div style="font-size:14px;font-weight:700;color:var(--primary);margin-bottom:8px;padding:6px 12px;background:var(--bg);border-radius:6px;">${dayLabel}</div>
+      ${list.map(item => `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;">
+        <div style="font-size:20px;flex-shrink:0;">${typeIcon[item.type]||'📌'}</div>
+        <div style="flex:1;min-width:0;">
+          ${item.time_slot?`<div style="font-size:12px;color:var(--muted);font-weight:600;">${item.time_slot}</div>`:''}
+          <div style="font-weight:600;">${_escHtml(item.title)}</div>
+          ${item.description?`<div style="font-size:13px;color:var(--muted);">${_escHtml(item.description)}</div>`:''}
+        </div>
+        <button onclick="deleteScheduleItem(${item.id})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:0;flex-shrink:0;">×</button>
+      </div>`).join('')}
+    </div>`;
+  }).join('') || '<div style="color:var(--muted);text-align:center;padding:20px;">尚無時程項目</div>';
+}
+
+async function addScheduleItem() {
+  const day_offset = parseInt($('sch-day')?.value)||1;
+  const time_slot  = $('sch-time')?.value||'';
+  const type       = $('sch-type')?.value||'activity';
+  const title      = $('sch-title')?.value?.trim();
+  const description= $('sch-desc')?.value?.trim();
+  if (!title || !_currentTripId) return;
+  await api(`/api/travel/trips/${_currentTripId}/schedule`, 'POST', { day_offset, time_slot, title, description, type });
+  $('sch-title').value = '';
+  $('sch-desc').value = '';
+  loadSchedule();
+}
+
+async function deleteScheduleItem(id) {
+  await api(`/api/travel/schedule/${id}`, 'DELETE');
+  loadSchedule();
+}
+
+function showAddTripModal() {
+  showModal(`<div style="padding:4px;">
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:18px;">新增行程</h3>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">行程名稱 *</label><input id="trip-name" type="text" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="例：東京五日遊"></div>
+      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">目的地</label><input id="trip-dest" type="text" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="例：東京、大阪"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">出發日期</label><input id="trip-start" type="date" class="form-input" style="width:100%;box-sizing:border-box;"></div>
+        <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">回程日期</label><input id="trip-end" type="date" class="form-input" style="width:100%;box-sizing:border-box;"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">交通方式</label><input id="trip-transport" type="text" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="例：台灣虎航"></div>
+        <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">住宿</label><input id="trip-accom" type="text" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="例：APA Hotel"></div>
+      </div>
+      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">狀態</label>
+        <select id="trip-status" class="form-input" style="width:100%;box-sizing:border-box;">
+          <option value="planning">計畫中</option>
+          <option value="ongoing">進行中</option>
+          <option value="completed">已完成</option>
+        </select>
+      </div>
+      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">備註</label><textarea id="trip-notes" class="form-input" style="width:100%;box-sizing:border-box;height:70px;resize:vertical;" placeholder="其他說明..."></textarea></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="submitAddTrip()">新增</button>
+    </div>
+  </div>`);
+}
+
+async function submitAddTrip() {
+  const name = $('trip-name')?.value?.trim();
+  if (!name) { toast('請填寫行程名稱','err'); return; }
+  const body = {
+    name, destination: $('trip-dest')?.value?.trim(),
+    start_date: $('trip-start')?.value||null, end_date: $('trip-end')?.value||null,
+    status: $('trip-status')?.value||'planning',
+    transportation: $('trip-transport')?.value?.trim(),
+    accommodation: $('trip-accom')?.value?.trim(),
+    notes: $('trip-notes')?.value?.trim()
+  };
+  const res = await api('/api/travel/trips', 'POST', body);
+  if (res.success) { closeModal(); loadTrips(); toast('行程已新增'); }
+  else toast(res.error||'新增失敗','err');
+}
+
+function showEditTripModal(id) {
+  const trip = _tripsCache.find(t => t.id === id);
+  if (!trip) return;
+  showModal(`<div style="padding:4px;">
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:18px;">編輯行程</h3>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">行程名稱 *</label><input id="etrip-name" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(trip.name)}"></div>
+      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">目的地</label><input id="etrip-dest" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(trip.destination||'')}"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">出發日期</label><input id="etrip-start" type="date" class="form-input" style="width:100%;box-sizing:border-box;" value="${trip.start_date||''}"></div>
+        <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">回程日期</label><input id="etrip-end" type="date" class="form-input" style="width:100%;box-sizing:border-box;" value="${trip.end_date||''}"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">交通方式</label><input id="etrip-transport" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(trip.transportation||'')}"></div>
+        <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">住宿</label><input id="etrip-accom" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(trip.accommodation||'')}"></div>
+      </div>
+      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">狀態</label>
+        <select id="etrip-status" class="form-input" style="width:100%;box-sizing:border-box;">
+          <option value="planning" ${trip.status==='planning'?'selected':''}>計畫中</option>
+          <option value="ongoing" ${trip.status==='ongoing'?'selected':''}>進行中</option>
+          <option value="completed" ${trip.status==='completed'?'selected':''}>已完成</option>
+        </select>
+      </div>
+      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">備註</label><textarea id="etrip-notes" class="form-input" style="width:100%;box-sizing:border-box;height:70px;resize:vertical;">${_escHtml(trip.notes||'')}</textarea></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="submitEditTrip(${id})">儲存</button>
+    </div>
+  </div>`);
+}
+
+async function submitEditTrip(id) {
+  const name = $('etrip-name')?.value?.trim();
+  if (!name) { toast('請填寫行程名稱','err'); return; }
+  const body = {
+    name, destination: $('etrip-dest')?.value?.trim(),
+    start_date: $('etrip-start')?.value||null, end_date: $('etrip-end')?.value||null,
+    status: $('etrip-status')?.value||'planning',
+    transportation: $('etrip-transport')?.value?.trim(),
+    accommodation: $('etrip-accom')?.value?.trim(),
+    notes: $('etrip-notes')?.value?.trim()
+  };
+  const res = await api(`/api/travel/trips/${id}`, 'PUT', body);
+  if (res.success) { closeModal(); loadTrips(); if(_currentTripId===id){ const t=body; t.id=id; const idx=_tripsCache.findIndex(x=>x.id===id); if(idx>=0)_tripsCache[idx]={..._tripsCache[idx],...body}; } toast('行程已更新'); }
+  else toast(res.error||'更新失敗','err');
+}
+
+async function deleteTrip(id) {
+  if (!confirm('確認刪除此行程？（含所有清單與時程）')) return;
+  const res = await api(`/api/travel/trips/${id}`, 'DELETE');
+  if (res.success) { toast('行程已刪除'); loadTrips(); }
+  else toast(res.error||'刪除失敗','err');
+}
+
+// ── Memories ──
+async function loadMemories() {
+  const [res, tripsRes] = await Promise.all([api('/api/travel/memories'), api('/api/travel/trips')]);
+  const memories = res.data || [];
+  const trips = tripsRes.data || [];
+  const container = $('memories-grid');
+  if (!container) return;
+  container.innerHTML = memories.length ? memories.map(m => {
+    const tags = m.tags ? m.tags.split(',').filter(Boolean) : [];
+    return `<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+        <div>
+          <div style="font-size:17px;font-weight:700;">${_escHtml(m.title)}</div>
+          ${m.date?`<div style="font-size:13px;color:var(--muted);margin-top:2px;">${m.date}${m.trip_name?' · '+_escHtml(m.trip_name):''}</div>`:''}
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0;">
+          <button onclick="showEditMemoryModal(${m.id})" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);">✏️</button>
+          <button onclick="deleteMemory(${m.id})" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);">🗑</button>
+        </div>
+      </div>
+      ${m.content?`<div style="font-size:14px;color:var(--text);line-height:1.6;white-space:pre-wrap;">${_escHtml(m.content)}</div>`:''}
+      ${tags.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;">${tags.map(t=>`<span style="background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:2px 10px;font-size:12px;color:var(--muted);">#${_escHtml(t.trim())}</span>`).join('')}</div>`:''}
+    </div>`;
+  }).join('') : '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:40px;">尚無回憶記錄，點擊右上角新增</div>';
+}
+
+function _tripOptions(trips, selectedId) {
+  return `<option value="">-- 不關聯行程 --</option>` +
+    trips.map(t=>`<option value="${t.id}" ${t.id===selectedId?'selected':''}>${_escHtml(t.name)}</option>`).join('');
+}
+
+function showAddMemoryModal() {
+  api('/api/travel/trips').then(r => {
+    const trips = r.data||[];
+    showModal(`<div style="padding:4px;">
+      <h3 style="font-size:18px;font-weight:700;margin-bottom:18px;">新增回憶</h3>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">標題 *</label><input id="mem-title" type="text" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="這趟旅行的標題"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">日期</label><input id="mem-date" type="date" class="form-input" style="width:100%;box-sizing:border-box;"></div>
+          <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">關聯行程</label><select id="mem-trip" class="form-input" style="width:100%;box-sizing:border-box;">${_tripOptions(trips,null)}</select></div>
+        </div>
+        <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">內容</label><textarea id="mem-content" class="form-input" style="width:100%;box-sizing:border-box;height:100px;resize:vertical;" placeholder="寫下你的回憶..."></textarea></div>
+        <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">標籤（逗號分隔）</label><input id="mem-tags" type="text" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="例：美食,景點,夜市"></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end;">
+        <button class="btn btn-outline" onclick="closeModal()">取消</button>
+        <button class="btn btn-primary" onclick="submitAddMemory()">新增</button>
+      </div>
+    </div>`);
+  });
+}
+
+async function submitAddMemory() {
+  const title = $('mem-title')?.value?.trim();
+  if (!title) { toast('請填寫標題','err'); return; }
+  const body = { title, date:$('mem-date')?.value||null, trip_id:$('mem-trip')?.value||null, content:$('mem-content')?.value?.trim(), tags:$('mem-tags')?.value?.trim() };
+  const res = await api('/api/travel/memories', 'POST', body);
+  if (res.success) { closeModal(); loadMemories(); toast('回憶已新增'); }
+  else toast(res.error||'新增失敗','err');
+}
+
+function showEditMemoryModal(id) {
+  api('/api/travel/memories').then(r => {
+    const m = (r.data||[]).find(x=>x.id===id);
+    if (!m) return;
+    api('/api/travel/trips').then(tr => {
+      const trips = tr.data||[];
+      showModal(`<div style="padding:4px;">
+        <h3 style="font-size:18px;font-weight:700;margin-bottom:18px;">編輯回憶</h3>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">標題 *</label><input id="emem-title" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(m.title)}"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">日期</label><input id="emem-date" type="date" class="form-input" style="width:100%;box-sizing:border-box;" value="${m.date||''}"></div>
+            <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">關聯行程</label><select id="emem-trip" class="form-input" style="width:100%;box-sizing:border-box;">${_tripOptions(trips,m.trip_id)}</select></div>
+          </div>
+          <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">內容</label><textarea id="emem-content" class="form-input" style="width:100%;box-sizing:border-box;height:100px;resize:vertical;">${_escHtml(m.content||'')}</textarea></div>
+          <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">標籤（逗號分隔）</label><input id="emem-tags" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(m.tags||'')}"></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end;">
+          <button class="btn btn-outline" onclick="closeModal()">取消</button>
+          <button class="btn btn-primary" onclick="submitEditMemory(${id})">儲存</button>
+        </div>
+      </div>`);
+    });
+  });
+}
+
+async function submitEditMemory(id) {
+  const title = $('emem-title')?.value?.trim();
+  if (!title) { toast('請填寫標題','err'); return; }
+  const body = { title, date:$('emem-date')?.value||null, trip_id:$('emem-trip')?.value||null, content:$('emem-content')?.value?.trim(), tags:$('emem-tags')?.value?.trim() };
+  const res = await api(`/api/travel/memories/${id}`, 'PUT', body);
+  if (res.success) { closeModal(); loadMemories(); toast('回憶已更新'); }
+  else toast(res.error||'更新失敗','err');
+}
+
+async function deleteMemory(id) {
+  if (!confirm('確認刪除此回憶？')) return;
+  const res = await api(`/api/travel/memories/${id}`, 'DELETE');
+  if (res.success) { toast('已刪除'); loadMemories(); }
+  else toast(res.error||'刪除失敗','err');
 }
 
 function _escHtml(s) {
