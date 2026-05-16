@@ -12,7 +12,12 @@
     "pm2:logs": "pm2 logs life-manager",
     "seed": "node scripts/seed_geojson.js"
   },
-  "keywords": ["life-manager", "personal", "productivity", "sqlite"],
+  "keywords": [
+    "life-manager",
+    "personal",
+    "productivity",
+    "sqlite"
+  ],
   "author": "",
   "license": "ISC",
   "engines": {
@@ -20,12 +25,13 @@
   },
   "dependencies": {
     "axios": "^1.7.2",
-    "sql.js": "^1.11.0",
+    "compression": "^1.8.1",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "node-cron": "^3.0.3",
     "openai": "^4.52.0",
-    "socket.io": "^4.7.5"
+    "socket.io": "^4.7.5",
+    "sql.js": "^1.11.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.4"
