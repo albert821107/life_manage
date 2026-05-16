@@ -34,9 +34,26 @@ const PORT       = process.env.PORT || 3100;
 // ==========================================
 // Middleware
 // ==========================================
+app.use(require('compression')());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, '../public')));
+
+// 前端設定（由 .env 控制）
+app.get('/api/config', (req, res) => {
+  res.json({
+    enableAdvanced:   process.env.ENABLE_ADVANCED   === 'true',
+    enableReloadBtn:  process.env.ENABLE_RELOAD_BTN === 'true',
+  });
+});
+
+app.post('/api/admin/reload', (req, res) => {
+  if (process.env.ENABLE_RELOAD_BTN !== 'true') return res.json({ success: false, error: 'Not enabled' });
+  res.json({ success: true });
+  setTimeout(() => require('child_process').exec('pm2 reload all', err => {
+    if (err) console.error('PM2 reload failed:', err.message);
+  }), 300);
+});
 
 // ==========================================
 // 非同步啟動（等待 DB 初始化完成後掛載路由）

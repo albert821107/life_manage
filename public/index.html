@@ -272,6 +272,7 @@
     </div>
     <div id="nav-advanced" style="display:none;">
       <div class="nav-group-label">進階功能</div>
+      <div class="nav-item" data-sec="work"      onclick="nav('work')">      <span class="ico">💼</span><span>工作</span></div>
       <div class="nav-item" data-sec="analysis"  onclick="nav('analysis')">  <span class="ico">🔍</span><span>分析</span></div>
       <div class="nav-item" data-sec="investpro" onclick="nav('investpro')"> <span class="ico">💹</span><span>投資</span></div>
       <div class="nav-item" data-sec="trading"   onclick="nav('trading')">   <span class="ico">🎯</span><span>操盤</span></div>
@@ -790,6 +791,15 @@
       </div>
     </div>
 
+    <!-- ════ WORK ════ -->
+    <div class="section" id="section-work">
+      <div style="text-align:center;padding:80px 0;color:var(--muted);">
+        <div style="font-size:56px;margin-bottom:16px;">💼</div>
+        <div style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text);">工作管理</div>
+        <div style="font-size:14px;">開發中，敬請期待</div>
+      </div>
+    </div>
+
     <!-- ════ TRADING ════ -->
     <div class="section" id="section-trading">
             <div style="text-align:center;padding:80px 0;color:var(--muted);">
@@ -867,6 +877,7 @@ const PAGE_META = {
   ai:         ['🤖 AI 助理','智能生活分析'],
   line:       ['📣 通知管理','LINE & Telegram 通知'],
   travel:     ['✈️ 旅遊足跡','點擊國家展開地圖'],
+  work:       ['💼 工作','工作管理（開發中）'],
   analysis:   ['🔍 分析','進階分析（開發中）'],
   investpro:  ['💹 投資進階','投資進階（開發中）'],
   trading:    ['🎯 操盤','操盤記錄（開發中）'],
@@ -2910,38 +2921,90 @@ const _ZH_NAMES = {
 
   thailand: {
     'Bangkok':'曼谷','Nonthaburi':'暖武里','Pathum Thani':'巴吞他尼',
-    'Samut Prakan':'北欖坡','Nakhon Pathom':'那空巴色','Samut Sakhon':'薩穆特沙空',
-    'Samut Songkhram':'薩穆特頌堪','Ratchaburi':'拉差武里','Kanchanaburi':'北碧',
-    'Suphan Buri':'素攀武里','Ang Thong':'萬公','Sing Buri':'信武里',
-    'Lop Buri':'華富里','Saraburi':'沙拉武里','Nakhon Nayok':'那空乃',
-    'Phra Nakhon Si Ayutthaya':'大城','Chai Nat':'猜納','Chachoengsao':'北柳',
-    'Chon Buri':'春武里','Rayong':'羅勇','Chanthaburi':'尖竹汶','Trat':'達叻',
-    'Sa Kaeo':'沙繳','Nakhon Ratchasima':'呵叻','Buri Ram':'武里南',
-    'Surin':'素輦','Si Sa Ket':'四色菊','Ubon Ratchathani':'烏汶府',
-    'Yasothon':'雅沙他寧','Roi Et':'黎逸','Maha Sarakham':'瑪哈沙拉坎',
-    'Khon Kaen':'孔敬','Udon Thani':'烏隆','Nong Khai':'廊開',
-    'Nong Bua Lam Phu':'農布瓦蘭蓬','Loei':'黎府','Sakon Nakhon':'色軍',
-    'Nakhon Phanom':'那空帕農','Mukdahan':'莫達漢','Kalasin':'加拉信',
-    'Amnat Charoen':'阿納乍能','Bueng Kan':'彭干','Chiang Rai':'清萊',
-    'Chiang Mai':'清邁','Phayao':'帕堯','Nan':'南府','Phrae':'拍府',
-    'Lampang':'南邦','Lamphun':'南奔','Uttaradit':'烏他拉迪',
-    'Mae Hong Son':'湄宏順','Chaiyaphum':'猜亞蓬','Prachin Buri':'巴真武里',
-    'Sukhothai':'素可泰','Phitsanulok':'彭世洛','Phichit':'彼差汶',
-    'Phetchabun':'碧差汶','Tak':'達府','Kamphaeng Phet':'甘烹碧',
-    'Nakhon Sawan':'那空沙旺','Uthai Thani':'烏泰他尼府','Phetchaburi':'碧武里',
-    'Prachuap Khiri Khan':'巴蜀','Chumphon':'春蓬','Ranong':'拉農',
-    'Surat Thani':'素叻他尼','Phang Nga':'攀牙','Phuket':'普吉',
-    'Krabi':'甲米','Nakhon Si Thammarat':'那空是貪瑪叻','Trang':'董里',
-    'Phatthalung':'博他倫','Songkhla':'宋卡','Satun':'沙敦',
-    'Pattani':'北大年','Yala':'也拉','Narathiwat':'陶公'
+    'Samut Prakan':'北欖府','Nakhon Pathom':'佛統府','Samut Sakhon':'薩穆特沙空',
+    'Samut Songkhram':'薩穆特頌堪府','Ratchaburi':'拉差武里府','Kanchanaburi':'北碧府',
+    'Suphan Buri':'素攀武里府','Ang Thong':'昂通府','Sing Buri':'信武里府',
+    'Lop Buri':'華富里府','Saraburi':'沙拉武里府','Nakhon Nayok':'那空乃府',
+    'Phra Nakhon Si Ayutthaya':'大城府','Chai Nat':'猜納府','Chachoengsao':'北柳府',
+    'Chon Buri':'春武里府','Rayong':'羅勇府','Chanthaburi':'尖竹汶府','Trat':'達叻府',
+    'Sa Kaeo':'沙繳府','Nakhon Ratchasima':'呵叻府','Buri Ram':'武里南府',
+    'Surin':'素輦府','Si Sa Ket':'四色菊府','Ubon Ratchathani':'烏汶府',
+    'Yasothon':'雅沙他寧府','Roi Et':'黎逸府','Maha Sarakham':'瑪哈沙拉坎府',
+    'Khon Kaen':'孔敬府','Udon Thani':'烏隆府','Nong Khai':'廊開府',
+    'Nong Bua Lam Phu':'農布瓦蘭蓬府','Loei':'黎府','Sakon Nakhon':'色軍府',
+    'Nakhon Phanom':'那空帕農府','Mukdahan':'莫達漢府','Kalasin':'加拉信府',
+    'Amnat Charoen':'阿納乍能府','Bueng Kan':'汶干府','Chiang Rai':'清萊府',
+    'Chiang Mai':'清邁府','Phayao':'帕堯府','Nan':'南府','Phrae':'拍府',
+    'Lampang':'南邦府','Lamphun':'南奔府','Uttaradit':'烏他拉迪府',
+    'Mae Hong Son':'湄宏順府','Chaiyaphum':'猜亞蓬府','Prachin Buri':'巴真武里府',
+    'Sukhothai':'素可泰府','Phitsanulok':'彭世洛府','Phichit':'彼差汶府',
+    'Phetchabun':'碧差汶府','Tak':'達府','Kamphaeng Phet':'甘烹碧府',
+    'Nakhon Sawan':'那空沙旺府','Uthai Thani':'烏泰他尼府','Phetchaburi':'碧武里府',
+    'Prachuap Khiri Khan':'巴蜀府','Chumphon':'春蓬府','Ranong':'拉農府',
+    'Surat Thani':'素叻他尼府','Phang Nga':'攀牙府','Phuket':'普吉府',
+    'Krabi':'甲米府','Nakhon Si Thammarat':'洛坤府','Trang':'董里府',
+    'Phatthalung':'博他倫府','Songkhla':'宋卡府','Satun':'沙敦府',
+    'Pattani':'北大年府','Yala':'也拉府','Narathiwat':'陶公府'
+  },
+
+  korea: {
+    'Seoul':'首爾特別市','Busan':'釜山廣域市','Incheon':'仁川廣域市',
+    'Daegu':'大邱廣域市','Daejeon':'大田廣域市','Gwangju':'光州廣域市',
+    'Ulsan':'蔚山廣域市','Sejong':'世宗特別自治市',
+    'Gyeonggi':'京畿道','Gangwon':'江原道',
+    'North Chungcheong':'忠清北道','South Chungcheong':'忠清南道',
+    'North Jeolla':'全羅北道','South Jeolla':'全羅南道',
+    'North Gyeongsang':'慶尚北道','South Gyeongsang':'慶尚南道',
+    'Jeju':'濟州特別自治道'
+  },
+
+  vietnam: {
+    'Hanoi':'河內市','Ho Chi Minh City':'胡志明市','Da Nang':'峴港市',
+    'Hai Phong':'海防市','Can Tho':'芹苴市','An Giang':'安江省',
+    'Ba Ria - Vung Tau':'頭頓省','Bac Giang':'北江省','Bac Kan':'北𣴓省',
+    'Bac Lieu':'薄遼省','Bac Ninh':'北寧省','Ben Tre':'檳知省',
+    'Binh Dinh':'平定省','Binh Duong':'平陽省','Binh Phuoc':'平福省',
+    'Binh Thuan':'平順省','Ca Mau':'金甌省','Cao Bang':'高平省',
+    'Dak Lak':'得樂省','Dak Nong':'得農省','Dien Bien':'奠邊省',
+    'Dong Nai':'同奈省','Dong Thap':'同塔省','Gia Lai':'嘉萊省',
+    'Ha Giang':'河江省','Ha Nam':'河南省','Ha Tinh':'河靜省',
+    'Hai Duong':'海陽省','Hau Giang':'後江省','Hoa Binh':'和平省',
+    'Hung Yen':'興安省','Khanh Hoa':'慶和省','Kien Giang':'堅江省',
+    'Kon Tum':'崑嵩省','Lai Chau':'萊州省','Lam Dong':'林同省',
+    'Lang Son':'諒山省','Lao Cai':'老街省','Long An':'龍安省',
+    'Nam Dinh':'南定省','Nghe An':'乂安省','Ninh Binh':'寧平省',
+    'Ninh Thuan':'寧順省','Phu Tho':'富壽省','Phu Yen':'富安省',
+    'Quang Binh':'廣平省','Quang Nam':'廣南省','Quang Ngai':'廣義省',
+    'Quang Ninh':'廣寧省','Quang Tri':'廣治省','Soc Trang':'朔莊省',
+    'Son La':'山羅省','Tay Ninh':'西寧省','Thai Binh':'太平省',
+    'Thai Nguyen':'太原省','Thanh Hoa':'清化省','Thua Thien Hue':'承天順化省',
+    'Tien Giang':'前江省','Tra Vinh':'茶榮省','Tuyen Quang':'宣光省',
+    'Vinh Long':'永隆省','Vinh Phuc':'永福省','Yen Bai':'安沛省'
   },
 
 };
 
 const TRAVEL_COUNTRIES = {
-  japan:   { name: '日本',   flag: '/flags/jp.svg', getRegionName: p => p.nam_ja||p.nam||p.name||'未知', getRegionNameZh: p => { const b=String(p.nam||'').replace(/ (?:Ken|Fu|To|Do)$/i,'').trim(); return _ZH_NAMES.japan[b]||p.nam_ja||p.nam||'未知'; }, getRegionId: p => String(p.nam||p.name||'?'), center:[37.0,136.0], zoom:5, totalRegions:47 },
-  thailand:{ name: '泰國',   flag: '/flags/th.svg', getRegionName: p => p.name||'未知', getRegionNameZh: p => _ZH_NAMES.thailand[p.name]||p.name||'未知', getRegionId: p => String(p.provinceCode||p.name||'?'), center:[13.0,101.0], zoom:6, totalRegions:77 },
-  taiwan:  { name: '台灣',   flag: '/flags/tw.svg', getRegionName: p => p.name||'未知', getRegionNameZh: p => p.name_traditional_chinese||p.name||'未知', getRegionId: p => String(p.name||'?'), center:[23.5,121.0], zoom:7, totalRegions:22 }
+  japan:   { name: '日本',   flag: '/flags/jp.svg',
+    getRegionName:   p => p.nam_ja||p.nam||p.name||'未知',
+    getRegionNameZh: p => { const b=String(p.nam||'').replace(/ (?:Ken|Fu|To|Do)$/i,'').trim(); return _ZH_NAMES.japan[b]||p.nam_ja||p.nam||'未知'; },
+    getRegionId: p => String(p.nam||p.name||'?'), center:[37.0,136.0], zoom:5, totalRegions:47 },
+  thailand:{ name: '泰國',   flag: '/flags/th.svg',
+    getRegionName:   p => _ZH_NAMES.thailand[p.name]||p.name||'未知',
+    getRegionNameZh: p => _ZH_NAMES.thailand[p.name]||p.name||'未知',
+    getRegionId: p => String(p.provinceCode||p.name||'?'), center:[13.0,101.0], zoom:6, totalRegions:77 },
+  taiwan:  { name: '台灣',   flag: '/flags/tw.svg',
+    getRegionName:   p => p.name||'未知',
+    getRegionNameZh: p => p.name||'未知',
+    getRegionId: p => String(p.name||'?'), center:[23.5,121.0], zoom:7, totalRegions:22 },
+  korea:   { name: '韓國',   flag: '/flags/kr.svg',
+    getRegionName:   p => { const n=p.CTP_ENG_NM||p.NAME_1||p.name||''; return _ZH_NAMES.korea[n]||n||'未知'; },
+    getRegionNameZh: p => { const n=p.CTP_ENG_NM||p.NAME_1||p.name||''; return _ZH_NAMES.korea[n]||n||'未知'; },
+    getRegionId: p => String(p.CTP_KOR_NM||p.CTP_ENG_NM||p.NAME_1||p.name||'?'), center:[36.5,127.5], zoom:7, totalRegions:17 },
+  vietnam: { name: '越南',   flag: '/flags/vn.svg',
+    getRegionName:   p => { const n=p.Name||p.NAME_1||p.name||''; return _ZH_NAMES.vietnam[n]||n||'未知'; },
+    getRegionNameZh: p => { const n=p.Name||p.NAME_1||p.name||''; return _ZH_NAMES.vietnam[n]||n||'未知'; },
+    getRegionId: p => String(p.GID_1||p.Name||p.NAME_1||p.name||'?'), center:[16.0,106.0], zoom:6, totalRegions:63 },
 };
 
 let _travelMap = null;
@@ -3492,26 +3555,28 @@ async function loadWeekly() {
     </td></tr>`;
     return;
   }
+  const TD = 'padding:10px 12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
   tbody.innerHTML = _weeklyCache.map(w => {
     const isBig   = w.week_type === '大';
     const isPast  = w.week_date < today;
     const hasData = w.location || w.transportation || w.tickets || w.accommodation;
-    const rowBg   = isPast ? 'opacity:.55;' : '';
+    const rowOpacity = isPast ? 'opacity:.5;' : '';
+    const rowHighlight = hasData && !isPast ? 'background:rgba(99,102,241,.04);' : '';
     const typeBg  = isBig ? 'background:#dbeafe;color:#1e40af;' : 'background:#f3f4f6;color:#374151;';
-    return `<tr style="${rowBg}border-bottom:1px solid var(--border);transition:background .1s;${hasData?'background:rgba(99,102,241,.04);':''}"
-      onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='${hasData?'rgba(99,102,241,.04)':''}'">
-      <td style="padding:9px 12px;text-align:center;">
+    return `<tr style="${rowOpacity}${rowHighlight}border-bottom:1px solid var(--border);transition:background .1s;"
+      onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='${hasData&&!isPast?'rgba(99,102,241,.04)':''}'">
+      <td style="${TD}text-align:center;">
         <span style="display:inline-block;${typeBg}border-radius:6px;padding:2px 8px;font-size:13px;font-weight:700;">${w.week_type}</span>
       </td>
-      <td style="padding:9px 12px;font-size:14px;${isBig?'font-weight:600;':''}">${w.week_date||'--'}</td>
-      <td style="padding:9px 12px;font-size:14px;color:var(--muted);">${w.return_date||'--'}</td>
-      <td style="padding:9px 12px;font-size:14px;">${_escHtml(w.location||'')}</td>
-      <td style="padding:9px 12px;font-size:13px;color:var(--muted);">${_escHtml(w.transportation||'')}</td>
-      <td style="padding:9px 12px;font-size:13px;color:var(--muted);">${_escHtml(w.tickets||'')}</td>
-      <td style="padding:9px 12px;font-size:13px;color:var(--muted);">${_escHtml(w.accommodation||'')}</td>
-      <td style="padding:9px 12px;">
-        <button onclick="showEditWeeklyModal(${w.id})" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);" title="編輯">✏️</button>
-        <button onclick="deleteWeekly(${w.id})" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);" title="刪除">×</button>
+      <td style="${TD}font-size:14px;${isBig?'font-weight:600;':''}">${w.week_date||'--'}</td>
+      <td style="${TD}font-size:14px;color:var(--muted);">${w.return_date||'--'}</td>
+      <td style="${TD}font-size:14px;" title="${_escHtml(w.location||'')}">${_escHtml(w.location||'')}</td>
+      <td style="${TD}font-size:13px;color:var(--muted);" title="${_escHtml(w.transportation||'')}">${_escHtml(w.transportation||'')}</td>
+      <td style="${TD}font-size:13px;color:var(--muted);" title="${_escHtml(w.tickets||'')}">${_escHtml(w.tickets||'')}</td>
+      <td style="${TD}font-size:13px;color:var(--muted);" title="${_escHtml(w.accommodation||'')}">${_escHtml(w.accommodation||'')}</td>
+      <td style="padding:10px 6px;text-align:center;white-space:nowrap;">
+        <button onclick="showEditWeeklyModal(${w.id})" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--muted);padding:2px;" title="編輯">✏️</button>
+        <button onclick="deleteWeekly(${w.id})" style="background:none;border:none;cursor:pointer;font-size:17px;color:var(--muted);padding:2px;" title="刪除">×</button>
       </td>
     </tr>`;
   }).join('');

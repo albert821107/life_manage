@@ -144,7 +144,7 @@ Memory 檔案存於 `.claude/memory/`（git tracked），透過 git push/pull �
 ```json
 {
   "model": "claude-sonnet-4-6",
-  "autoMemoryDirectory": "/Users/<username>/Project/life_manage/.claude/memory"
+  "autoMemoryDirectory": "/Users/<username>/Desktop/project/life_manager/.claude/memory"
 }
 ```
 
