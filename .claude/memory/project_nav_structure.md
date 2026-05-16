@@ -24,10 +24,13 @@ metadata:
 | 工作 work | `switchWorkTab(tab)` | `work-tab-{tab}` / `work-sub-{tab}` |
 
 ## 資產子頁籤清單
-assets（資產總覽）/ tw（台股）/ us（美股）/ crypto（加密貨幣）/ forex（存款）/ yearlypnl（年度損益）
+assets（資產總覽）/ tw（台股）/ us（美股）/ crypto（加密貨幣）/ forex（存款）
 
 ## 旅遊子頁籤清單
 weekly（總覽）/ trips（行程）/ memories（回憶）/ footprint（足跡）
+
+## 投資子頁籤清單（investpro，進階功能）
+yearlypnl（年度損益）
 
 ## 工作子頁籤清單
 jira（Jira 工單，已完成基本架構）

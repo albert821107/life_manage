@@ -420,7 +420,6 @@
         <div class="inv-tab"        id="inv-tab-us"     onclick="switchInvTab('us')"><img class="tab-flag" src="/flags/us.svg" alt="US"> 美股</div>
         <div class="inv-tab"        id="inv-tab-crypto" onclick="switchInvTab('crypto')">💎 加密貨幣</div>
         <div class="inv-tab"        id="inv-tab-forex"  onclick="switchInvTab('forex')">💰 存款</div>
-        <div class="inv-tab"        id="inv-tab-yearlypnl" onclick="switchInvTab('yearlypnl')">📊 年度損益</div>
       </div>
 
       <!-- ── 資產總覽 ── -->
@@ -551,34 +550,6 @@
         </div>
       </div>
 
-      <!-- 年度損益 sub -->
-      <div class="inv-sub" id="inv-sub-yearlypnl">
-        <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
-          <button class="btn btn-primary btn-sm" onclick="showAddYearlyPnlModal()">&#65291; 新增年度</button>
-        </div>
-        <div class="card" style="padding:0;overflow:hidden;">
-          <div style="overflow-x:auto;">
-            <table style="width:100%;border-collapse:collapse;">
-              <thead>
-                <tr style="background:var(--bg);border-bottom:2px solid var(--border);">
-                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">年份</th>
-                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">已實現損益</th>
-                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">未實現損益</th>
-                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">股利/利息</th>
-                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">稅費</th>
-                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);font-weight:700;">淨損益</th>
-                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">備註</th>
-                  <th style="padding:10px 14px;width:80px;"></th>
-                </tr>
-              </thead>
-              <tbody id="yearlypnl-tbody">
-                <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:40px;">尚無年度損益記錄</td></tr>
-              </tbody>
-              <tfoot id="yearlypnl-tfoot"></tfoot>
-            </table>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- ════ INVEST (投資 - 開發中) ════ -->
@@ -879,11 +850,39 @@
     </div>
 
     <!-- ════ INVESTPRO ════ -->
+    <!-- ════ INVESTPRO ════ -->
     <div class="section" id="section-investpro">
-            <div style="text-align:center;padding:80px 0;color:var(--muted);">
-        <div style="font-size:56px;margin-bottom:16px;">💹</div>
-        <div style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text);">投資進階</div>
-        <div style="font-size:14px;">開發中，敬請期待</div>
+      <div class="inv-tabs" id="investpro-tabs">
+        <div class="inv-tab active" id="investpro-tab-yearlypnl" onclick="switchInvestproTab('yearlypnl')">📊 年度損益</div>
+      </div>
+
+      <!-- 年度損益 sub -->
+      <div id="investpro-sub-yearlypnl">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+          <button class="btn btn-primary btn-sm" onclick="showAddYearlyPnlModal()">&#65291; 新增年度</button>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;">
+              <thead>
+                <tr style="background:var(--bg);border-bottom:2px solid var(--border);">
+                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">年份</th>
+                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">已實現損益</th>
+                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">未實現損益</th>
+                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">股利/利息</th>
+                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">稅費</th>
+                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);font-weight:700;">淨損益</th>
+                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">備註</th>
+                  <th style="padding:10px 14px;width:80px;"></th>
+                </tr>
+              </thead>
+              <tbody id="yearlypnl-tbody">
+                <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:40px;">尚無年度損益記錄</td></tr>
+              </tbody>
+              <tfoot id="yearlypnl-tfoot"></tfoot>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1038,7 +1037,7 @@ const PAGE_META = {
   games:      ['🎮 遊戲','PS 成就獎盃與遊戲管理'],
   work:       ['💼 工作','Jira 工單管理'],
   analysis:   ['🔍 分析','進階分析（開發中）'],
-  investpro:  ['💹 投資進階','投資進階（開發中）'],
+  investpro:  ['💹 投資','年度損益與投資分析'],
   trading:    ['🎯 操盤','操盤記錄（開發中）'],
 };
 
@@ -1103,7 +1102,7 @@ $('fit-month').value  = state.fitMonth;
 // ════════════════════════════════════════════════
 // Navigation
 // ════════════════════════════════════════════════
-const LOADERS = { dashboard:loadDashboard, accounting:loadAccounting, tasks:loadTasks, fitness:loadFitness, investment:loadInvestment, invest:loadInvest, ai:loadAI, line:loadLine, travel:loadTravel, work:loadWork };
+const LOADERS = { dashboard:loadDashboard, accounting:loadAccounting, tasks:loadTasks, fitness:loadFitness, investment:loadInvestment, invest:loadInvest, ai:loadAI, line:loadLine, travel:loadTravel, work:loadWork, investpro:loadInvestpro };
 
 function nav(sec){
   state.sec = sec;
@@ -1129,7 +1128,7 @@ async function initNavSort(){
     res.order.forEach(sec => {
       const item = document.querySelector(`[data-sec="${sec}"]`);
       if(!item) return;
-      const isAdv = ['analysis','investpro','trading'].includes(sec);
+      const isAdv = ['analysis','investpro','trading','work'].includes(sec);
       if(isAdv && advEl) advEl.appendChild(item);
       else if(!isAdv && basicEl) basicEl.appendChild(item);
     });
@@ -1575,7 +1574,9 @@ function showAddFitness(){
 // ════════════════════════════════════════════════
 async function loadInvestment(){
   const saved = localStorage.getItem('invTab');
-  if(saved && saved !== _invTab){ switchInvTab(saved); return; }
+  const validTabs = ['assets','tw','us','crypto','forex'];
+  const tab = (saved && validTabs.includes(saved)) ? saved : 'assets';
+  if(tab !== _invTab){ switchInvTab(tab); return; }
   if(_invTab === 'assets') loadAssets();
   else if(_invTab === 'forex') loadForex();
   else loadMarket(_invTab);
@@ -1726,11 +1727,6 @@ function switchInvTab(tab){
     $('inv-header-assets').style.display = 'none';
     $('inv-header-market').style.display = 'none';
     loadForex();
-  } else if(tab === 'yearlypnl'){
-    $('inv-sub-yearlypnl').classList.add('active');
-    $('inv-header-assets').style.display = 'none';
-    $('inv-header-market').style.display = 'none';
-    loadYearlyPnl();
   } else {
     $('inv-sub-market').classList.add('active');
     $('inv-header-assets').style.display = 'none';
@@ -3974,6 +3970,27 @@ function _escHtml(s) {
 // 年度損益
 // ════════════════════════════════════════════════
 let _yearlyPnlCache = [];
+
+// ════════════════════════════════════════════════
+// INVESTPRO
+// ════════════════════════════════════════════════
+let _investproTab = 'yearlypnl';
+
+function loadInvestpro() {
+  switchInvestproTab(_investproTab);
+}
+
+function switchInvestproTab(tab) {
+  _investproTab = tab;
+  document.querySelectorAll('#investpro-tabs .inv-tab').forEach(el => el.classList.remove('active'));
+  ['yearlypnl'].forEach(t => {
+    const el  = $(`investpro-tab-${t}`);
+    const sub = $(`investpro-sub-${t}`);
+    if (el)  el.classList.toggle('active', t === tab);
+    if (sub) sub.style.display = t === tab ? '' : 'none';
+  });
+  if (tab === 'yearlypnl') loadYearlyPnl();
+}
 
 async function loadYearlyPnl() {
   const res = await api('/api/investment/yearly-pnl');
