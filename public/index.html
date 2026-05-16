@@ -531,10 +531,10 @@
                   <th class="th-check"><input type="checkbox" id="acc-chk-all" onchange="toggleAccSelectAll(this)"></th>
                   <th class="mkt-th-sort" onclick="sortDepTable('unit')">帳戶<span class="dsort-ind" id="dsi-unit">⇅</span></th>
                   <th class="mkt-th-sort" style="width:72px;" onclick="sortDepTable('currency')">幣種<span class="dsort-ind" id="dsi-currency">⇅</span></th>
-                  <th class="mkt-th-sort" style="text-align:right;" onclick="sortDepTable('_amount')">金額<span class="dsort-ind" id="dsi-_amount">⇅</span></th>
-                  <th class="mkt-th-sort" style="text-align:right;" onclick="sortDepTable('_rate')">匯率<span class="dsort-ind" id="dsi-_rate">⇅</span></th>
-                  <th class="mkt-th-sort" style="text-align:right;" onclick="sortDepTable('_twd')">換算台幣<span class="dsort-ind" id="dsi-_twd">⇅</span></th>
-                  <th class="mkt-th-sort" style="text-align:right;" onclick="sortDepTable('_pct')">佔比<span class="dsort-ind" id="dsi-_pct">⇅</span></th>
+                  <th class="mkt-th-sort" onclick="sortDepTable('_amount')">金額<span class="dsort-ind" id="dsi-_amount">⇅</span></th>
+                  <th class="mkt-th-sort" onclick="sortDepTable('_rate')">匯率<span class="dsort-ind" id="dsi-_rate">⇅</span></th>
+                  <th class="mkt-th-sort" onclick="sortDepTable('_twd')">換算台幣<span class="dsort-ind" id="dsi-_twd">⇅</span></th>
+                  <th class="mkt-th-sort" onclick="sortDepTable('_pct')">佔比<span class="dsort-ind" id="dsi-_pct">⇅</span></th>
                   <th class="mkt-th-sort" onclick="sortDepTable('category')">類別<span class="dsort-ind" id="dsi-category">⇅</span></th>
                   <th style="width:80px;"></th>
                 </tr>
@@ -2008,10 +2008,10 @@ function _depRenderRows(rows, cashTWD, catBadge){
       <td class="td-check"><input type="checkbox" class="acc-row-chk" data-id="${a.id}" onchange="onAccRowCheck()"></td>
       <td><strong>${a.unit}</strong></td>
       <td><span class="badge b-pending">${_CUR_DISPLAY[a.currency]||a.currency}</span></td>
-      <td style="text-align:right;">${Number(a.amount).toLocaleString('zh-TW',{minimumFractionDigits:0,maximumFractionDigits:4})}</td>
-      <td style="text-align:right;color:var(--muted);font-size:13px;">${a.rate}</td>
-      <td style="text-align:right;font-weight:600;">${a.twdAmount!==null?fmtMoney(a.twdAmount):'<span style="color:var(--warning);">未設匯率</span>'}</td>
-      <td style="text-align:right;color:var(--primary);font-size:13px;">${a.percentage}</td>
+      <td>${Number(a.amount).toLocaleString('zh-TW',{minimumFractionDigits:0,maximumFractionDigits:4})}</td>
+      <td style="color:var(--muted);font-size:13px;">${a.rate}</td>
+      <td style="font-weight:600;">${a.twdAmount!==null?fmtMoney(a.twdAmount):'<span style="color:var(--warning);">未設匯率</span>'}</td>
+      <td style="color:var(--primary);font-size:13px;">${a.percentage}</td>
       <td>${catBadge(a.category)}</td>
       <td style="white-space:nowrap;">
         <span class="acc-drag-handle" title="拖曳排序" style="cursor:grab;padding:0 6px;color:var(--muted);">⠿</span>
@@ -2022,8 +2022,8 @@ function _depRenderRows(rows, cashTWD, catBadge){
   $('ast-tfoot').innerHTML = rows.length ? `
     <tr class="assets-tbl-row-total">
       <td></td><td colspan="4"><strong>合計</strong></td>
-      <td style="text-align:right;"><strong>${fmtMoney(cashTWD)}</strong></td>
-      <td style="text-align:right;font-weight:700;">100%</td>
+      <td><strong>${fmtMoney(cashTWD)}</strong></td>
+      <td style="font-weight:700;">100%</td>
       <td colspan="2"></td>
     </tr>` : '';
 }
@@ -2249,10 +2249,15 @@ function _accountForm(a = {}){
         <label>\u5e63\u7a2e *</label>
         <select id="acc-currency" class="form-control">
           ${[
-            {c:'TWD',s:'NT$'},{c:'USD',s:'$'},{c:'JPY',s:'¥'},{c:'EUR',s:'€'},{c:'GBP',s:'£'},
-            {c:'HKD',s:'HK$'},{c:'CNY',s:'CN¥'},{c:'AUD',s:'A$'},{c:'CAD',s:'C$'},{c:'SGD',s:'S$'},
-            {c:'CHF',s:'Fr'},{c:'KRW',s:'₩'},{c:'THB',s:'฿'},
-            {c:'USDT',s:'💵 USDT'},{c:'USDC',s:'💵 USDC'}
+            {c:'TWD', s:'🇹🇼 NT$ TWD'},{c:'USD', s:'🇺🇸 $ USD'},{c:'JPY', s:'🇯🇵 ¥ JPY'},
+            {c:'EUR', s:'🇪🇺 € EUR'},{c:'GBP', s:'🇬🇧 £ GBP'},{c:'HKD', s:'🇭🇰 HK$ HKD'},
+            {c:'CNY', s:'🇨🇳 ¥ CNY'},{c:'AUD', s:'🇦🇺 A$ AUD'},{c:'CAD', s:'🇨🇦 C$ CAD'},
+            {c:'SGD', s:'🇸🇬 S$ SGD'},{c:'CHF', s:'🇨🇭 Fr CHF'},{c:'KRW', s:'🇰🇷 ₩ KRW'},
+            {c:'THB', s:'🇹🇭 ฿ THB'},{c:'VND', s:'🇻🇳 ₫ VND'},{c:'NZD', s:'🇳🇿 NZ$ NZD'},
+            {c:'SEK', s:'🇸🇪 kr SEK'},{c:'DKK', s:'🇩🇰 kr DKK'},{c:'NOK', s:'🇳🇴 kr NOK'},
+            {c:'MYR', s:'🇲🇾 RM MYR'},{c:'IDR', s:'🇮🇩 Rp IDR'},{c:'PHP', s:'🇵🇭 ₱ PHP'},
+            {c:'ZAR', s:'🇿🇦 R ZAR'},{c:'SAR', s:'🇸🇦 SR SAR'},
+            {c:'USDT',s:'🟢 USDT'},{c:'USDC',s:'🔵 USDC'}
           ].map(({c,s})=>`<option value="${c}" ${a.currency===c?'selected':''}>${s}</option>`).join('')}
           <option value="__custom__">+ \u81ea\u8a02</option>
         </select>
@@ -2314,8 +2319,18 @@ const _CUR_DISPLAY = {
   CHF:  '<img src="/flags/ch.png" style="width:20px;height:14px;border-radius:2px;vertical-align:middle;object-fit:cover;margin-right:5px;">CHF',
   KRW:  '<img src="/flags/kr.svg" style="width:20px;height:14px;border-radius:2px;vertical-align:middle;object-fit:cover;margin-right:5px;">KRW',
   THB:  '<img src="/flags/th.svg" style="width:20px;height:14px;border-radius:2px;vertical-align:middle;object-fit:cover;margin-right:5px;">THB',
-  USDT: '<span style="display:inline-flex;width:20px;height:14px;border-radius:2px;background:#26a17b;color:#fff;font-size:8px;font-weight:700;align-items:center;justify-content:center;vertical-align:middle;margin-right:5px;">\u20ae</span>USDT',
-  USDC: '<span style="display:inline-flex;width:20px;height:14px;border-radius:2px;background:#2775ca;color:#fff;font-size:8px;font-weight:700;align-items:center;justify-content:center;vertical-align:middle;margin-right:5px;">$</span>USDC',
+  VND:  '<img src="/flags/vn.svg" style="width:20px;height:14px;border-radius:2px;vertical-align:middle;object-fit:cover;margin-right:5px;">VND',
+  NZD:  '<span style="font-size:15px;vertical-align:middle;margin-right:4px;line-height:1;">🇳🇿</span>NZD',
+  SEK:  '<span style="font-size:15px;vertical-align:middle;margin-right:4px;line-height:1;">🇸🇪</span>SEK',
+  DKK:  '<span style="font-size:15px;vertical-align:middle;margin-right:4px;line-height:1;">🇩🇰</span>DKK',
+  NOK:  '<span style="font-size:15px;vertical-align:middle;margin-right:4px;line-height:1;">🇳🇴</span>NOK',
+  MYR:  '<span style="font-size:15px;vertical-align:middle;margin-right:4px;line-height:1;">🇲🇾</span>MYR',
+  IDR:  '<span style="font-size:15px;vertical-align:middle;margin-right:4px;line-height:1;">🇮🇩</span>IDR',
+  PHP:  '<span style="font-size:15px;vertical-align:middle;margin-right:4px;line-height:1;">🇵🇭</span>PHP',
+  ZAR:  '<span style="font-size:15px;vertical-align:middle;margin-right:4px;line-height:1;">🇿🇦</span>ZAR',
+  SAR:  '<span style="font-size:15px;vertical-align:middle;margin-right:4px;line-height:1;">🇸🇦</span>SAR',
+  USDT:  '<span style="display:inline-flex;width:20px;height:14px;border-radius:2px;background:#26a17b;color:#fff;font-size:8px;font-weight:700;align-items:center;justify-content:center;vertical-align:middle;margin-right:5px;">T</span>USDT',
+  USDC:  '<span style="display:inline-flex;width:20px;height:14px;border-radius:2px;background:#2775ca;color:#fff;font-size:8px;font-weight:700;align-items:center;justify-content:center;vertical-align:middle;margin-right:5px;">$</span>USDC',
 };
 const _INST_LIST = [
   '台灣銀行','合作金庫','土地銀行','兆豐銀行','台灣企銀',
