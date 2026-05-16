@@ -227,6 +227,32 @@
     .inv-tab:hover{color:var(--text);}
     .inv-tab.active{color:var(--primary);border-bottom-color:var(--primary);}
     .tab-flag{width:20px;height:15px;object-fit:cover;border-radius:2px;display:inline-block;vertical-align:middle;flex-shrink:0;}
+    .docs-layout{display:flex;}
+    @media(max-width:640px){.docs-layout{flex-direction:column;} #docs-sidebar{max-width:100%!important;min-width:unset!important;}}
+    #docs-dropzone.drag-over{border-color:var(--primary);background:var(--primary)14;}
+    .docs-file-item{padding:6px 8px;border-radius:6px;cursor:pointer;font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:4px;word-break:break-all;}
+    .docs-file-item:hover{background:var(--border);}
+    .docs-file-item.active{background:var(--primary)22;color:var(--primary);font-weight:600;}
+    /* Markdown rendered styles */
+    #docs-content-area h1{font-size:24px;font-weight:800;margin:0 0 16px;padding-bottom:8px;border-bottom:2px solid var(--border);}
+    #docs-content-area h2{font-size:20px;font-weight:700;margin:24px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+    #docs-content-area h3{font-size:17px;font-weight:700;margin:18px 0 8px;}
+    #docs-content-area h4,#docs-content-area h5,#docs-content-area h6{font-size:15px;font-weight:600;margin:14px 0 6px;}
+    #docs-content-area p{margin:8px 0;line-height:1.8;}
+    #docs-content-area ul,#docs-content-area ol{margin:8px 0 12px 22px;}
+    #docs-content-area li{margin:4px 0;line-height:1.7;}
+    #docs-content-area code{background:var(--bg2);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:13px;}
+    #docs-content-area pre{background:var(--bg2);border-radius:8px;padding:14px 16px;overflow-x:auto;margin:12px 0;}
+    #docs-content-area pre code{background:none;padding:0;font-size:13px;line-height:1.6;}
+    #docs-content-area blockquote{border-left:4px solid var(--primary);margin:12px 0;padding:8px 14px;background:var(--primary)0d;border-radius:0 6px 6px 0;color:var(--muted);}
+    #docs-content-area hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
+    #docs-content-area a{color:var(--primary);text-decoration:underline;}
+    #docs-content-area table{border-collapse:collapse;width:100%;margin:12px 0;}
+    #docs-content-area th,#docs-content-area td{border:1px solid var(--border);padding:8px 12px;text-align:left;}
+    #docs-content-area th{background:var(--bg2);font-weight:700;}
+    #docs-content-area strong{font-weight:700;}
+    #docs-content-area em{font-style:italic;}
+    #docs-content-area del{text-decoration:line-through;opacity:.6;}
     .inv-sub{display:none;}
     .inv-sub.active{display:block;}
     .assets-info-card{background:#fffbeb;border:1px solid #fcd34d;border-radius:var(--radius);padding:16px 20px;margin-bottom:16px;}
@@ -881,6 +907,7 @@
     <div class="section" id="section-investpro">
       <div class="inv-tabs" id="investpro-tabs">
         <div class="inv-tab active" id="investpro-tab-yearlypnl" onclick="switchInvestproTab('yearlypnl')">📊 年度損益</div>
+        <div class="inv-tab" id="investpro-tab-docs" onclick="switchInvestproTab('docs')">📄 文件閱讀</div>
       </div>
 
       <!-- 年度損益 sub -->
@@ -903,6 +930,33 @@
               </tbody>
               <tfoot id="yearlypnl-tfoot"></tfoot>
             </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 文件閱讀 sub -->
+      <div id="investpro-sub-docs" style="display:none;">
+        <!-- 拖曳區 -->
+        <div id="docs-dropzone"
+          style="border:2px dashed var(--border);border-radius:12px;padding:48px 24px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:16px;"
+          ondragover="docsDragOver(event)" ondragleave="docsDragLeave(event)" ondrop="docsDrop(event)"
+          onclick="docsPickFile()">
+          <div style="font-size:40px;margin-bottom:12px;">📂</div>
+          <div style="font-size:16px;font-weight:600;margin-bottom:6px;">拖曳 .md 檔案至此</div>
+          <div style="font-size:13px;color:var(--muted);">或點擊選擇檔案（支援多檔同時載入）</div>
+          <input id="docs-file-input" type="file" accept=".md,.markdown,.txt" multiple style="display:none;" onchange="docsFileInputChange(event)">
+        </div>
+        <!-- 主體：左側清單 + 右側內容 -->
+        <div id="docs-main" style="display:none;gap:16px;align-items:flex-start;" class="docs-layout">
+          <!-- 左側檔案清單 -->
+          <div id="docs-sidebar" style="background:var(--bg2);border-radius:10px;padding:10px;min-width:180px;max-width:220px;flex-shrink:0;">
+            <div style="font-size:12px;font-weight:700;color:var(--muted);padding:4px 6px 8px;letter-spacing:.05em;">已載入檔案</div>
+            <div id="docs-file-list"></div>
+            <button class="btn btn-sm" style="width:100%;margin-top:10px;font-size:12px;" onclick="docsPickFile()">＋ 新增檔案</button>
+          </div>
+          <!-- 右側文件內容 -->
+          <div style="flex:1;min-width:0;">
+            <div id="docs-content-area" class="card" style="padding:24px 28px;min-height:300px;line-height:1.75;font-size:15px;overflow-x:auto;"></div>
           </div>
         </div>
       </div>
@@ -4065,7 +4119,7 @@ function loadInvestpro() {
 function switchInvestproTab(tab) {
   _investproTab = tab;
   document.querySelectorAll('#investpro-tabs .inv-tab').forEach(el => el.classList.remove('active'));
-  ['yearlypnl'].forEach(t => {
+  ['yearlypnl','docs'].forEach(t => {
     const el  = $(`investpro-tab-${t}`);
     const sub = $(`investpro-sub-${t}`);
     if (el)  el.classList.toggle('active', t === tab);
@@ -4157,6 +4211,196 @@ async function deleteYearlyPnl(year) {
   const res = await api(`/api/investment/yearly-pnl/${year}`, 'DELETE');
   if (res.success) { loadYearlyPnl(); toast('已刪除'); }
   else toast(res.error||'刪除失敗','err');
+}
+
+// ════════════════════════════════════════════════
+// 文件閱讀 (2-2-2)
+// ════════════════════════════════════════════════
+let _docsFiles = [];   // [{name, html}]
+let _docsActive = -1;
+
+function docsDragOver(e) {
+  e.preventDefault();
+  $('docs-dropzone').classList.add('drag-over');
+}
+function docsDragLeave(e) {
+  $('docs-dropzone').classList.remove('drag-over');
+}
+function docsDrop(e) {
+  e.preventDefault();
+  $('docs-dropzone').classList.remove('drag-over');
+  const files = [...e.dataTransfer.files].filter(f => /\.(md|markdown|txt)$/i.test(f.name));
+  if (!files.length) { toast('僅支援 .md / .txt 檔案','err'); return; }
+  _docsReadFiles(files);
+}
+function docsPickFile() {
+  $('docs-file-input').click();
+}
+function docsFileInputChange(e) {
+  const files = [...e.target.files];
+  e.target.value = '';
+  if (!files.length) return;
+  _docsReadFiles(files);
+}
+function _docsReadFiles(files) {
+  let pending = files.length;
+  files.forEach(f => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const html = _mdToHtml(ev.target.result || '');
+      const existing = _docsFiles.findIndex(d => d.name === f.name);
+      if (existing >= 0) {
+        _docsFiles[existing].html = html;
+      } else {
+        _docsFiles.push({ name: f.name, html });
+      }
+      pending--;
+      if (pending === 0) {
+        _docsActive = _docsFiles.length - 1;
+        _docsRender();
+      }
+    };
+    reader.readAsText(f, 'utf-8');
+  });
+}
+function _docsRender() {
+  const dropzone = $('docs-dropzone');
+  const main     = $('docs-main');
+  if (!_docsFiles.length) {
+    dropzone.style.display = '';
+    main.style.display = 'none';
+    return;
+  }
+  dropzone.style.display = 'none';
+  main.style.display = 'flex';
+
+  // File list
+  const list = $('docs-file-list');
+  list.innerHTML = _docsFiles.map((f, i) => `
+    <div class="docs-file-item ${i === _docsActive ? 'active' : ''}" onclick="docsSelectFile(${i})">
+      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">📄 ${_escHtml(f.name)}</span>
+      <button onclick="event.stopPropagation();docsRemoveFile(${i})" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--muted);flex-shrink:0;padding:0 2px;" title="移除">×</button>
+    </div>`).join('');
+
+  // Content
+  const content = $('docs-content-area');
+  if (_docsActive >= 0 && _docsFiles[_docsActive]) {
+    content.innerHTML = _docsFiles[_docsActive].html;
+  }
+}
+function docsSelectFile(i) {
+  _docsActive = i;
+  _docsRender();
+}
+function docsRemoveFile(i) {
+  _docsFiles.splice(i, 1);
+  if (_docsActive >= _docsFiles.length) _docsActive = _docsFiles.length - 1;
+  _docsRender();
+  if (!_docsFiles.length) {
+    $('docs-dropzone').style.display = '';
+    $('docs-main').style.display = 'none';
+  }
+}
+
+// ── Markdown renderer ──────────────────────────
+function _mdToHtml(raw) {
+  const saved = [];
+  const ph = s => { const k = `\x00${saved.length}\x00`; saved.push(s); return k; };
+  const restore = s => { saved.forEach((v, i) => { s = s.replaceAll(`\x00${i}\x00`, v); }); return s; };
+  const esc = t => t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  // Save fenced code blocks
+  let md = raw.replace(/```([\w]*)\n?([\s\S]*?)```/g, (_, lang, code) =>
+    ph(`<pre><code class="lang-${esc(lang)}">${esc(code.replace(/\n$/,''))}</code></pre>`));
+
+  // Save inline code
+  md = md.replace(/`([^`\n]+)`/g, (_, c) => ph(`<code>${esc(c)}</code>`));
+
+  // Save blockquotes
+  md = md.replace(/^> (.+)$/gm, (_, t) => ph(`<blockquote>${t}</blockquote>`));
+
+  // Process line by line
+  const lines = md.split('\n');
+  const out = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // Headings
+    const hm = line.match(/^(#{1,6}) (.*)/);
+    if (hm) {
+      const lvl = hm[1].length;
+      out.push(`<h${lvl}>${_mdInline(hm[2])}</h${lvl}>`);
+      i++; continue;
+    }
+
+    // HR
+    if (/^(---+|\*\*\*+|___+)$/.test(line.trim())) {
+      out.push('<hr>'); i++; continue;
+    }
+
+    // Tables (| col | col |)
+    if (/^\|.+\|/.test(line)) {
+      const rows = [];
+      while (i < lines.length && /^\|.+\|/.test(lines[i])) {
+        rows.push(lines[i]); i++;
+      }
+      const isHeader = rows[1] && /^\|[-| :]+\|$/.test(rows[1].trim());
+      const start = isHeader ? 0 : 0;
+      const body  = isHeader ? rows.slice(2) : rows;
+      const parseRow = r => r.replace(/^\||\|$/g,'').split('|').map(c => `<td>${_mdInline(c.trim())}</td>`).join('');
+      const hRow  = isHeader ? '<thead><tr>' + rows[0].replace(/^\||\|$/g,'').split('|').map(c=>`<th>${_mdInline(c.trim())}</th>`).join('') + '</tr></thead>' : '';
+      out.push(`<table>${hRow}<tbody>${body.map(r=>`<tr>${parseRow(r)}</tr>`).join('')}</tbody></table>`);
+      continue;
+    }
+
+    // Unordered list
+    if (/^[-*+] /.test(line)) {
+      const items = [];
+      while (i < lines.length && /^[-*+] /.test(lines[i])) {
+        items.push(lines[i].replace(/^[-*+] /,''));
+        i++;
+      }
+      out.push(`<ul>${items.map(x=>`<li>${_mdInline(x)}</li>`).join('')}</ul>`);
+      continue;
+    }
+
+    // Ordered list
+    if (/^\d+\. /.test(line)) {
+      const items = [];
+      while (i < lines.length && /^\d+\. /.test(lines[i])) {
+        items.push(lines[i].replace(/^\d+\. /,''));
+        i++;
+      }
+      out.push(`<ol>${items.map(x=>`<li>${_mdInline(x)}</li>`).join('')}</ol>`);
+      continue;
+    }
+
+    // Blank line or placeholder
+    if (line.trim() === '' || /^\x00\d+\x00$/.test(line.trim())) {
+      out.push(line.trim());
+    } else {
+      out.push(`<p>${_mdInline(line)}</p>`);
+    }
+    i++;
+  }
+
+  return restore(out.join('\n'));
+
+  function _mdInline(t) {
+    // split out existing placeholders so they skip escaping
+    return t.split(/(\x00\d+\x00)/).map(chunk => {
+      if (/^\x00\d+\x00$/.test(chunk)) return chunk;
+      chunk = esc(chunk);
+      chunk = chunk.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+      chunk = chunk.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      chunk = chunk.replace(/\*(.+?)\*/g, '<em>$1</em>');
+      chunk = chunk.replace(/~~(.+?)~~/g, '<del>$1</del>');
+      chunk = chunk.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+      return chunk;
+    }).join('');
+  }
 }
 
 // ════════════════════════════════════════════════
