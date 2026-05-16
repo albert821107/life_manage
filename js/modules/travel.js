@@ -10,8 +10,8 @@ const GEOJSON_SOURCES = {
   japan:    'https://cdn.jsdelivr.net/gh/dataofjapan/land/japan.geojson',
   thailand: 'https://cdn.jsdelivr.net/gh/apisit/thailand.json/thailand.json',
   taiwan:   'https://raw.githubusercontent.com/codeforgermany/click_that_hood/main/public/data/taiwan.geojson',
-  korea:    'https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2013/json/skorea-provinces-geo.json',
-  vietnam:  'https://raw.githubusercontent.com/dsfsi/covid19africa/master/data/geojson/countries/vnm.geojson',
+  korea:    'https://geodata.ucdavis.edu/gadm/gadm4.1/json/gadm41_KOR_1.json',
+  vietnam:  'https://geodata.ucdavis.edu/gadm/gadm4.1/json/gadm41_VNM_1.json',
 };
 
 function fetchUrl(url, redirectCount = 0) {

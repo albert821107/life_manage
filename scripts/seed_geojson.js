@@ -11,7 +11,9 @@ require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const COUNTRIES = {
   japan:    'https://cdn.jsdelivr.net/gh/dataofjapan/land/japan.geojson',
   thailand: 'https://cdn.jsdelivr.net/gh/apisit/thailand.json/thailand.json',
-  taiwan:   'https://raw.githubusercontent.com/codeforgermany/click_that_hood/main/public/data/taiwan.geojson'
+  taiwan:   'https://raw.githubusercontent.com/codeforgermany/click_that_hood/main/public/data/taiwan.geojson',
+  korea:    'https://geodata.ucdavis.edu/gadm/gadm4.1/json/gadm41_KOR_1.json',
+  vietnam:  'https://geodata.ucdavis.edu/gadm/gadm4.1/json/gadm41_VNM_1.json',
 };
 
 function fetchUrl(url, redirectCount = 0) {
