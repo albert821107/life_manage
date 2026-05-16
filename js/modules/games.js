@@ -24,13 +24,24 @@ module.exports = (io) => {
       const url = `https://psnprofiles.com/${encodeURIComponent(username)}`;
       const resp = await axios.get(url, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Accept-Language': 'zh-TW,zh;q=0.9,en;q=0.8',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.9',
           'Accept-Encoding': 'gzip, deflate, br',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+          'Referer': 'https://psnprofiles.com/',
+          'Sec-Fetch-Dest': 'document',
+          'Sec-Fetch-Mode': 'navigate',
+          'Sec-Fetch-Site': 'same-origin',
+          'Upgrade-Insecure-Requests': '1',
         },
         timeout: 15000,
+        maxRedirects: 5,
       });
+      if (resp.status === 403) {
+        return res.json({ success: false, error: 'PSNProfiles 拒絕存取 (403)。請直接前往 https://psnprofiles.com/' + encodeURIComponent(username), blocked: true });
+      }
       const html = resp.data;
 
       // Parse trophy counts from HTML
@@ -65,8 +76,11 @@ module.exports = (io) => {
       db.prepare('INSERT OR REPLACE INTO psn_cache (username,profile_data,updated_at) VALUES (?,?,datetime(\'now\',\'localtime\'))').run(username.toLowerCase(), JSON.stringify(profile));
       res.json({ success: true, data: profile, cached: false });
     } catch(e) {
-      const msg = e.response?.status === 404 ? '找不到此 PSN 帳號' : `無法取得資料：${e.message}`;
-      res.json({ success: false, error: msg });
+      const status = e.response?.status;
+      const msg = status === 404 ? '找不到此 PSN 帳號'
+        : status === 403 ? 'PSNProfiles 封鎖伺服器端存取 (403)。請點擊下方連結直接查看。'
+        : `無法取得資料：${e.message}`;
+      res.json({ success: false, error: msg, blocked: status === 403, profileUrl: `https://psnprofiles.com/${encodeURIComponent(username)}` });
     }
   });
 

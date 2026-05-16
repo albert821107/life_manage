@@ -473,12 +473,12 @@
                 <th class="mkt-th-sort" onclick="sortMktTable('symbol')">代碼<span class="sort-ind" id="si-symbol">⇅</span></th>
                 <th class="mkt-th-sort" onclick="sortMktTable('name')">名稱<span class="sort-ind" id="si-name">⇅</span></th>
                 <th id="mkt-th-type" class="mkt-th-sort" onclick="sortMktTable('type')">類型<span class="sort-ind" id="si-type">⇅</span></th>
-                <th class="mkt-th-sort" onclick="sortMktTable('_shares')">數量<span class="sort-ind" id="si-_shares">⇅</span></th>
-                <th id="mkt-th-cost" class="mkt-th-sort" onclick="sortMktTable('_cost')">均成本<span class="sort-ind" id="si-_cost">⇅</span></th>
-                <th id="mkt-th-price" class="mkt-th-sort" onclick="sortMktTable('_price')">現價<span class="sort-ind" id="si-_price">⇅</span></th>
-                <th id="mkt-th-val" class="mkt-th-sort" onclick="sortMktTable('_val')">市值<span class="sort-ind" id="si-_val">⇅</span></th>
-                <th id="mkt-th-pnl" class="mkt-th-sort" onclick="sortMktTable('_p')">損益<span class="sort-ind" id="si-_p">⇅</span></th>
-                <th id="mkt-th-pnlpct" class="mkt-th-sort" onclick="sortMktTable('_pp')">損益%<span class="sort-ind" id="si-_pp">⇅</span></th>
+                <th class="mkt-th-sort" style="text-align:right;" onclick="sortMktTable('_shares')">數量<span class="sort-ind" id="si-_shares">⇅</span></th>
+                <th id="mkt-th-cost" class="mkt-th-sort" style="text-align:right;" onclick="sortMktTable('_cost')">均成本<span class="sort-ind" id="si-_cost">⇅</span></th>
+                <th id="mkt-th-price" class="mkt-th-sort" style="text-align:right;" onclick="sortMktTable('_price')">現價<span class="sort-ind" id="si-_price">⇅</span></th>
+                <th id="mkt-th-val" class="mkt-th-sort" style="text-align:right;" onclick="sortMktTable('_val')">市值<span class="sort-ind" id="si-_val">⇅</span></th>
+                <th id="mkt-th-pnl" class="mkt-th-sort" style="text-align:right;" onclick="sortMktTable('_p')">損益<span class="sort-ind" id="si-_p">⇅</span></th>
+                <th id="mkt-th-pnlpct" class="mkt-th-sort" style="text-align:right;" onclick="sortMktTable('_pp')">損益%<span class="sort-ind" id="si-_pp">⇅</span></th>
                 <th></th>
               </tr></thead>
               <tbody id="mkt-holdings-tbody"><tr><td colspan="11" style="text-align:center;color:var(--muted);padding:24px;">載入中...</td></tr></tbody>
@@ -1827,7 +1827,7 @@ function _mktRenderRows(rows, isCrypto, market, _isTw){
     return `<tr data-sym="${sym}" data-name="${name}" data-shares="${h.shares}" data-cost="${h.avg_cost}" data-price="${h.current_price}" data-note="${note}" data-type="${h.type||'stock'}" data-market="${h.market||market}" data-exchange="${exch}">
       <td class="td-check"><input type="checkbox" class="mkt-row-chk" data-sym="${sym}" onchange="onRowCheck()"></td>
       <td><strong>${h.symbol}</strong>${h.exchange?`<br><small style="color:var(--muted);font-size:11px;">${h.exchange}</small>`:''}</td>
-      <td>${isCrypto?`<img src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1.0.0/svg/color/${h.symbol.toLowerCase()}.svg" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;margin-right:4px;border-radius:50%;" onerror="this.style.display='none'">`+_exchTag(h.exchange):''}<span style="vertical-align:middle;">${h.name}</span></td>
+      <td>${isCrypto?`<img src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1.0.0/svg/color/${h.symbol.toLowerCase()}.svg" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;margin-right:4px;border-radius:50%;" onerror="this.style.display='none'">`:''}<span style="vertical-align:middle;">${h.name}</span></td>
       <td style="${isCrypto?'width:0;max-width:0;padding:0;overflow:hidden;border:none;':''}"><span class="badge b-pending" style="font-size:11px;">${typeLbl}</span></td>
       <td style="text-align:right;">${sharesDisp}</td>
       <td style="text-align:right;">${fmtPrice(h.avg_cost)}</td>
@@ -3103,7 +3103,7 @@ const TRAVEL_COUNTRIES = {
     getRegionNameZh: p => { const b=String(p.nam||'').replace(/ (?:Ken|Fu|To|Do)$/i,'').trim(); return _ZH_NAMES.japan[b]||p.nam_ja||p.nam||'未知'; },
     getRegionId: p => String(p.nam||p.name||'?'), center:[37.0,136.0], zoom:5, totalRegions:47 },
   thailand:{ name: '泰國',   flag: '/flags/th.svg',
-    getRegionName:   p => _ZH_NAMES.thailand[p.name]||p.name||'未知',
+    getRegionName:   p => p.name||'未知',
     getRegionNameZh: p => _ZH_NAMES.thailand[p.name]||p.name||'未知',
     getRegionId: p => String(p.provinceCode||p.name||'?'), center:[13.0,101.0], zoom:6, totalRegions:77 },
   taiwan:  { name: '台灣',   flag: '/flags/tw.svg',
@@ -3111,11 +3111,11 @@ const TRAVEL_COUNTRIES = {
     getRegionNameZh: p => p.name||'未知',
     getRegionId: p => String(p.name||'?'), center:[23.5,121.0], zoom:7, totalRegions:22 },
   korea:   { name: '韓國',   flag: '/flags/kr.svg',
-    getRegionName:   p => { const n=p.CTP_ENG_NM||p.NAME_1||p.name||''; return _ZH_NAMES.korea[n]||n||'未知'; },
+    getRegionName:   p => p.CTP_ENG_NM||p.NAME_1||p.name||'未知',
     getRegionNameZh: p => { const n=p.CTP_ENG_NM||p.NAME_1||p.name||''; return _ZH_NAMES.korea[n]||n||'未知'; },
     getRegionId: p => String(p.CTP_KOR_NM||p.CTP_ENG_NM||p.NAME_1||p.name||'?'), center:[36.5,127.5], zoom:7, totalRegions:17 },
   vietnam: { name: '越南',   flag: '/flags/vn.svg',
-    getRegionName:   p => { const n=p.Name||p.NAME_1||p.name||''; return _ZH_NAMES.vietnam[n]||n||'未知'; },
+    getRegionName:   p => p.Name||p.NAME_1||p.name||'未知',
     getRegionNameZh: p => { const n=p.Name||p.NAME_1||p.name||''; return _ZH_NAMES.vietnam[n]||n||'未知'; },
     getRegionId: p => String(p.GID_1||p.Name||p.NAME_1||p.name||'?'), center:[16.0,106.0], zoom:6, totalRegions:63 },
 };
@@ -4067,7 +4067,18 @@ async function fetchPsnProfile() {
   if (btn) { btn.disabled=true; btn.textContent='⏳ 查詢中...'; }
   try {
     const res = await api(`/api/games/psn/profile?username=${encodeURIComponent(username)}`);
-    if (!res.success) { toast('查詢失敗：'+res.error,'err'); return; }
+    if (!res.success) {
+      if (res.blocked && res.profileUrl) {
+        toast('PSNProfiles 封鎖存取，請直接開啟網頁查看','err');
+        const noteEl = $('psn-cache-note');
+        if (noteEl) noteEl.innerHTML = `⚠️ ${res.error} <a href="${res.profileUrl}" target="_blank" style="color:var(--primary);">前往 PSNProfiles ↗</a>`;
+        $('psn-empty').style.display = 'none';
+        $('psn-overview').style.display = '';
+      } else {
+        toast('查詢失敗：'+res.error,'err');
+      }
+      return;
+    }
     _renderPsnProfile(res.data, res.cached, res.updated_at);
   } catch(e) { toast('查詢失敗','err'); }
   finally { if (btn) { btn.disabled=false; btn.textContent='🔍 查詢'; } }
