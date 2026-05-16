@@ -2004,7 +2004,17 @@ async function deleteShort(symbol){
 // 存款
 // ════════════════════════════════════════════════
 const _DEPOSIT_TYPES = ['活存','定存','現金','法幣'];
-const _DEPOSIT_CURRENCIES = ['TWD','USD','JPY','EUR','GBP','HKD','CNY','AUD','CAD','SGD','CHF','KRW','THB'];
+const _DEPOSIT_CURRENCIES = [
+  {c:'TWD', s:'🇹🇼 NT$ TWD'}, {c:'USD', s:'🇺🇸 $ USD'},    {c:'JPY', s:'🇯🇵 ¥ JPY'},
+  {c:'EUR', s:'🇪🇺 € EUR'},   {c:'GBP', s:'🇬🇧 £ GBP'},    {c:'HKD', s:'🇭🇰 HK$ HKD'},
+  {c:'CNY', s:'🇨🇳 ¥ CNY'},   {c:'AUD', s:'🇦🇺 A$ AUD'},   {c:'CAD', s:'🇨🇦 C$ CAD'},
+  {c:'SGD', s:'🇸🇬 S$ SGD'},  {c:'CHF', s:'🇨🇭 Fr CHF'},   {c:'KRW', s:'🇰🇷 ₩ KRW'},
+  {c:'THB', s:'🇹🇭 ฿ THB'},   {c:'VND', s:'🇻🇳 ₫ VND'},    {c:'NZD', s:'🇳🇿 NZ$ NZD'},
+  {c:'SEK', s:'🇸🇪 kr SEK'},  {c:'DKK', s:'🇩🇰 kr DKK'},   {c:'NOK', s:'🇳🇴 kr NOK'},
+  {c:'MYR', s:'🇲🇾 RM MYR'},  {c:'IDR', s:'🇮🇩 Rp IDR'},   {c:'PHP', s:'🇵🇭 ₱ PHP'},
+  {c:'ZAR', s:'🇿🇦 R ZAR'},   {c:'SAR', s:'🇸🇦 SR SAR'},
+  {c:'USDT',s:'🟢 USDT'},     {c:'USDC',s:'🔵 USDC'},
+];
 
 async function loadForex(){
   const r = await api('/api/investment/assets');
@@ -2097,7 +2107,7 @@ function showAddDeposit(){
       <div class="form-group">
         <label>幣種 *</label>
         <select id="dep-currency" class="form-control">
-          ${_DEPOSIT_CURRENCIES.map(c=>`<option value="${c}">${c}</option>`).join('')}
+          ${_DEPOSIT_CURRENCIES.map(({c,s})=>`<option value="${c}">${s}</option>`).join('')}
         </select>
       </div>
       <div class="form-group"><label>金額 *</label><input type="number" id="dep-amount" class="form-control" placeholder="0" step="any"></div>
