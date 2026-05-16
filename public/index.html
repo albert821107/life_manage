@@ -846,26 +846,65 @@
 
     <!-- ════ INVESTPRO ════ -->
     <div class="section" id="section-investpro">
-      <div class="sec-header">
-        <div class="sec-header-right">
+      <!-- 子頁籤 -->
+      <div class="inv-tabs" id="investpro-tabs">
+        <div class="inv-tab active" id="investpro-tab-unrealized" onclick="switchInvestproTab('unrealized')">📈 未實現損益</div>
+        <div class="inv-tab"        id="investpro-tab-yearlypnl"  onclick="switchInvestproTab('yearlypnl')">📊 年度損益</div>
+      </div>
+
+      <!-- 未實現損益 sub -->
+      <div id="investpro-sub-unrealized">
+        <div class="stats-grid" style="margin-bottom:16px;">
+          <div class="stat-card stat-highlight">
+            <div class="lbl">📈 未實現損益（TWD）</div>
+            <div class="val" id="investpro-unrealized-val" style="font-size:28px;">--</div>
+            <div class="sub" id="investpro-unrealized-sub" style="color:var(--muted);">尚未設定</div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
           <button class="btn btn-primary btn-sm" onclick="showEditUnrealizedPnl()">✏️ 更新損益</button>
         </div>
-      </div>
-
-      <!-- 未實現損益卡片 -->
-      <div class="stats-grid" style="margin-bottom:20px;">
-        <div class="stat-card stat-highlight">
-          <div class="lbl">📈 未實現損益（TWD）</div>
-          <div class="val" id="investpro-unrealized-val" style="font-size:28px;">--</div>
-          <div class="sub" id="investpro-unrealized-sub" style="color:var(--muted);">尚未設定</div>
+        <div class="card" style="padding:16px 20px;">
+          <div style="font-size:13px;color:var(--muted);line-height:1.9;">
+            <div>• 此數值為手動輸入，不會自動更新</div>
+            <div>• 適合定期（每月/每季）手動輸入當前市值加總後的未實現損益</div>
+            <div>• 可為正數（獲利）或負數（虧損）</div>
+          </div>
         </div>
       </div>
 
-      <div class="card" style="padding:20px 24px;">
-        <div style="font-size:14px;color:var(--muted);line-height:1.8;">
-          <div>• 此數值為手動輸入，不會自動更新</div>
-          <div>• 適合定期（每月/每季）手動輸入當前市值加總後的未實現損益</div>
-          <div>• 可為正數（獲利）或負數（虧損）</div>
+      <!-- 年度損益 sub -->
+      <div id="investpro-sub-yearlypnl" style="display:none;">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+          <button class="btn btn-primary btn-sm" onclick="showAddYearlyPnlModal()">＋ 新增年度</button>
+        </div>
+
+        <!-- 折線圖 -->
+        <div class="card" style="padding:16px 20px;margin-bottom:16px;">
+          <div style="font-weight:600;font-size:14px;margin-bottom:12px;">📈 年度損益趨勢</div>
+          <div style="position:relative;height:220px;">
+            <canvas id="yearlypnl-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- 表格 -->
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;">
+              <thead>
+                <tr style="background:var(--bg);border-bottom:2px solid var(--border);">
+                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);text-align:left;">年份</th>
+                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);text-align:right;">已實現損益 (TWD)</th>
+                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);text-align:left;max-width:180px;">備註</th>
+                  <th style="padding:10px 14px;width:72px;"></th>
+                </tr>
+              </thead>
+              <tbody id="yearlypnl-tbody">
+                <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:40px;">尚無記錄</td></tr>
+              </tbody>
+              <tfoot id="yearlypnl-tfoot"></tfoot>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -873,7 +912,8 @@
     <!-- ════ WORK ════ -->
     <div class="section" id="section-work">
       <div class="inv-tabs" id="work-tabs">
-        <div class="inv-tab active" id="work-tab-jira" onclick="switchWorkTab('jira')">📋 Jira 工單</div>
+        <div class="inv-tab active" id="work-tab-jira"   onclick="switchWorkTab('jira')">📋 Jira 工單</div>
+        <div class="inv-tab"        id="work-tab-creds"  onclick="switchWorkTab('creds')">🔐 帳密設定</div>
       </div>
 
       <!-- Jira sub -->
@@ -941,6 +981,33 @@
             </tr></thead>
             <tbody id="jira-tbody"></tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- 帳密設定 sub -->
+      <div id="work-sub-creds" style="display:none;">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+          <button class="btn btn-primary btn-sm" onclick="showAddCredModal()">＋ 新增設定</button>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:13px;">
+              <thead>
+                <tr style="background:var(--bg);border-bottom:2px solid var(--border);">
+                  <th style="padding:9px 12px;text-align:left;color:var(--muted);">分類</th>
+                  <th style="padding:9px 12px;text-align:left;color:var(--muted);">名稱</th>
+                  <th style="padding:9px 12px;text-align:left;color:var(--muted);">帳號</th>
+                  <th style="padding:9px 12px;text-align:left;color:var(--muted);">密碼</th>
+                  <th style="padding:9px 12px;text-align:left;color:var(--muted);">網址</th>
+                  <th style="padding:9px 12px;text-align:left;color:var(--muted);">備註</th>
+                  <th style="padding:9px 12px;width:72px;"></th>
+                </tr>
+              </thead>
+              <tbody id="creds-tbody">
+                <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:40px;">尚無設定，點擊「＋ 新增設定」開始記錄</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -3722,42 +3789,228 @@ function _escHtml(s) {
 
 // ════════════════════════════════════════════════
 // ════════════════════════════════════════════════
-// INVESTPRO - 未實現損益（單一手動輸入）
+// INVESTPRO
 // ════════════════════════════════════════════════
-async function loadInvestpro() {
+let _investproTab  = 'unrealized';
+let _yearlyPnlData = [];
+let _ypChart       = null;
+
+function loadInvestpro() {
+  switchInvestproTab(_investproTab);
+}
+
+function switchInvestproTab(tab) {
+  _investproTab = tab;
+  document.querySelectorAll('#investpro-tabs .inv-tab').forEach(el => el.classList.remove('active'));
+  ['unrealized', 'yearlypnl'].forEach(t => {
+    const el  = $(`investpro-tab-${t}`);
+    const sub = $(`investpro-sub-${t}`);
+    if (el)  el.classList.toggle('active', t === tab);
+    if (sub) sub.style.display = t === tab ? '' : 'none';
+  });
+  if (tab === 'unrealized') _loadUnrealizedPnl();
+  if (tab === 'yearlypnl')  loadYearlyPnl();
+}
+
+// ── 未實現損益 ─────────────────────────────────
+async function _loadUnrealizedPnl() {
   const res = await api('/api/investment/settings?key=unrealized_pnl');
-  const val = res.success && res.value !== undefined ? parseFloat(res.value) : null;
+  const val = res.success && res.value !== null ? parseFloat(res.value) : null;
   const el  = $('investpro-unrealized-val');
   const sub = $('investpro-unrealized-sub');
   if (!el) return;
   if (val === null) {
-    el.textContent = '--';
-    el.style.color = 'var(--muted)';
+    el.textContent = '--'; el.style.color = 'var(--muted)';
     if (sub) sub.textContent = '尚未設定';
   } else {
-    const sign = val >= 0 ? '+' : '';
-    el.textContent = sign + fmtMoney(val);
+    el.textContent = (val >= 0 ? '+' : '') + fmtMoney(val);
     el.style.color = val >= 0 ? 'var(--success)' : 'var(--danger)';
     if (sub) sub.textContent = `最後更新：${res.updated_at || '--'}`;
   }
 }
 
 function showEditUnrealizedPnl() {
-  const form = `<div>
+  showModal('✏️ 更新未實現損益', `<div>
     <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📈 未實現損益 (TWD)</label>
-    <input id="ip-unrealized" type="number" class="form-input" style="width:100%;box-sizing:border-box;" step="1" placeholder="輸入金額（負數代表虧損）">
-    <div style="margin-top:8px;font-size:12px;color:var(--muted);">正數為獲利，負數為虧損，例如 -500000</div>
-  </div>`;
-  showModal('✏️ 更新未實現損益', form, { onSubmit: submitUnrealizedPnl, submitLabel: '儲存' });
-  setTimeout(() => { const el = $('ip-unrealized'); if (el) el.focus(); }, 80);
+    <input id="ip-unrealized" type="number" class="form-input" style="width:100%;box-sizing:border-box;" step="1" placeholder="正數獲利 / 負數虧損">
+    <div style="margin-top:8px;font-size:12px;color:var(--muted);">例如 -500000 代表虧損 50 萬</div>
+  </div>`, { onSubmit: _submitUnrealizedPnl, submitLabel: '儲存' });
+  setTimeout(() => $('ip-unrealized')?.focus(), 80);
 }
 
-async function submitUnrealizedPnl() {
+async function _submitUnrealizedPnl() {
   const val = $('ip-unrealized')?.value?.trim();
-  if (val === '' || val === undefined) { toast('請輸入金額','err'); return; }
+  if (val === '' || val === undefined) { toast('請輸入金額', 'err'); return; }
   const res = await api('/api/investment/settings', 'POST', { key: 'unrealized_pnl', value: val });
-  if (res.success) { closeModalForce(); loadInvestpro(); toast('已更新','ok'); }
-  else toast(res.error || '更新失敗','err');
+  if (res.success) { closeModalForce(); _loadUnrealizedPnl(); toast('已更新', 'ok'); }
+  else toast(res.error || '更新失敗', 'err');
+}
+
+// ── 年度損益 ────────────────────────────────────
+async function loadYearlyPnl() {
+  const res = await api('/api/investment/yearly-pnl');
+  _yearlyPnlData = res.data || [];
+  _renderYearlyTable();
+  _renderYearlyChart();
+}
+
+function _renderYearlyTable() {
+  const tbody = $('yearlypnl-tbody');
+  const tfoot = $('yearlypnl-tfoot');
+  if (!tbody) return;
+  if (!_yearlyPnlData.length) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:40px;">尚無記錄</td></tr>`;
+    if (tfoot) tfoot.innerHTML = '';
+    return;
+  }
+  const fmt = n => {
+    const v = Number(n || 0);
+    return `<span style="color:${v >= 0 ? 'var(--success)' : 'var(--danger)'};">${v >= 0 ? '+' : ''}${fmtMoney(v)}</span>`;
+  };
+  let total = 0;
+  tbody.innerHTML = _yearlyPnlData.map(r => {
+    total += r.realized_pnl || 0;
+    return `<tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:9px 14px;font-weight:700;">${r.year}</td>
+      <td style="padding:9px 14px;text-align:right;">${fmt(r.realized_pnl)}</td>
+      <td style="padding:9px 14px;color:var(--muted);font-size:12px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_escHtml(r.note || '')}</td>
+      <td style="padding:9px 8px;text-align:center;white-space:nowrap;">
+        <button onclick="showEditYearlyPnlModal(${r.year})" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--muted);" title="編輯">✏️</button>
+        <button onclick="deleteYearlyPnl(${r.year})" style="background:none;border:none;cursor:pointer;font-size:17px;color:var(--muted);" title="刪除">×</button>
+      </td>
+    </tr>`;
+  }).join('');
+  if (tfoot) tfoot.innerHTML = `<tr style="background:var(--bg);font-weight:700;border-top:2px solid var(--border);">
+    <td style="padding:9px 14px;">合計</td>
+    <td style="padding:9px 14px;text-align:right;">${fmt(total)}</td>
+    <td colspan="2"></td>
+  </tr>`;
+}
+
+function _renderYearlyChart() {
+  const canvas = $('yearlypnl-chart');
+  if (!canvas) return;
+  if (_ypChart) { _ypChart.destroy(); _ypChart = null; }
+  if (!_yearlyPnlData.length) return;
+
+  const sorted = [..._yearlyPnlData].sort((a, b) => a.year - b.year);
+  const labels = sorted.map(r => String(r.year));
+  const vals   = sorted.map(r => r.realized_pnl || 0);
+
+  // 累計線
+  let cum = 0;
+  const cumVals = sorted.map(r => { cum += r.realized_pnl || 0; return cum; });
+
+  _ypChart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: '當年已實現損益',
+          data: vals,
+          borderColor: '#6366f1',
+          backgroundColor: 'rgba(99,102,241,.12)',
+          borderWidth: 2.5,
+          pointRadius: 5,
+          pointBackgroundColor: '#6366f1',
+          tension: 0.35,
+          fill: true,
+          yAxisID: 'y',
+        },
+        {
+          label: '累計損益',
+          data: cumVals,
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16,185,129,.08)',
+          borderWidth: 2,
+          pointRadius: 4,
+          pointBackgroundColor: '#10b981',
+          borderDash: [5, 3],
+          tension: 0.35,
+          fill: false,
+          yAxisID: 'y',
+        },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'top', labels: { boxWidth: 14, font: { size: 12 } } },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}：${ctx.parsed.y >= 0 ? '+' : ''}${Number(ctx.parsed.y).toLocaleString()} TWD`,
+          },
+        },
+      },
+      scales: {
+        y: {
+          ticks: { callback: v => (v >= 0 ? '+' : '') + (v / 10000).toFixed(0) + '萬' },
+          grid: { color: 'rgba(0,0,0,.06)' },
+        },
+        x: { grid: { display: false } },
+      },
+    },
+  });
+}
+
+function _yearlyPnlForm(r = {}) {
+  const yr = r.year || new Date().getFullYear();
+  return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+    <div>
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📅 年份 <span style="color:#ef4444;font-size:11px;">必填</span></label>
+      <input id="yp-year" type="number" class="form-input" style="width:100%;box-sizing:border-box;" value="${yr}" min="2000" max="2099" ${r.year ? 'readonly' : ''}>
+    </div>
+    <div>
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">💰 已實現損益 (TWD)</label>
+      <input id="yp-realized" type="number" class="form-input" style="width:100%;box-sizing:border-box;" value="${r.realized_pnl || 0}" step="1" placeholder="0">
+    </div>
+  </div>
+  <div>
+    <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📝 備註</label>
+    <input id="yp-note" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(r.note || '')}" placeholder="選填">
+  </div>`;
+}
+
+function showAddYearlyPnlModal() {
+  showModal('📊 新增年度損益', _yearlyPnlForm(), { onSubmit: _submitAddYearlyPnl, submitLabel: '＋ 新增' });
+}
+
+async function _submitAddYearlyPnl() {
+  const year = parseInt($('yp-year')?.value);
+  if (!year) { toast('請填寫年份', 'err'); return; }
+  const res = await api('/api/investment/yearly-pnl', 'POST', {
+    year,
+    realized_pnl:   parseFloat($('yp-realized')?.value) || 0,
+    unrealized_pnl: 0,
+    note:           $('yp-note')?.value || '',
+  });
+  if (res.success) { closeModalForce(); loadYearlyPnl(); toast('已新增', 'ok'); }
+  else toast(res.error || '新增失敗', 'err');
+}
+
+function showEditYearlyPnlModal(year) {
+  const r = _yearlyPnlData.find(x => x.year === year);
+  if (!r) return;
+  showModal(`✏️ 編輯 ${year} 年度損益`, _yearlyPnlForm(r), { onSubmit: () => _submitEditYearlyPnl(year), submitLabel: '儲存' });
+}
+
+async function _submitEditYearlyPnl(year) {
+  const res = await api(`/api/investment/yearly-pnl/${year}`, 'PUT', {
+    realized_pnl:   parseFloat($('yp-realized')?.value) || 0,
+    unrealized_pnl: 0,
+    note:           $('yp-note')?.value || '',
+  });
+  if (res.success) { closeModalForce(); loadYearlyPnl(); toast('已更新', 'ok'); }
+  else toast(res.error || '更新失敗', 'err');
+}
+
+async function deleteYearlyPnl(year) {
+  if (!confirm(`確認刪除 ${year} 年度損益？`)) return;
+  const res = await api(`/api/investment/yearly-pnl/${year}`, 'DELETE');
+  if (res.success) { loadYearlyPnl(); toast('已刪除'); }
+  else toast(res.error || '刪除失敗', 'err');
 }
 
 // ════════════════════════════════════════════════
@@ -4174,13 +4427,14 @@ function loadWork() {
 function switchWorkTab(tab) {
   _workTab = tab;
   document.querySelectorAll('#work-tabs .inv-tab').forEach(el => el.classList.remove('active'));
-  ['jira'].forEach(t => {
+  ['jira', 'creds'].forEach(t => {
     const el = $(`work-tab-${t}`);
     const sub = $(`work-sub-${t}`);
     if (el) el.classList.toggle('active', t === tab);
     if (sub) sub.style.display = t === tab ? '' : 'none';
   });
   if (tab === 'jira') loadJiraConfig();
+  if (tab === 'creds') loadCreds();
 }
 
 async function loadJiraConfig() {
@@ -4285,6 +4539,125 @@ async function loadJiraIssues() {
       <td style="padding:8px 10px;white-space:nowrap;font-size:12px;color:var(--muted);">${updated}</td>
     </tr>`;
   }).join('');
+}
+
+// ── 帳密設定 ──────────────────────────────────────────────────────────────────
+let _credsList = [];
+
+async function loadCreds() {
+  const res = await api('/api/work/credentials');
+  _credsList = res.success ? res.data : [];
+  _renderCredsTable();
+}
+
+function _renderCredsTable() {
+  const tbody = $('creds-tbody');
+  if (!tbody) return;
+  if (!_credsList.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:40px;">尚無設定，點擊「＋ 新增設定」開始記錄</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = _credsList.map(r => `
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:9px 12px;">${r.category||''}</td>
+      <td style="padding:9px 12px;font-weight:600;">${r.name||''}</td>
+      <td style="padding:9px 12px;">${r.username||'—'}</td>
+      <td style="padding:9px 12px;">
+        <span class="cred-pw-mask" data-id="${r.id}" style="cursor:pointer;letter-spacing:2px;">••••••</span>
+        <button class="btn btn-outline btn-sm" style="padding:2px 8px;font-size:11px;margin-left:6px;" onclick="_toggleCredPw(${r.id},'${(r.password||'').replace(/'/g,"\\'")}')" title="顯示/隱藏">👁</button>
+      </td>
+      <td style="padding:9px 12px;">${r.url ? `<a href="${r.url}" target="_blank" style="color:var(--primary);">${r.url}</a>` : '—'}</td>
+      <td style="padding:9px 12px;color:var(--muted);font-size:12px;">${r.note||'—'}</td>
+      <td style="padding:9px 12px;white-space:nowrap;">
+        <button class="btn btn-outline btn-sm" onclick="showEditCredModal(${r.id})">✎</button>
+        <button class="btn btn-sm" style="background:var(--danger);color:#fff;" onclick="deleteCred(${r.id})">✕</button>
+      </td>
+    </tr>`).join('');
+}
+
+function _toggleCredPw(id, pw) {
+  const span = document.querySelector(`.cred-pw-mask[data-id="${id}"]`);
+  if (!span) return;
+  span.textContent = span.textContent === '••••••' ? (pw || '（空白）') : '••••••';
+}
+
+function showAddCredModal() {
+  showModal('＋ 新增帳密設定', `
+    <div style="display:grid;gap:12px;">
+      <div><label style="font-size:12px;color:var(--muted);">分類</label>
+        <input id="cred-cat" class="input" placeholder="例：工作、個人、VPN…" style="width:100%;margin-top:4px;"></div>
+      <div><label style="font-size:12px;color:var(--muted);">名稱 *</label>
+        <input id="cred-name" class="input" placeholder="服務或系統名稱" style="width:100%;margin-top:4px;"></div>
+      <div><label style="font-size:12px;color:var(--muted);">帳號</label>
+        <input id="cred-user" class="input" placeholder="帳號 / Email" style="width:100%;margin-top:4px;"></div>
+      <div><label style="font-size:12px;color:var(--muted);">密碼</label>
+        <input id="cred-pw" class="input" type="password" placeholder="密碼" style="width:100%;margin-top:4px;"></div>
+      <div><label style="font-size:12px;color:var(--muted);">網址</label>
+        <input id="cred-url" class="input" placeholder="https://..." style="width:100%;margin-top:4px;"></div>
+      <div><label style="font-size:12px;color:var(--muted);">備註</label>
+        <textarea id="cred-note" class="input" rows="2" placeholder="其他說明" style="width:100%;margin-top:4px;resize:vertical;"></textarea></div>
+    </div>`,
+    { onSubmit: submitAddCred, submitLabel:'儲存' });
+}
+
+async function submitAddCred() {
+  const name = ($('cred-name')?.value||'').trim();
+  if (!name) { toast('請填寫名稱','err'); return; }
+  const res = await api('/api/work/credentials','POST', {
+    category: ($('cred-cat')?.value||'其他').trim(),
+    name,
+    username: ($('cred-user')?.value||'').trim(),
+    password: $('cred-pw')?.value||'',
+    url:      ($('cred-url')?.value||'').trim(),
+    note:     ($('cred-note')?.value||'').trim(),
+  });
+  if (res.success) { closeModal(); toast('已新增','ok'); loadCreds(); }
+  else toast(res.error||'新增失敗','err');
+}
+
+function showEditCredModal(id) {
+  const r = _credsList.find(x => x.id === id);
+  if (!r) return;
+  showModal('✎ 編輯帳密設定', `
+    <div style="display:grid;gap:12px;">
+      <div><label style="font-size:12px;color:var(--muted);">分類</label>
+        <input id="cred-cat" class="input" value="${r.category||''}" style="width:100%;margin-top:4px;"></div>
+      <div><label style="font-size:12px;color:var(--muted);">名稱 *</label>
+        <input id="cred-name" class="input" value="${r.name||''}" style="width:100%;margin-top:4px;"></div>
+      <div><label style="font-size:12px;color:var(--muted);">帳號</label>
+        <input id="cred-user" class="input" value="${r.username||''}" style="width:100%;margin-top:4px;"></div>
+      <div><label style="font-size:12px;color:var(--muted);">密碼</label>
+        <input id="cred-pw" class="input" type="password" placeholder="不改則留空" style="width:100%;margin-top:4px;"></div>
+      <div><label style="font-size:12px;color:var(--muted);">網址</label>
+        <input id="cred-url" class="input" value="${r.url||''}" style="width:100%;margin-top:4px;"></div>
+      <div><label style="font-size:12px;color:var(--muted);">備註</label>
+        <textarea id="cred-note" class="input" rows="2" style="width:100%;margin-top:4px;resize:vertical;">${r.note||''}</textarea></div>
+    </div>`,
+    { onSubmit: () => submitEditCred(id), submitLabel:'儲存' });
+}
+
+async function submitEditCred(id) {
+  const name = ($('cred-name')?.value||'').trim();
+  if (!name) { toast('請填寫名稱','err'); return; }
+  const pwField = $('cred-pw')?.value||'';
+  const orig    = _credsList.find(x => x.id === id);
+  const res = await api(`/api/work/credentials/${id}`,'PUT', {
+    category: ($('cred-cat')?.value||'其他').trim(),
+    name,
+    username: ($('cred-user')?.value||'').trim(),
+    password: pwField || orig?.password || '',
+    url:      ($('cred-url')?.value||'').trim(),
+    note:     ($('cred-note')?.value||'').trim(),
+  });
+  if (res.success) { closeModal(); toast('已更新','ok'); loadCreds(); }
+  else toast(res.error||'更新失敗','err');
+}
+
+async function deleteCred(id) {
+  if (!confirm('確定刪除這筆帳密設定？')) return;
+  const res = await api(`/api/work/credentials/${id}`,'DELETE');
+  if (res.success) { toast('已刪除','ok'); loadCreds(); }
+  else toast(res.error||'刪除失敗','err');
 }
 
 function loadGames() {

@@ -7,3 +7,5 @@
 - [自動更新MD](feedback_auto_md.md) — CLAUDE.md 和 memory 檔直接更新，不需確認
 - [溝通風格](feedback_comms.md) — 完成後只給最終結果摘要，不列過程細節
 - [導航結構與新增SOP](project_nav_structure.md) — 左側大頁籤層級、子頁籤對應、新增功能步驟
+- [Git 推送規則](feedback_git_push.md) — 必須等使用者說了再 push，不自動推
+- [.env 同步規則](feedback_env_sync.md) — 新增變數時 .env.example 和 .env 都要更新

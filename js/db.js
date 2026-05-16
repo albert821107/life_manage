@@ -98,7 +98,8 @@ async function init() {
     `CREATE TABLE IF NOT EXISTS psn_cache (username TEXT NOT NULL PRIMARY KEY, profile_data TEXT NOT NULL, updated_at TEXT DEFAULT (datetime('now','localtime')))`,
     `CREATE TABLE IF NOT EXISTS work_jira_config (id INTEGER PRIMARY KEY AUTOINCREMENT, base_url TEXT NOT NULL, email TEXT NOT NULL, api_token TEXT NOT NULL, updated_at TEXT DEFAULT (datetime('now','localtime')))`,
     `CREATE TABLE IF NOT EXISTS encrypted_files (id INTEGER PRIMARY KEY AUTOINCREMENT, filename TEXT NOT NULL, mime_type TEXT NOT NULL, size_bytes INTEGER DEFAULT 0, content_encrypted TEXT NOT NULL, iv TEXT NOT NULL, auth_tag TEXT NOT NULL, is_binary INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime('now','localtime')))`,
-    `CREATE TABLE IF NOT EXISTS investment_settings (key TEXT NOT NULL PRIMARY KEY, value TEXT NOT NULL, updated_at TEXT DEFAULT (datetime('now','localtime')))`
+    `CREATE TABLE IF NOT EXISTS investment_settings (key TEXT NOT NULL PRIMARY KEY, value TEXT NOT NULL, updated_at TEXT DEFAULT (datetime('now','localtime')))`,
+    `CREATE TABLE IF NOT EXISTS work_credentials (id INTEGER PRIMARY KEY AUTOINCREMENT, category TEXT DEFAULT '其他', name TEXT NOT NULL, username TEXT DEFAULT '', password TEXT DEFAULT '', url TEXT DEFAULT '', note TEXT DEFAULT '', created_at TEXT DEFAULT (datetime('now','localtime')), updated_at TEXT DEFAULT (datetime('now','localtime')))`
   ];
   SCHEMA.forEach(s => { try { raw.run(s); } catch(e) { console.error('[DB]', e.message); } });
 

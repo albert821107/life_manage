@@ -98,5 +98,43 @@ module.exports = (io) => {
     }
   });
 
+  // ── 帳密設定 CRUD ─────────────────────────────
+
+  // GET /api/work/credentials
+  router.get('/credentials', (req, res) => {
+    try {
+      const rows = db.prepare('SELECT id, category, name, username, password, url, note, created_at FROM work_credentials ORDER BY category, name').all();
+      res.json({ success: true, data: rows });
+    } catch(e) { res.json({ success: false, error: e.message }); }
+  });
+
+  // POST /api/work/credentials
+  router.post('/credentials', (req, res) => {
+    try {
+      const { category = '其他', name, username = '', password = '', url = '', note = '' } = req.body;
+      if (!name) return res.json({ success: false, error: '請填寫名稱' });
+      const r = db.prepare(`INSERT INTO work_credentials (category, name, username, password, url, note) VALUES (?,?,?,?,?,?)`).run(category, name, username, password, url, note);
+      res.json({ success: true, id: r.lastInsertRowid });
+    } catch(e) { res.json({ success: false, error: e.message }); }
+  });
+
+  // PUT /api/work/credentials/:id
+  router.put('/credentials/:id', (req, res) => {
+    try {
+      const { category = '其他', name, username = '', password = '', url = '', note = '' } = req.body;
+      if (!name) return res.json({ success: false, error: '請填寫名稱' });
+      db.prepare(`UPDATE work_credentials SET category=?,name=?,username=?,password=?,url=?,note=?,updated_at=datetime('now','localtime') WHERE id=?`).run(category, name, username, password, url, note, req.params.id);
+      res.json({ success: true });
+    } catch(e) { res.json({ success: false, error: e.message }); }
+  });
+
+  // DELETE /api/work/credentials/:id
+  router.delete('/credentials/:id', (req, res) => {
+    try {
+      db.prepare('DELETE FROM work_credentials WHERE id=?').run(req.params.id);
+      res.json({ success: true });
+    } catch(e) { res.json({ success: false, error: e.message }); }
+  });
+
   return router;
 };
