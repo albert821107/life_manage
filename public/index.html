@@ -298,7 +298,7 @@
     <div id="nav-advanced" style="display:none;">
       <div class="nav-group-label">進階功能</div>
       <div class="nav-item" data-sec="work"      onclick="nav('work')">      <span class="ico">💼</span><span>工作<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
-      <div class="nav-item" data-sec="analysis"  onclick="nav('analysis')">  <span class="ico">📄</span><span>文件閱讀<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
+      <div class="nav-item" data-sec="analysis"  onclick="nav('analysis')">  <span class="ico">🔍</span><span>分析<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
       <div class="nav-item" data-sec="investpro" onclick="nav('investpro')"> <span class="ico">💹</span><span>投資(進階)<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
       <div class="nav-item" data-sec="trading"   onclick="nav('trading')">   <span class="ico">🎯</span><span>操盤<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
       <div class="nav-item" data-sec="resume"    onclick="nav('resume')">    <span class="ico">📋</span><span>履歷<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
@@ -800,65 +800,72 @@
     <div class="section" id="section-analysis">
       <div class="sec-header">
         <div>
-          <div class="sec-title">📄 文件閱讀</div>
-          <div class="sec-sub">拖曳 .md 檔案閱讀</div>
+          <div class="sec-title">🔍 分析</div>
+          <div class="sec-sub">加密保存重要文件，解密後閱讀</div>
+        </div>
+        <div class="sec-header-right">
+          <span id="enc-key-badge" style="font-size:12px;padding:3px 10px;border-radius:20px;background:var(--bg2);color:var(--muted);">⏳ 檢查金鑰...</span>
+          <button class="btn btn-primary btn-sm" onclick="encPickFile()">＋ 上傳加密</button>
         </div>
       </div>
-      <!-- 拖曳區 -->
-      <div id="docs-dropzone"
-        style="border:2px dashed var(--border);border-radius:12px;padding:48px 24px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:16px;"
-        ondragover="docsDragOver(event)" ondragleave="docsDragLeave(event)" ondrop="docsDrop(event)"
-        onclick="docsPickFile()">
-        <div style="font-size:40px;margin-bottom:12px;">📂</div>
-        <div style="font-size:16px;font-weight:600;margin-bottom:6px;">拖曳 .md 檔案至此</div>
-        <div style="font-size:13px;color:var(--muted);">或點擊選擇檔案（支援多檔同時載入）</div>
-        <input id="docs-file-input" type="file" accept=".md,.markdown,.txt" multiple style="display:none;" onchange="docsFileInputChange(event)">
+      <input id="enc-file-input" type="file" multiple style="display:none;" onchange="encFileInputChange(event)">
+
+      <!-- 拖曳上傳區 -->
+      <div id="enc-dropzone"
+        style="border:2px dashed var(--border);border-radius:12px;padding:40px 24px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:20px;"
+        ondragover="encDragOver(event)" ondragleave="encDragLeave(event)" ondrop="encDrop(event)"
+        onclick="encPickFile()">
+        <div style="font-size:36px;margin-bottom:10px;">🔒</div>
+        <div style="font-size:15px;font-weight:600;margin-bottom:4px;">拖曳檔案至此上傳加密</div>
+        <div style="font-size:13px;color:var(--muted);">或點擊選擇檔案（任意格式，加密後存入資料庫）</div>
       </div>
-      <!-- 主體：左側清單 + 右側內容 -->
-      <div id="docs-main" style="display:none;gap:16px;align-items:flex-start;" class="docs-layout">
-        <!-- 左側檔案清單 -->
-        <div id="docs-sidebar" style="background:var(--bg2);border-radius:10px;padding:10px;min-width:180px;max-width:220px;flex-shrink:0;">
-          <div style="font-size:12px;font-weight:700;color:var(--muted);padding:4px 6px 8px;letter-spacing:.05em;">已載入檔案</div>
-          <div id="docs-file-list"></div>
-          <button class="btn btn-sm" style="width:100%;margin-top:10px;font-size:12px;" onclick="docsPickFile()">＋ 新增檔案</button>
+
+      <!-- 檔案列表 -->
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600;font-size:14px;">📁 已加密文件</div>
+        <div id="enc-file-list" style="min-height:80px;">
+          <div style="text-align:center;padding:40px 0;color:var(--muted);">載入中...</div>
         </div>
-        <!-- 右側文件內容 -->
-        <div style="flex:1;min-width:0;">
-          <div id="docs-content-area" class="card" style="padding:24px 28px;min-height:300px;line-height:1.75;font-size:15px;overflow-x:auto;"></div>
+      </div>
+
+      <!-- 內容閱讀區 -->
+      <div id="enc-viewer" style="display:none;margin-top:20px;">
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+            <span id="enc-viewer-title" style="font-weight:600;font-size:14px;"></span>
+            <button class="btn btn-outline btn-sm" onclick="encCloseViewer()">✕ 關閉</button>
+          </div>
+          <div id="enc-viewer-body" style="padding:24px 28px;min-height:200px;line-height:1.75;font-size:15px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;"></div>
         </div>
       </div>
     </div>
 
     <!-- ════ INVESTPRO ════ -->
-    <!-- ════ INVESTPRO ════ -->
     <div class="section" id="section-investpro">
-      <div class="inv-tabs" id="investpro-tabs">
-        <div class="inv-tab active" id="investpro-tab-yearlypnl" onclick="switchInvestproTab('yearlypnl')">📊 年度損益</div>
+      <div class="sec-header">
+        <div>
+          <div class="sec-title">💹 投資</div>
+          <div class="sec-sub">未實現損益追蹤</div>
+        </div>
+        <div class="sec-header-right">
+          <button class="btn btn-primary btn-sm" onclick="showEditUnrealizedPnl()">✏️ 更新損益</button>
+        </div>
       </div>
 
-      <!-- 年度損益 sub -->
-      <div id="investpro-sub-yearlypnl" style="display:none;">
-        <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
-          <button class="btn btn-primary btn-sm" onclick="showAddYearlyPnlModal()">&#65291; 新增年度</button>
+      <!-- 未實現損益卡片 -->
+      <div class="stats-grid" style="margin-bottom:20px;">
+        <div class="stat-card stat-highlight">
+          <div class="lbl">📈 未實現損益（TWD）</div>
+          <div class="val" id="investpro-unrealized-val" style="font-size:28px;">--</div>
+          <div class="sub" id="investpro-unrealized-sub" style="color:var(--muted);">尚未設定</div>
         </div>
-        <div class="card" style="padding:0;overflow:hidden;">
-          <div style="overflow-x:auto;">
-            <table style="width:100%;border-collapse:collapse;">
-              <thead>
-                <tr style="background:var(--bg);border-bottom:2px solid var(--border);">
-                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);text-align:left;">年份</th>
-                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);text-align:right;">已實現損益 (TWD)</th>
-                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);text-align:right;">未實現損益 (TWD)</th>
-                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);text-align:right;font-weight:700;">合計 (TWD)</th>
-                  <th style="padding:10px 14px;width:80px;"></th>
-                </tr>
-              </thead>
-              <tbody id="yearlypnl-tbody">
-                <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:40px;">尚無年度損益記錄</td></tr>
-              </tbody>
-              <tfoot id="yearlypnl-tfoot"></tfoot>
-            </table>
-          </div>
+      </div>
+
+      <div class="card" style="padding:20px 24px;">
+        <div style="font-size:14px;color:var(--muted);line-height:1.8;">
+          <div>• 此數值為手動輸入，不會自動更新</div>
+          <div>• 適合定期（每月/每季）手動輸入當前市值加總後的未實現損益</div>
+          <div>• 可為正數（獲利）或負數（虧損）</div>
         </div>
       </div>
     </div>
@@ -878,18 +885,22 @@
             <span id="jira-cfg-toggle" style="color:var(--muted);font-size:13px;">展開 ▼</span>
           </div>
           <div id="jira-config-form" style="display:none;margin-top:14px;">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:10px;padding:8px 12px;background:var(--bg);border-radius:6px;line-height:1.7;">
+              ☁️ <b>Cloud (atlassian.net)</b>：填帳號Email + API Token<br>
+              🏢 <b>私有 Server/DC</b>：填帳號Username + 密碼，或只填 PAT（帳號留空）
+            </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
               <div>
                 <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Jira 網域 *</label>
-                <input id="jira-base-url" type="text" class="form-input" placeholder="https://xxx.atlassian.net" style="width:100%;box-sizing:border-box;">
+                <input id="jira-base-url" type="text" class="form-input" placeholder="https://pmo-jira.example.com" style="width:100%;box-sizing:border-box;">
               </div>
               <div>
-                <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Email *</label>
-                <input id="jira-email" type="email" class="form-input" placeholder="your@email.com" style="width:100%;box-sizing:border-box;">
+                <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">帳號 / Email（PAT 模式可留空）</label>
+                <input id="jira-email" type="text" class="form-input" placeholder="username 或 your@email.com" style="width:100%;box-sizing:border-box;">
               </div>
               <div style="grid-column:1/-1;">
-                <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">API Token * <a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank" style="color:var(--primary);font-size:11px;">（點此取得 Token）</a></label>
-                <input id="jira-api-token" type="password" class="form-input" placeholder="API Token" style="width:100%;box-sizing:border-box;">
+                <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">密碼 / API Token / PAT *</label>
+                <input id="jira-api-token" type="password" class="form-input" placeholder="密碼、API Token 或 Personal Access Token" style="width:100%;box-sizing:border-box;">
               </div>
             </div>
             <div style="display:flex;gap:8px;margin-top:12px;">
@@ -936,10 +947,51 @@
 
     <!-- ════ TRADING ════ -->
     <div class="section" id="section-trading">
-            <div style="text-align:center;padding:80px 0;color:var(--muted);">
-        <div style="font-size:56px;margin-bottom:16px;">🎯</div>
-        <div style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text);">操盤記錄</div>
-        <div style="font-size:14px;">開發中，敬請期待</div>
+      <div class="sec-header">
+        <div>
+          <div class="sec-title">🎯 操盤</div>
+          <div class="sec-sub">Bybit 帳戶連動</div>
+        </div>
+        <div class="sec-header-right">
+          <span id="bybit-status-badge" style="font-size:12px;padding:3px 12px;border-radius:20px;background:var(--bg2);color:var(--muted);">⏳ 檢查連線...</span>
+          <button class="btn btn-outline btn-sm" onclick="loadTrading()">↻ 重整</button>
+        </div>
+      </div>
+
+      <!-- 帳戶資產 -->
+      <div class="stats-grid" style="margin-bottom:20px;">
+        <div class="stat-card">
+          <div class="lbl">💰 總權益 (USDT)</div>
+          <div class="val" id="bybit-equity">--</div>
+        </div>
+        <div class="stat-card">
+          <div class="lbl">💵 可用餘額 (USDT)</div>
+          <div class="val" id="bybit-available">--</div>
+        </div>
+        <div class="stat-card">
+          <div class="lbl">📊 未平倉盈虧 (USDT)</div>
+          <div class="val" id="bybit-upnl">--</div>
+        </div>
+      </div>
+
+      <!-- 持倉列表 -->
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:20px;">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600;font-size:14px;">📋 持倉（線性合約）</div>
+        <div id="bybit-positions" style="min-height:80px;">
+          <div style="text-align:center;padding:40px 0;color:var(--muted);">載入中...</div>
+        </div>
+      </div>
+
+      <!-- 未設定提示 -->
+      <div id="bybit-unconfig" style="display:none;text-align:center;padding:60px 0;color:var(--muted);">
+        <div style="font-size:48px;margin-bottom:14px;">🔑</div>
+        <div style="font-size:17px;font-weight:700;margin-bottom:8px;color:var(--text);">尚未設定 Bybit API</div>
+        <div style="font-size:13px;margin-bottom:16px;">請在 .env 設定 BYBIT_API_KEY 與 BYBIT_API_SECRET</div>
+        <div style="font-size:12px;color:var(--muted);background:var(--bg2);border-radius:8px;padding:12px 18px;display:inline-block;text-align:left;">
+          BYBIT_API_KEY=your-key<br>
+          BYBIT_API_SECRET=your-secret<br>
+          BYBIT_TESTNET=false
+        </div>
       </div>
     </div>
 
@@ -1050,9 +1102,9 @@ const PAGE_META = {
   travel:     ['✈️ 旅遊足跡','點擊國家展開地圖'],
   games:      ['🎮 遊戲','PS 成就獎盃與遊戲管理'],
   work:       ['💼 工作','Jira 工單管理'],
-  analysis:   ['🔍 分析','進階分析（開發中）'],
-  investpro:  ['💹 投資','年度損益與投資分析'],
-  trading:    ['🎯 操盤','操盤記錄（開發中）'],
+  analysis:   ['🔍 分析','加密文件管理'],
+  investpro:  ['💹 投資','未實現損益追蹤'],
+  trading:    ['🎯 操盤','Bybit 帳戶連動'],
   resume:     ['📋 履歷','履歷讀取與產生'],
 };
 
@@ -1114,7 +1166,7 @@ function toast(msg, type='ok'){
 // ════════════════════════════════════════════════
 // Navigation
 // ════════════════════════════════════════════════
-const LOADERS = { dashboard:loadDashboard, investment:loadInvestment, invest:loadInvest, ai:loadAI, line:loadLine, travel:loadTravel, work:loadWork, investpro:loadInvestpro, games:loadGames, analysis:loadAnalysis, resume:loadResume };
+const LOADERS = { dashboard:loadDashboard, investment:loadInvestment, invest:loadInvest, ai:loadAI, line:loadLine, travel:loadTravel, work:loadWork, investpro:loadInvestpro, games:loadGames, analysis:loadAnalysis, resume:loadResume, trading:loadTrading };
 
 function nav(sec){
   state.sec = sec;
@@ -3677,343 +3729,155 @@ function _escHtml(s) {
 }
 
 // ════════════════════════════════════════════════
-// 年度損益
 // ════════════════════════════════════════════════
-let _yearlyPnlCache = [];
-
+// INVESTPRO - 未實現損益（單一手動輸入）
 // ════════════════════════════════════════════════
-// INVESTPRO
-// ════════════════════════════════════════════════
-let _investproTab = 'yearlypnl';
-
-function loadInvestpro() {
-  switchInvestproTab(_investproTab);
+async function loadInvestpro() {
+  const res = await api('/api/investment/settings?key=unrealized_pnl');
+  const val = res.success && res.value !== undefined ? parseFloat(res.value) : null;
+  const el  = $('investpro-unrealized-val');
+  const sub = $('investpro-unrealized-sub');
+  if (!el) return;
+  if (val === null) {
+    el.textContent = '--';
+    el.style.color = 'var(--muted)';
+    if (sub) sub.textContent = '尚未設定';
+  } else {
+    const sign = val >= 0 ? '+' : '';
+    el.textContent = sign + fmtMoney(val);
+    el.style.color = val >= 0 ? 'var(--success)' : 'var(--danger)';
+    if (sub) sub.textContent = `最後更新：${res.updated_at || '--'}`;
+  }
 }
 
-function switchInvestproTab(tab) {
-  _investproTab = tab;
-  document.querySelectorAll('#investpro-tabs .inv-tab').forEach(el => el.classList.remove('active'));
-  ['yearlypnl'].forEach(t => {
-    const el  = $(`investpro-tab-${t}`);
-    const sub = $(`investpro-sub-${t}`);
-    if (el)  el.classList.toggle('active', t === tab);
-    if (sub) sub.style.display = t === tab ? '' : 'none';
-  });
-  if (tab === 'yearlypnl') loadYearlyPnl();
+function showEditUnrealizedPnl() {
+  const form = `<div>
+    <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📈 未實現損益 (TWD)</label>
+    <input id="ip-unrealized" type="number" class="form-input" style="width:100%;box-sizing:border-box;" step="1" placeholder="輸入金額（負數代表虧損）">
+    <div style="margin-top:8px;font-size:12px;color:var(--muted);">正數為獲利，負數為虧損，例如 -500000</div>
+  </div>`;
+  showModal('✏️ 更新未實現損益', form, { onSubmit: submitUnrealizedPnl, submitLabel: '儲存' });
+  setTimeout(() => { const el = $('ip-unrealized'); if (el) el.focus(); }, 80);
 }
 
-async function loadYearlyPnl() {
-  const res = await api('/api/investment/yearly-pnl');
-  _yearlyPnlCache = res.data || [];
-  const tbody = $('yearlypnl-tbody');
-  const tfoot = $('yearlypnl-tfoot');
-  if (!tbody) return;
-  if (!_yearlyPnlCache.length) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:40px;">
-      <div style="font-size:32px;margin-bottom:8px;">📊</div>
-      <div>尚無年度損益記錄，點擊「＋ 新增年度」開始記錄</div>
-    </td></tr>`;
-    if (tfoot) tfoot.innerHTML = '';
+async function submitUnrealizedPnl() {
+  const val = $('ip-unrealized')?.value?.trim();
+  if (val === '' || val === undefined) { toast('請輸入金額','err'); return; }
+  const res = await api('/api/investment/settings', 'POST', { key: 'unrealized_pnl', value: val });
+  if (res.success) { closeModalForce(); loadInvestpro(); toast('已更新','ok'); }
+  else toast(res.error || '更新失敗','err');
+}
+
+// ════════════════════════════════════════════════
+// 2-2 分析 - 加密文件管理
+// ════════════════════════════════════════════════
+async function loadAnalysis() {
+  const res = await api('/api/analysis/key-status');
+  const badge = $('enc-key-badge');
+  if (badge) {
+    if (res.configured) {
+      badge.textContent = '🔑 金鑰已設定';
+      badge.style.color = 'var(--success)';
+    } else {
+      badge.textContent = '⚠️ 未設定 ENCRYPT_KEY';
+      badge.style.color = 'var(--danger)';
+    }
+  }
+  await _encLoadList();
+}
+
+async function _encLoadList() {
+  const res  = await api('/api/analysis/files');
+  const list = $('enc-file-list');
+  if (!list) return;
+  if (!res.success || !res.data?.length) {
+    list.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted);">尚無加密文件，點擊「上傳加密」新增</div>';
     return;
   }
-  const fmtPnl = n => {
-    const v = Number(n||0);
-    const s = v >= 0 ? '+' : '-';
-    return `<span style="color:${v>=0?'var(--success)':'var(--danger)'};">${s}${fmtMoney(Math.abs(v))}</span>`;
-  };
-  let totalRealized = 0, totalUnrealized = 0;
-  tbody.innerHTML = _yearlyPnlCache.map(r => {
-    totalRealized   += r.realized_pnl   || 0;
-    totalUnrealized += r.unrealized_pnl || 0;
-    const net = (r.realized_pnl||0) + (r.unrealized_pnl||0);
-    return `<tr style="border-bottom:1px solid var(--border);">
-      <td style="padding:10px 14px;font-weight:700;">${r.year}</td>
-      <td style="padding:10px 14px;text-align:right;">${fmtPnl(r.realized_pnl)}</td>
-      <td style="padding:10px 14px;text-align:right;">${fmtPnl(r.unrealized_pnl)}</td>
-      <td style="padding:10px 14px;text-align:right;font-weight:700;">${fmtPnl(net)}</td>
-      <td style="padding:10px 8px;text-align:center;white-space:nowrap;">
-        <button onclick="showEditYearlyPnlModal(${r.year})" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--muted);" title="編輯">✏️</button>
-        <button onclick="deleteYearlyPnl(${r.year})" style="background:none;border:none;cursor:pointer;font-size:17px;color:var(--muted);" title="刪除">×</button>
-      </td>
-    </tr>`;
-  }).join('');
-  const totalNet = totalRealized + totalUnrealized;
-  if (tfoot) tfoot.innerHTML = `<tr style="background:var(--bg);font-weight:700;border-top:2px solid var(--border);">
-    <td style="padding:10px 14px;">合計</td>
-    <td style="padding:10px 14px;text-align:right;">${fmtPnl(totalRealized)}</td>
-    <td style="padding:10px 14px;text-align:right;">${fmtPnl(totalUnrealized)}</td>
-    <td style="padding:10px 14px;text-align:right;">${fmtPnl(totalNet)}</td>
-    <td></td>
-  </tr>`;
-}
-
-function _yearlyPnlForm(r = {}) {
-  const currentYear = new Date().getFullYear();
-  return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
-    <div>
-      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📅 年份 <span style="color:#ef4444;font-size:11px;">必填</span></label>
-      <input id="yp-year" type="number" class="form-input" style="width:100%;box-sizing:border-box;" value="${r.year||currentYear}" min="2000" max="2099" ${r.year?'readonly':''}>
-    </div>
-    <div>
-      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">💰 已實現損益 (TWD)</label>
-      <input id="yp-realized" type="number" class="form-input" style="width:100%;box-sizing:border-box;" value="${r.realized_pnl||0}" step="1" placeholder="0">
-    </div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-    <div>
-      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📈 未實現損益 (TWD)</label>
-      <input id="yp-unrealized" type="number" class="form-input" style="width:100%;box-sizing:border-box;" value="${r.unrealized_pnl||0}" step="1" placeholder="0">
-    </div>
-    <div style="display:flex;align-items:flex-end;padding-bottom:2px;">
-      <div style="width:100%;background:var(--bg2);border-radius:8px;padding:10px 12px;font-size:13px;">
-        <div style="color:var(--muted);margin-bottom:4px;font-weight:600;">合計</div>
-        <div id="yp-total-preview" style="font-size:16px;font-weight:700;"></div>
+  list.innerHTML = res.data.map(f => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid var(--border);">
+      <span style="font-size:18px;">${f.is_binary ? '📎' : '📄'}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_escHtml(f.filename)}</div>
+        <div style="font-size:12px;color:var(--muted);">${_fmtSize(f.size_bytes)} · ${f.created_at?.slice(0,16) || '--'}</div>
       </div>
-    </div>
-  </div>`;
+      <button class="btn btn-outline btn-sm" onclick="encReadFile(${f.id})">🔓 閱讀</button>
+      <button onclick="encDeleteFile(${f.id},'${_escHtml(f.filename)}')" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--muted);" title="刪除">×</button>
+    </div>`).join('');
 }
 
-function _ypBindPreview() {
-  function upd() {
-    const r = parseFloat($('yp-realized')?.value)  || 0;
-    const u = parseFloat($('yp-unrealized')?.value) || 0;
-    const t = r + u;
-    const el = $('yp-total-preview');
-    if (el) { el.textContent = (t >= 0 ? '+' : '') + t.toLocaleString(); el.style.color = t >= 0 ? 'var(--success)' : 'var(--danger)'; }
-  }
-  setTimeout(() => {
-    ['yp-realized','yp-unrealized'].forEach(id => { const el = $(id); if (el) el.addEventListener('input', upd); });
-    upd();
-  }, 50);
+function _fmtSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/1024/1024).toFixed(2) + ' MB';
 }
 
-function showAddYearlyPnlModal() {
-  showModal('📊 新增年度損益', _yearlyPnlForm(), { onSubmit: submitAddYearlyPnl, submitLabel: '＋ 新增' });
-  _ypBindPreview();
-}
+function encPickFile() { $('enc-file-input').click(); }
 
-async function submitAddYearlyPnl() {
-  const year = parseInt($('yp-year')?.value);
-  if (!year) { toast('請填寫年份','err'); return; }
-  const body = { year, realized_pnl: parseFloat($('yp-realized')?.value)||0,
-    unrealized_pnl: parseFloat($('yp-unrealized')?.value)||0 };
-  const res = await api('/api/investment/yearly-pnl', 'POST', body);
-  if (res.success) { closeModalForce(); loadYearlyPnl(); toast('已新增','ok'); }
-  else toast(res.error||'新增失敗','err');
-}
-
-function showEditYearlyPnlModal(year) {
-  const r = _yearlyPnlCache.find(x => x.year === year);
-  if (!r) return;
-  showModal(`✏️ 編輯 ${year} 年度損益`, _yearlyPnlForm(r), { onSubmit: () => submitEditYearlyPnl(year), submitLabel: '儲存' });
-  _ypBindPreview();
-}
-
-async function submitEditYearlyPnl(year) {
-  const body = { realized_pnl: parseFloat($('yp-realized')?.value)||0,
-    unrealized_pnl: parseFloat($('yp-unrealized')?.value)||0 };
-  const res = await api(`/api/investment/yearly-pnl/${year}`, 'PUT', body);
-  if (res.success) { closeModalForce(); loadYearlyPnl(); toast('已更新','ok'); }
-  else toast(res.error||'更新失敗','err');
-}
-
-async function deleteYearlyPnl(year) {
-  if (!confirm(`確認刪除 ${year} 年度損益記錄？`)) return;
-  const res = await api(`/api/investment/yearly-pnl/${year}`, 'DELETE');
-  if (res.success) { loadYearlyPnl(); toast('已刪除'); }
-  else toast(res.error||'刪除失敗','err');
-}
-
-// ════════════════════════════════════════════════
-// 分析 / 文件閱讀 (2-2)
-// ════════════════════════════════════════════════
-function loadAnalysis() { _docsRender(); }
-
-let _docsFiles = [];   // [{name, html}]
-let _docsActive = -1;
-
-function docsDragOver(e) {
-  e.preventDefault();
-  $('docs-dropzone').classList.add('drag-over');
-}
-function docsDragLeave(e) {
-  $('docs-dropzone').classList.remove('drag-over');
-}
-function docsDrop(e) {
-  e.preventDefault();
-  $('docs-dropzone').classList.remove('drag-over');
-  const files = [...e.dataTransfer.files].filter(f => /\.(md|markdown|txt)$/i.test(f.name));
-  if (!files.length) { toast('僅支援 .md / .txt 檔案','err'); return; }
-  _docsReadFiles(files);
-}
-function docsPickFile() {
-  $('docs-file-input').click();
-}
-function docsFileInputChange(e) {
+function encFileInputChange(e) {
   const files = [...e.target.files];
   e.target.value = '';
-  if (!files.length) return;
-  _docsReadFiles(files);
-}
-function _docsReadFiles(files) {
-  let pending = files.length;
-  files.forEach(f => {
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const html = _mdToHtml(ev.target.result || '');
-      const existing = _docsFiles.findIndex(d => d.name === f.name);
-      if (existing >= 0) {
-        _docsFiles[existing].html = html;
-      } else {
-        _docsFiles.push({ name: f.name, html });
-      }
-      pending--;
-      if (pending === 0) {
-        _docsActive = _docsFiles.length - 1;
-        _docsRender();
-      }
-    };
-    reader.readAsText(f, 'utf-8');
-  });
-}
-function _docsRender() {
-  const dropzone = $('docs-dropzone');
-  const main     = $('docs-main');
-  if (!_docsFiles.length) {
-    dropzone.style.display = '';
-    main.style.display = 'none';
-    return;
-  }
-  dropzone.style.display = 'none';
-  main.style.display = 'flex';
-
-  // File list
-  const list = $('docs-file-list');
-  list.innerHTML = _docsFiles.map((f, i) => `
-    <div class="docs-file-item ${i === _docsActive ? 'active' : ''}" onclick="docsSelectFile(${i})">
-      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">📄 ${_escHtml(f.name)}</span>
-      <button onclick="event.stopPropagation();docsRemoveFile(${i})" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--muted);flex-shrink:0;padding:0 2px;" title="移除">×</button>
-    </div>`).join('');
-
-  // Content
-  const content = $('docs-content-area');
-  if (_docsActive >= 0 && _docsFiles[_docsActive]) {
-    content.innerHTML = _docsFiles[_docsActive].html;
-  }
-}
-function docsSelectFile(i) {
-  _docsActive = i;
-  _docsRender();
-}
-function docsRemoveFile(i) {
-  _docsFiles.splice(i, 1);
-  if (_docsActive >= _docsFiles.length) _docsActive = _docsFiles.length - 1;
-  _docsRender();
-  if (!_docsFiles.length) {
-    $('docs-dropzone').style.display = '';
-    $('docs-main').style.display = 'none';
-  }
+  files.forEach(encUploadFile);
 }
 
-// ── Markdown renderer ──────────────────────────
-function _mdToHtml(raw) {
-  const saved = [];
-  const ph = s => { const k = `\x00${saved.length}\x00`; saved.push(s); return k; };
-  const restore = s => { saved.forEach((v, i) => { s = s.replaceAll(`\x00${i}\x00`, v); }); return s; };
-  const esc = t => t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function encDragOver(e) { e.preventDefault(); $('enc-dropzone').style.borderColor = 'var(--primary)'; }
+function encDragLeave(e) { $('enc-dropzone').style.borderColor = ''; }
+function encDrop(e) {
+  e.preventDefault();
+  $('enc-dropzone').style.borderColor = '';
+  [...e.dataTransfer.files].forEach(encUploadFile);
+}
 
-  // Save fenced code blocks
-  let md = raw.replace(/```([\w]*)\n?([\s\S]*?)```/g, (_, lang, code) =>
-    ph(`<pre><code class="lang-${esc(lang)}">${esc(code.replace(/\n$/,''))}</code></pre>`));
+function encUploadFile(file) {
+  const reader = new FileReader();
+  reader.onload = async ev => {
+    const arrayBuf = ev.target.result;
+    const b64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuf)));
+    const res = await api('/api/analysis/upload', 'POST', {
+      filename: file.name,
+      mimeType: file.type || 'application/octet-stream',
+      dataB64: b64,
+    });
+    if (res.success) { toast(`已加密保存：${file.name}`, 'ok'); _encLoadList(); }
+    else toast(res.error || '上傳失敗', 'err');
+  };
+  reader.readAsArrayBuffer(file);
+}
 
-  // Save inline code
-  md = md.replace(/`([^`\n]+)`/g, (_, c) => ph(`<code>${esc(c)}</code>`));
+async function encReadFile(id) {
+  const res = await api(`/api/analysis/file/${id}`);
+  if (!res.success) { toast(res.error || '解密失敗', 'err'); return; }
+  const { filename, mimeType, dataB64 } = res.data;
 
-  // Save blockquotes
-  md = md.replace(/^> (.+)$/gm, (_, t) => ph(`<blockquote>${t}</blockquote>`));
-
-  // Process line by line
-  const lines = md.split('\n');
-  const out = [];
-  let i = 0;
-
-  while (i < lines.length) {
-    const line = lines[i];
-
-    // Headings
-    const hm = line.match(/^(#{1,6}) (.*)/);
-    if (hm) {
-      const lvl = hm[1].length;
-      out.push(`<h${lvl}>${_mdInline(hm[2])}</h${lvl}>`);
-      i++; continue;
-    }
-
-    // HR
-    if (/^(---+|\*\*\*+|___+)$/.test(line.trim())) {
-      out.push('<hr>'); i++; continue;
-    }
-
-    // Tables (| col | col |)
-    if (/^\|.+\|/.test(line)) {
-      const rows = [];
-      while (i < lines.length && /^\|.+\|/.test(lines[i])) {
-        rows.push(lines[i]); i++;
-      }
-      const isHeader = rows[1] && /^\|[-| :]+\|$/.test(rows[1].trim());
-      const start = isHeader ? 0 : 0;
-      const body  = isHeader ? rows.slice(2) : rows;
-      const parseRow = r => r.replace(/^\||\|$/g,'').split('|').map(c => `<td>${_mdInline(c.trim())}</td>`).join('');
-      const hRow  = isHeader ? '<thead><tr>' + rows[0].replace(/^\||\|$/g,'').split('|').map(c=>`<th>${_mdInline(c.trim())}</th>`).join('') + '</tr></thead>' : '';
-      out.push(`<table>${hRow}<tbody>${body.map(r=>`<tr>${parseRow(r)}</tr>`).join('')}</tbody></table>`);
-      continue;
-    }
-
-    // Unordered list
-    if (/^[-*+] /.test(line)) {
-      const items = [];
-      while (i < lines.length && /^[-*+] /.test(lines[i])) {
-        items.push(lines[i].replace(/^[-*+] /,''));
-        i++;
-      }
-      out.push(`<ul>${items.map(x=>`<li>${_mdInline(x)}</li>`).join('')}</ul>`);
-      continue;
-    }
-
-    // Ordered list
-    if (/^\d+\. /.test(line)) {
-      const items = [];
-      while (i < lines.length && /^\d+\. /.test(lines[i])) {
-        items.push(lines[i].replace(/^\d+\. /,''));
-        i++;
-      }
-      out.push(`<ol>${items.map(x=>`<li>${_mdInline(x)}</li>`).join('')}</ol>`);
-      continue;
-    }
-
-    // Blank line or placeholder
-    if (line.trim() === '' || /^\x00\d+\x00$/.test(line.trim())) {
-      out.push(line.trim());
-    } else {
-      out.push(`<p>${_mdInline(line)}</p>`);
-    }
-    i++;
+  // decode base64 → text
+  let text;
+  try {
+    const bin = atob(dataB64);
+    text = decodeURIComponent(escape(bin));
+  } catch {
+    try { text = atob(dataB64); } catch { text = dataB64; }
   }
 
-  return restore(out.join('\n'));
+  const viewer = $('enc-viewer');
+  const title  = $('enc-viewer-title');
+  const body   = $('enc-viewer-body');
+  if (!viewer) return;
+  if (title) title.textContent = `🔓 ${filename}`;
+  if (body)  body.textContent = text;
+  viewer.style.display = '';
+  viewer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
-  function _mdInline(t) {
-    // split out existing placeholders so they skip escaping
-    return t.split(/(\x00\d+\x00)/).map(chunk => {
-      if (/^\x00\d+\x00$/.test(chunk)) return chunk;
-      chunk = esc(chunk);
-      chunk = chunk.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
-      chunk = chunk.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-      chunk = chunk.replace(/\*(.+?)\*/g, '<em>$1</em>');
-      chunk = chunk.replace(/~~(.+?)~~/g, '<del>$1</del>');
-      chunk = chunk.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
-      return chunk;
-    }).join('');
-  }
+function encCloseViewer() {
+  const viewer = $('enc-viewer');
+  if (viewer) viewer.style.display = 'none';
+}
+
+async function encDeleteFile(id, name) {
+  if (!confirm(`確認刪除「${name}」？刪除後無法還原。`)) return;
+  const res = await api(`/api/analysis/file/${id}`, 'DELETE');
+  if (res.success) { toast('已刪除'); encCloseViewer(); _encLoadList(); }
+  else toast(res.error || '刪除失敗', 'err');
 }
 
 // ════════════════════════════════════════════════
@@ -4032,6 +3896,84 @@ async function downloadMaps() {
     loadTravelFootprint();
   } catch(e) { toast('下載失敗：'+e.message,'err'); }
   finally { if (btn) { btn.disabled = false; btn.textContent = '📥 下載地圖'; } }
+}
+
+// ════════════════════════════════════════════════
+// 2-4 操盤 - Bybit 框架
+// ════════════════════════════════════════════════
+async function loadTrading() {
+  const res = await api('/api/trading/bybit/status');
+  const badge   = $('bybit-status-badge');
+  const unconf  = $('bybit-unconfig');
+  const posBox  = $('bybit-positions');
+
+  if (!res.configured) {
+    if (badge)  { badge.textContent = '⚠️ 未設定 API Key'; badge.style.color = 'var(--danger)'; }
+    if (unconf) unconf.style.display = '';
+    if (posBox) posBox.innerHTML = '';
+    return;
+  }
+  if (unconf) unconf.style.display = 'none';
+
+  if (!res.connected) {
+    if (badge) { badge.textContent = `❌ 連線失敗`; badge.style.color = 'var(--danger)'; }
+    if (posBox) posBox.innerHTML = `<div style="text-align:center;padding:30px;color:var(--danger);">${res.error || '連線失敗'}</div>`;
+    return;
+  }
+
+  const env = res.testnet ? '（測試網）' : '（正式網）';
+  if (badge) { badge.textContent = `✅ 已連線 ${env}`; badge.style.color = 'var(--success)'; }
+
+  // 載入餘額
+  const balRes = await api('/api/trading/bybit/balance');
+  if (balRes.success) {
+    const list = balRes.data?.list?.[0];
+    const coin = list?.coin?.find(c => c.coin === 'USDT') || {};
+    const setVal = (id, v) => { const el = $(id); if (el) el.textContent = v !== undefined ? parseFloat(v||0).toFixed(2) : '--'; };
+    setVal('bybit-equity',    coin.equity    ?? list?.totalEquity);
+    setVal('bybit-available', coin.availableToWithdraw ?? list?.totalAvailableBalance);
+    setVal('bybit-upnl',      coin.unrealisedPnl ?? list?.totalUnrealisedPnl);
+    const upnlEl = $('bybit-upnl');
+    if (upnlEl) {
+      const v = parseFloat(upnlEl.textContent);
+      upnlEl.style.color = v > 0 ? 'var(--success)' : v < 0 ? 'var(--danger)' : '';
+    }
+  }
+
+  // 載入持倉
+  const posRes = await api('/api/trading/bybit/positions');
+  if (posRes.success && posBox) {
+    const rows = posRes.data?.list || [];
+    if (!rows.length) {
+      posBox.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);">目前無持倉</div>';
+    } else {
+      posBox.innerHTML = `<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead><tr style="background:var(--bg);border-bottom:2px solid var(--border);">
+          <th style="padding:8px 12px;text-align:left;">交易對</th>
+          <th style="padding:8px 12px;text-align:left;">方向</th>
+          <th style="padding:8px 12px;text-align:right;">數量</th>
+          <th style="padding:8px 12px;text-align:right;">均價</th>
+          <th style="padding:8px 12px;text-align:right;">現價</th>
+          <th style="padding:8px 12px;text-align:right;">未平倉盈虧</th>
+          <th style="padding:8px 12px;text-align:right;">槓桿</th>
+        </tr></thead>
+        <tbody>${rows.map(p => {
+          const pnl = parseFloat(p.unrealisedPnl || 0);
+          const pnlColor = pnl > 0 ? 'var(--success)' : pnl < 0 ? 'var(--danger)' : '';
+          const side = p.side === 'Buy' ? '<span style="color:var(--success);">多</span>' : '<span style="color:var(--danger);">空</span>';
+          return `<tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px 12px;font-weight:600;">${p.symbol}</td>
+            <td style="padding:8px 12px;">${side}</td>
+            <td style="padding:8px 12px;text-align:right;">${p.size}</td>
+            <td style="padding:8px 12px;text-align:right;">${parseFloat(p.avgPrice||0).toFixed(4)}</td>
+            <td style="padding:8px 12px;text-align:right;">${parseFloat(p.markPrice||0).toFixed(4)}</td>
+            <td style="padding:8px 12px;text-align:right;color:${pnlColor};font-weight:600;">${pnl >= 0?'+':''}${pnl.toFixed(2)}</td>
+            <td style="padding:8px 12px;text-align:right;">${p.leverage}x</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table></div>`;
+    }
+  }
 }
 
 // ════════════════════════════════════════════════

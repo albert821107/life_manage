@@ -726,5 +726,26 @@ module.exports = (io) => {
     } catch(e) { res.json({ success: false, error: e.message }); }
   });
 
+  // GET /api/investment/settings?key=xxx
+  router.get('/settings', (req, res) => {
+    try {
+      const { key } = req.query;
+      if (!key) return res.json({ success: false, error: '缺少 key' });
+      const row = db.prepare('SELECT value, updated_at FROM investment_settings WHERE key=?').get(key);
+      res.json({ success: true, value: row?.value ?? null, updated_at: row?.updated_at ?? null });
+    } catch(e) { res.json({ success: false, error: e.message }); }
+  });
+
+  // POST /api/investment/settings  body: { key, value }
+  router.post('/settings', (req, res) => {
+    try {
+      const { key, value } = req.body;
+      if (!key || value === undefined) return res.json({ success: false, error: '缺少 key 或 value' });
+      db.prepare(`INSERT INTO investment_settings (key, value, updated_at) VALUES (?,?,datetime('now','localtime'))
+        ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at`).run(key, String(value));
+      res.json({ success: true });
+    } catch(e) { res.json({ success: false, error: e.message }); }
+  });
+
   return router;
 };

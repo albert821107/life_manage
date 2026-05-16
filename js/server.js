@@ -68,6 +68,8 @@ app.post('/api/admin/reload', (req, res) => {
   const travelRouter     = require('./modules/travel')(io);
   const gamesRouter      = require('./modules/games')(io);
   const workRouter       = require('./modules/work')(io);
+  const analysisRouter   = require('./modules/analysis')(io);
+  const tradingRouter    = require('./modules/trading')(io);
 
   app.use('/api/investment', investmentRouter);
   app.use('/api/ai',         aiRouter);
@@ -76,6 +78,8 @@ app.post('/api/admin/reload', (req, res) => {
   app.use('/api/travel',     travelRouter);
   app.use('/api/games',      gamesRouter);
   app.use('/api/work',       workRouter);
+  app.use('/api/analysis',   analysisRouter);
+  app.use('/api/trading',    tradingRouter);
 
   app.get('/api/health', (req, res) => {
     res.json({ success: true, version: '1.0.0', uptime: Math.floor(process.uptime()) });

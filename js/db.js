@@ -96,7 +96,9 @@ async function init() {
     `CREATE TABLE IF NOT EXISTS travel_weekly_schedule (id INTEGER PRIMARY KEY AUTOINCREMENT, week_date TEXT NOT NULL, return_date TEXT, week_type TEXT DEFAULT '大', location TEXT DEFAULT '', transportation TEXT DEFAULT '', tickets TEXT DEFAULT '', accommodation TEXT DEFAULT '', note TEXT DEFAULT '', created_at TEXT DEFAULT (datetime('now','localtime')))`,
     `CREATE TABLE IF NOT EXISTS investment_yearly_pnl (id INTEGER PRIMARY KEY AUTOINCREMENT, year INTEGER NOT NULL UNIQUE, realized_pnl REAL DEFAULT 0, unrealized_pnl REAL DEFAULT 0, dividend_income REAL DEFAULT 0, tax_paid REAL DEFAULT 0, note TEXT DEFAULT '', updated_at TEXT DEFAULT (datetime('now','localtime')))`,
     `CREATE TABLE IF NOT EXISTS psn_cache (username TEXT NOT NULL PRIMARY KEY, profile_data TEXT NOT NULL, updated_at TEXT DEFAULT (datetime('now','localtime')))`,
-    `CREATE TABLE IF NOT EXISTS work_jira_config (id INTEGER PRIMARY KEY AUTOINCREMENT, base_url TEXT NOT NULL, email TEXT NOT NULL, api_token TEXT NOT NULL, updated_at TEXT DEFAULT (datetime('now','localtime')))`
+    `CREATE TABLE IF NOT EXISTS work_jira_config (id INTEGER PRIMARY KEY AUTOINCREMENT, base_url TEXT NOT NULL, email TEXT NOT NULL, api_token TEXT NOT NULL, updated_at TEXT DEFAULT (datetime('now','localtime')))`,
+    `CREATE TABLE IF NOT EXISTS encrypted_files (id INTEGER PRIMARY KEY AUTOINCREMENT, filename TEXT NOT NULL, mime_type TEXT NOT NULL, size_bytes INTEGER DEFAULT 0, content_encrypted TEXT NOT NULL, iv TEXT NOT NULL, auth_tag TEXT NOT NULL, is_binary INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime('now','localtime')))`,
+    `CREATE TABLE IF NOT EXISTS investment_settings (key TEXT NOT NULL PRIMARY KEY, value TEXT NOT NULL, updated_at TEXT DEFAULT (datetime('now','localtime')))`
   ];
   SCHEMA.forEach(s => { try { raw.run(s); } catch(e) { console.error('[DB]', e.message); } });
 
