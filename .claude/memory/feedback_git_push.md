@@ -7,8 +7,10 @@ metadata:
   originSessionId: f9aedee9-fbce-41f1-b0d7-b6bdeb62d9bb
 ---
 
-不要在完成任務後自動 git push。只有當使用者明確說「推送」或「push」時才執行。
+只有 commit 和 push 這兩個操作需要等使用者明確指示才執行。其他 git 查詢操作（status、log、diff、show、branch 等）可自由執行。
 
-**Why:** 使用者要控制推送時機，避免未確認的程式碼被推到遠端。
+**Why:** 使用者要控制程式碼實際寫入 / 推出的時機，但查詢操作不影響狀態，不需要確認。
 
-**How to apply:** 完成 commit 後停止，不執行 git push，不提示「要推送嗎？」。
+**How to apply:**
+- `git commit`、`git push` — 必須等使用者說「commit」「推送」「push」等才執行
+- `git status`、`git log`、`git diff`、`git show` 等 — 可直接執行，無需確認
