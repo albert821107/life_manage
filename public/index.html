@@ -300,7 +300,7 @@
     <div id="nav-advanced" style="display:none;">
       <div class="nav-group-label">進階功能</div>
       <div class="nav-item" data-sec="work"      onclick="nav('work')">      <span class="ico">💼</span><span>工作<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
-      <div class="nav-item" data-sec="analysis"  onclick="nav('analysis')">  <span class="ico">🔍</span><span>分析<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
+      <div class="nav-item" data-sec="analysis"  onclick="nav('analysis')">  <span class="ico">📄</span><span>文件閱讀</span></div>
       <div class="nav-item" data-sec="investpro" onclick="nav('investpro')"> <span class="ico">💹</span><span>投資<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
       <div class="nav-item" data-sec="trading"   onclick="nav('trading')">   <span class="ico">🎯</span><span>操盤<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
     </div>
@@ -895,10 +895,34 @@
 
     <!-- ════ ANALYSIS ════ -->
     <div class="section" id="section-analysis">
-            <div style="text-align:center;padding:80px 0;color:var(--muted);">
-        <div style="font-size:56px;margin-bottom:16px;">🔍</div>
-        <div style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text);">分析模組</div>
-        <div style="font-size:14px;">開發中，敬請期待</div>
+      <div class="sec-header">
+        <div>
+          <div class="sec-title">📄 文件閱讀</div>
+          <div class="sec-sub">拖曳 .md 檔案閱讀</div>
+        </div>
+      </div>
+      <!-- 拖曳區 -->
+      <div id="docs-dropzone"
+        style="border:2px dashed var(--border);border-radius:12px;padding:48px 24px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:16px;"
+        ondragover="docsDragOver(event)" ondragleave="docsDragLeave(event)" ondrop="docsDrop(event)"
+        onclick="docsPickFile()">
+        <div style="font-size:40px;margin-bottom:12px;">📂</div>
+        <div style="font-size:16px;font-weight:600;margin-bottom:6px;">拖曳 .md 檔案至此</div>
+        <div style="font-size:13px;color:var(--muted);">或點擊選擇檔案（支援多檔同時載入）</div>
+        <input id="docs-file-input" type="file" accept=".md,.markdown,.txt" multiple style="display:none;" onchange="docsFileInputChange(event)">
+      </div>
+      <!-- 主體：左側清單 + 右側內容 -->
+      <div id="docs-main" style="display:none;gap:16px;align-items:flex-start;" class="docs-layout">
+        <!-- 左側檔案清單 -->
+        <div id="docs-sidebar" style="background:var(--bg2);border-radius:10px;padding:10px;min-width:180px;max-width:220px;flex-shrink:0;">
+          <div style="font-size:12px;font-weight:700;color:var(--muted);padding:4px 6px 8px;letter-spacing:.05em;">已載入檔案</div>
+          <div id="docs-file-list"></div>
+          <button class="btn btn-sm" style="width:100%;margin-top:10px;font-size:12px;" onclick="docsPickFile()">＋ 新增檔案</button>
+        </div>
+        <!-- 右側文件內容 -->
+        <div style="flex:1;min-width:0;">
+          <div id="docs-content-area" class="card" style="padding:24px 28px;min-height:300px;line-height:1.75;font-size:15px;overflow-x:auto;"></div>
+        </div>
       </div>
     </div>
 
@@ -907,7 +931,6 @@
     <div class="section" id="section-investpro">
       <div class="inv-tabs" id="investpro-tabs">
         <div class="inv-tab active" id="investpro-tab-yearlypnl" onclick="switchInvestproTab('yearlypnl')">📊 年度損益</div>
-        <div class="inv-tab" id="investpro-tab-docs" onclick="switchInvestproTab('docs')">📄 文件閱讀</div>
       </div>
 
       <!-- 年度損益 sub -->
@@ -922,41 +945,16 @@
                 <tr style="background:var(--bg);border-bottom:2px solid var(--border);">
                   <th style="padding:10px 14px;font-size:13px;color:var(--muted);text-align:left;">年份</th>
                   <th style="padding:10px 14px;font-size:13px;color:var(--muted);text-align:right;">已實現損益 (TWD)</th>
+                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);text-align:right;">未實現損益 (TWD)</th>
+                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);text-align:right;font-weight:700;">合計 (TWD)</th>
                   <th style="padding:10px 14px;width:80px;"></th>
                 </tr>
               </thead>
               <tbody id="yearlypnl-tbody">
-                <tr><td colspan="3" style="text-align:center;color:var(--muted);padding:40px;">尚無年度損益記錄</td></tr>
+                <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:40px;">尚無年度損益記錄</td></tr>
               </tbody>
               <tfoot id="yearlypnl-tfoot"></tfoot>
             </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- 文件閱讀 sub -->
-      <div id="investpro-sub-docs" style="display:none;">
-        <!-- 拖曳區 -->
-        <div id="docs-dropzone"
-          style="border:2px dashed var(--border);border-radius:12px;padding:48px 24px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:16px;"
-          ondragover="docsDragOver(event)" ondragleave="docsDragLeave(event)" ondrop="docsDrop(event)"
-          onclick="docsPickFile()">
-          <div style="font-size:40px;margin-bottom:12px;">📂</div>
-          <div style="font-size:16px;font-weight:600;margin-bottom:6px;">拖曳 .md 檔案至此</div>
-          <div style="font-size:13px;color:var(--muted);">或點擊選擇檔案（支援多檔同時載入）</div>
-          <input id="docs-file-input" type="file" accept=".md,.markdown,.txt" multiple style="display:none;" onchange="docsFileInputChange(event)">
-        </div>
-        <!-- 主體：左側清單 + 右側內容 -->
-        <div id="docs-main" style="display:none;gap:16px;align-items:flex-start;" class="docs-layout">
-          <!-- 左側檔案清單 -->
-          <div id="docs-sidebar" style="background:var(--bg2);border-radius:10px;padding:10px;min-width:180px;max-width:220px;flex-shrink:0;">
-            <div style="font-size:12px;font-weight:700;color:var(--muted);padding:4px 6px 8px;letter-spacing:.05em;">已載入檔案</div>
-            <div id="docs-file-list"></div>
-            <button class="btn btn-sm" style="width:100%;margin-top:10px;font-size:12px;" onclick="docsPickFile()">＋ 新增檔案</button>
-          </div>
-          <!-- 右側文件內容 -->
-          <div style="flex:1;min-width:0;">
-            <div id="docs-content-area" class="card" style="padding:24px 28px;min-height:300px;line-height:1.75;font-size:15px;overflow-x:auto;"></div>
           </div>
         </div>
       </div>
@@ -1178,7 +1176,7 @@ $('fit-month').value  = state.fitMonth;
 // ════════════════════════════════════════════════
 // Navigation
 // ════════════════════════════════════════════════
-const LOADERS = { dashboard:loadDashboard, accounting:loadAccounting, tasks:loadTasks, fitness:loadFitness, investment:loadInvestment, invest:loadInvest, ai:loadAI, line:loadLine, travel:loadTravel, work:loadWork, investpro:loadInvestpro, games:loadGames };
+const LOADERS = { dashboard:loadDashboard, accounting:loadAccounting, tasks:loadTasks, fitness:loadFitness, investment:loadInvestment, invest:loadInvest, ai:loadAI, line:loadLine, travel:loadTravel, work:loadWork, investpro:loadInvestpro, games:loadGames, analysis:loadAnalysis };
 
 function nav(sec){
   state.sec = sec;
@@ -4119,7 +4117,7 @@ function loadInvestpro() {
 function switchInvestproTab(tab) {
   _investproTab = tab;
   document.querySelectorAll('#investpro-tabs .inv-tab').forEach(el => el.classList.remove('active'));
-  ['yearlypnl','docs'].forEach(t => {
+  ['yearlypnl'].forEach(t => {
     const el  = $(`investpro-tab-${t}`);
     const sub = $(`investpro-sub-${t}`);
     if (el)  el.classList.toggle('active', t === tab);
@@ -4144,31 +4142,38 @@ async function loadYearlyPnl() {
   }
   const fmtPnl = n => {
     const v = Number(n||0);
-    const s = v >= 0 ? '+' : '';
+    const s = v >= 0 ? '+' : '-';
     return `<span style="color:${v>=0?'var(--success)':'var(--danger)'};">${s}${fmtMoney(Math.abs(v))}</span>`;
   };
-  let totalRealized = 0;
+  let totalRealized = 0, totalUnrealized = 0;
   tbody.innerHTML = _yearlyPnlCache.map(r => {
-    totalRealized += r.realized_pnl || 0;
+    totalRealized   += r.realized_pnl   || 0;
+    totalUnrealized += r.unrealized_pnl || 0;
+    const net = (r.realized_pnl||0) + (r.unrealized_pnl||0);
     return `<tr style="border-bottom:1px solid var(--border);">
       <td style="padding:10px 14px;font-weight:700;">${r.year}</td>
       <td style="padding:10px 14px;text-align:right;">${fmtPnl(r.realized_pnl)}</td>
+      <td style="padding:10px 14px;text-align:right;">${fmtPnl(r.unrealized_pnl)}</td>
+      <td style="padding:10px 14px;text-align:right;font-weight:700;">${fmtPnl(net)}</td>
       <td style="padding:10px 8px;text-align:center;white-space:nowrap;">
         <button onclick="showEditYearlyPnlModal(${r.year})" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--muted);" title="編輯">✏️</button>
         <button onclick="deleteYearlyPnl(${r.year})" style="background:none;border:none;cursor:pointer;font-size:17px;color:var(--muted);" title="刪除">×</button>
       </td>
     </tr>`;
   }).join('');
+  const totalNet = totalRealized + totalUnrealized;
   if (tfoot) tfoot.innerHTML = `<tr style="background:var(--bg);font-weight:700;border-top:2px solid var(--border);">
     <td style="padding:10px 14px;">合計</td>
     <td style="padding:10px 14px;text-align:right;">${fmtPnl(totalRealized)}</td>
+    <td style="padding:10px 14px;text-align:right;">${fmtPnl(totalUnrealized)}</td>
+    <td style="padding:10px 14px;text-align:right;">${fmtPnl(totalNet)}</td>
     <td></td>
   </tr>`;
 }
 
 function _yearlyPnlForm(r = {}) {
   const currentYear = new Date().getFullYear();
-  return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+  return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
     <div>
       <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📅 年份 <span style="color:#ef4444;font-size:11px;">必填</span></label>
       <input id="yp-year" type="number" class="form-input" style="width:100%;box-sizing:border-box;" value="${r.year||currentYear}" min="2000" max="2099" ${r.year?'readonly':''}>
@@ -4177,7 +4182,37 @@ function _yearlyPnlForm(r = {}) {
       <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">💰 已實現損益 (TWD)</label>
       <input id="yp-realized" type="number" class="form-input" style="width:100%;box-sizing:border-box;" value="${r.realized_pnl||0}" step="1" placeholder="0">
     </div>
-  </div>`;
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+    <div>
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📈 未實現損益 (TWD)</label>
+      <input id="yp-unrealized" type="number" class="form-input" style="width:100%;box-sizing:border-box;" value="${r.unrealized_pnl||0}" step="1" placeholder="0">
+    </div>
+    <div style="display:flex;align-items:flex-end;padding-bottom:2px;">
+      <div style="width:100%;background:var(--bg2);border-radius:8px;padding:10px 12px;font-size:13px;">
+        <div style="color:var(--muted);margin-bottom:4px;font-weight:600;">合計</div>
+        <div id="yp-total-preview" style="font-size:16px;font-weight:700;"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+  (function(){
+    function upd(){
+      var r=parseFloat(document.getElementById('yp-realized')?.value)||0;
+      var u=parseFloat(document.getElementById('yp-unrealized')?.value)||0;
+      var t=r+u;
+      var el=document.getElementById('yp-total-preview');
+      if(el){el.textContent=(t>=0?'+':'')+t.toLocaleString();el.style.color=t>=0?'var(--success)':'var(--danger)';}
+    }
+    setTimeout(function(){
+      ['yp-realized','yp-unrealized'].forEach(function(id){
+        var el=document.getElementById(id);
+        if(el)el.addEventListener('input',upd);
+      });
+      upd();
+    },50);
+  })();
+  </script>`;
 }
 
 function showAddYearlyPnlModal() {
@@ -4187,7 +4222,8 @@ function showAddYearlyPnlModal() {
 async function submitAddYearlyPnl() {
   const year = parseInt($('yp-year')?.value);
   if (!year) { toast('請填寫年份','err'); return; }
-  const body = { year, realized_pnl: parseFloat($('yp-realized')?.value)||0 };
+  const body = { year, realized_pnl: parseFloat($('yp-realized')?.value)||0,
+    unrealized_pnl: parseFloat($('yp-unrealized')?.value)||0 };
   const res = await api('/api/investment/yearly-pnl', 'POST', body);
   if (res.success) { closeModalForce(); loadYearlyPnl(); toast('已新增','ok'); }
   else toast(res.error||'新增失敗','err');
@@ -4200,7 +4236,8 @@ function showEditYearlyPnlModal(year) {
 }
 
 async function submitEditYearlyPnl(year) {
-  const body = { realized_pnl: parseFloat($('yp-realized')?.value)||0 };
+  const body = { realized_pnl: parseFloat($('yp-realized')?.value)||0,
+    unrealized_pnl: parseFloat($('yp-unrealized')?.value)||0 };
   const res = await api(`/api/investment/yearly-pnl/${year}`, 'PUT', body);
   if (res.success) { closeModalForce(); loadYearlyPnl(); toast('已更新','ok'); }
   else toast(res.error||'更新失敗','err');
@@ -4214,8 +4251,10 @@ async function deleteYearlyPnl(year) {
 }
 
 // ════════════════════════════════════════════════
-// 文件閱讀 (2-2-2)
+// 分析 / 文件閱讀 (2-2)
 // ════════════════════════════════════════════════
+function loadAnalysis() { _docsRender(); }
+
 let _docsFiles = [];   // [{name, html}]
 let _docsActive = -1;
 

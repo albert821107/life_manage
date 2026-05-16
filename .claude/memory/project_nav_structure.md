@@ -34,9 +34,9 @@ metadata:
 | 1-9 | 遊戲 | games |
 | 2-1 | 工作 | work |
 | 2-1-1 | Jira工單 | tab=jira |
-| 2-2 | 投資(進階) | investpro |
-| 2-2-1 | 年度損益 | tab=yearlypnl |
-| 2-3 | 分析 | analysis |
+| 2-2 | 文件閱讀 | analysis |
+| 2-3 | 投資(進階) | investpro |
+| 2-3-1 | 年度損益 | tab=yearlypnl |
 | 2-4 | 操盤 | trading |
 
 ## 有子頁籤的大頁籤切換函式

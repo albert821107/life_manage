@@ -184,10 +184,10 @@ Memory 檔案存於 `.claude/memory/`（git tracked），透過 git push/pull �
     ├── 2-1  工作       data-sec="work"        → #section-work
     │         └── 子頁籤 (switchWorkTab)
     │             └── 2-1-1  Jira工單   tab='jira'      → #work-sub-jira
-    ├── 2-2  投資       data-sec="investpro"   → #section-investpro
+    ├── 2-2  文件閱讀   data-sec="analysis"    → #section-analysis
+    ├── 2-3  投資       data-sec="investpro"   → #section-investpro
     │         └── 子頁籤 (switchInvestproTab)
-    │             └── 2-2-1  年度損益   tab='yearlypnl' → #investpro-sub-yearlypnl
-    ├── 2-3  分析       data-sec="analysis"    → #section-analysis
+    │             └── 2-3-1  年度損益   tab='yearlypnl' → #investpro-sub-yearlypnl
     └── 2-4  操盤       data-sec="trading"     → #section-trading
 ```
 
