@@ -69,6 +69,7 @@ app.post('/api/admin/reload', (req, res) => {
   const lineModule       = require('./modules/line_notify')(io);
   const telegramModule   = require('./modules/telegram')(io);
   const travelRouter     = require('./modules/travel')(io);
+  const gamesRouter      = require('./modules/games')(io);
 
   app.use('/api/accounting', accountingRouter);
   app.use('/api/tasks',      tasksRouter);
@@ -78,6 +79,7 @@ app.post('/api/admin/reload', (req, res) => {
   app.use('/api/line',       lineModule.router);
   app.use('/api/telegram',   telegramModule.router);
   app.use('/api/travel',     travelRouter);
+  app.use('/api/games',      gamesRouter);
 
   app.get('/api/health', (req, res) => {
     res.json({ success: true, version: '1.0.0', uptime: Math.floor(process.uptime()) });

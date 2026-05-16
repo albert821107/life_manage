@@ -93,7 +93,9 @@ async function init() {
     `CREATE TABLE IF NOT EXISTS travel_schedule (id INTEGER PRIMARY KEY AUTOINCREMENT, trip_id INTEGER NOT NULL, day_offset INTEGER DEFAULT 1, time_slot TEXT DEFAULT '', title TEXT NOT NULL, description TEXT DEFAULT '', type TEXT DEFAULT 'activity', created_at TEXT DEFAULT (datetime('now','localtime')))`,
     `CREATE TABLE IF NOT EXISTS travel_checklist (id INTEGER PRIMARY KEY AUTOINCREMENT, trip_id INTEGER NOT NULL, item TEXT NOT NULL, checked INTEGER DEFAULT 0, category TEXT DEFAULT '其他', sort_order INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime('now','localtime')))`,
     `CREATE TABLE IF NOT EXISTS travel_memories (id INTEGER PRIMARY KEY AUTOINCREMENT, trip_id INTEGER, title TEXT NOT NULL, content TEXT DEFAULT '', date TEXT, tags TEXT DEFAULT '', created_at TEXT DEFAULT (datetime('now','localtime')))`,
-    `CREATE TABLE IF NOT EXISTS travel_weekly_schedule (id INTEGER PRIMARY KEY AUTOINCREMENT, week_date TEXT NOT NULL, return_date TEXT, week_type TEXT DEFAULT '大', location TEXT DEFAULT '', transportation TEXT DEFAULT '', tickets TEXT DEFAULT '', accommodation TEXT DEFAULT '', note TEXT DEFAULT '', created_at TEXT DEFAULT (datetime('now','localtime')))`
+    `CREATE TABLE IF NOT EXISTS travel_weekly_schedule (id INTEGER PRIMARY KEY AUTOINCREMENT, week_date TEXT NOT NULL, return_date TEXT, week_type TEXT DEFAULT '大', location TEXT DEFAULT '', transportation TEXT DEFAULT '', tickets TEXT DEFAULT '', accommodation TEXT DEFAULT '', note TEXT DEFAULT '', created_at TEXT DEFAULT (datetime('now','localtime')))`,
+    `CREATE TABLE IF NOT EXISTS investment_yearly_pnl (id INTEGER PRIMARY KEY AUTOINCREMENT, year INTEGER NOT NULL UNIQUE, realized_pnl REAL DEFAULT 0, unrealized_pnl REAL DEFAULT 0, dividend_income REAL DEFAULT 0, tax_paid REAL DEFAULT 0, note TEXT DEFAULT '', updated_at TEXT DEFAULT (datetime('now','localtime')))`,
+    `CREATE TABLE IF NOT EXISTS psn_cache (username TEXT NOT NULL PRIMARY KEY, profile_data TEXT NOT NULL, updated_at TEXT DEFAULT (datetime('now','localtime')))`
   ];
   SCHEMA.forEach(s => { try { raw.run(s); } catch(e) { console.error('[DB]', e.message); } });
 

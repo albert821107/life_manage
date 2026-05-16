@@ -76,6 +76,74 @@ function toCSV(headers, rows) {
   return [headers.join(','), ...rows.map(r => headers.map(h => escape(r[h])).join(','))].join('\n');
 }
 
+// ── 依交易所抓取加密貨幣 USDT 現價 ──────────────────
+async function fetchCryptoPriceUSDT(symbol, exchange) {
+  const exch = (exchange || '').toLowerCase();
+
+  if (exch.includes('bybit')) {
+    const d = await fetchJSON(`https://api.bybit.com/v5/market/tickers?category=spot&symbol=${symbol}USDT`);
+    const p = parseFloat(d?.result?.list?.[0]?.lastPrice);
+    if (p > 0) return p;
+  }
+
+  if (exch.includes('okx')) {
+    const d = await fetchJSON(`https://www.okx.com/api/v5/market/ticker?instId=${symbol}-USDT`);
+    const p = parseFloat(d?.data?.[0]?.last);
+    if (p > 0) return p;
+  }
+
+  if (exch.includes('gate')) {
+    const d = await fetchJSON(`https://api.gateio.ws/api/v4/spot/tickers?currency_pair=${symbol}_USDT`);
+    const p = parseFloat(d?.[0]?.last);
+    if (p > 0) return p;
+  }
+
+  if (exch.includes('mexc')) {
+    const d = await fetchJSON(`https://api.mexc.com/api/v3/ticker/price?symbol=${symbol}USDT`);
+    const p = parseFloat(d?.price);
+    if (p > 0) return p;
+  }
+
+  if (exch.includes('kucoin')) {
+    const d = await fetchJSON(`https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=${symbol}-USDT`);
+    const p = parseFloat(d?.data?.price);
+    if (p > 0) return p;
+  }
+
+  if (exch.includes('max')) {
+    const d = await fetchJSON(`https://max-api.maicoin.com/api/v2/tickers/${symbol.toLowerCase()}usdt`);
+    const p = parseFloat(d?.last);
+    if (p > 0) return p;
+  }
+
+  if (exch.includes('coinbase')) {
+    const d = await fetchJSON(`https://api.coinbase.com/v2/prices/${symbol}-USD/spot`);
+    const p = parseFloat(d?.data?.amount);
+    if (p > 0) return p;
+  }
+
+  if (exch.includes('kraken')) {
+    const pair = `${symbol}USDT`;
+    const d = await fetchJSON(`https://api.kraken.com/0/public/Ticker?pair=${pair}`);
+    const keys = Object.keys(d?.result || {});
+    const p = parseFloat(d?.result?.[keys[0]]?.c?.[0]);
+    if (p > 0) return p;
+  }
+
+  if (exch.includes('bitget')) {
+    const d = await fetchJSON(`https://api.bitget.com/api/v2/spot/market/tickers?symbol=${symbol}USDT`);
+    const p = parseFloat(d?.data?.[0]?.lastPr);
+    if (p > 0) return p;
+  }
+
+  // 預設 Binance
+  const d = await fetchJSON(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}USDT`);
+  const p = parseFloat(d?.price);
+  if (p > 0) return p;
+
+  throw new Error(`找不到 ${symbol} 價格`);
+}
+
 /**
  * 投資模組 - 持倉與交易管理
  */
@@ -102,7 +170,7 @@ module.exports = (io) => {
     const isTw = market === 'tw';
     holdings.forEach(h => {
       const val = h.shares * (h.current_price > 0 ? h.current_price : h.avg_cost);
-      totalCost  += h.shares * h.avg_cost;
+      totalCost  += h.market === 'crypto' ? h.avg_cost : h.shares * h.avg_cost;
       totalValue += val;
       if (isTw) totalFee += Math.ceil(val * 0.001425) + Math.ceil(val * 0.003);
     });
@@ -175,16 +243,16 @@ module.exports = (io) => {
   // PUT /api/investment/holdings/:symbol - 手動編輯持倉
   router.put('/holdings/:symbol', (req, res) => {
     const sym = req.params.symbol.toUpperCase();
-    const { name, type, market, shares, avg_cost, current_price, note } = req.body;
+    const { name, type, market, shares, avg_cost, current_price, note, exchange } = req.body;
     const mkt = market || 'tw';
     const existing = db.prepare(`SELECT id FROM investments WHERE symbol=?`).get(sym);
     if (existing) {
-      db.prepare(`UPDATE investments SET name=?, type=?, market=?, shares=?, avg_cost=?, current_price=?, note=?, updated_at=datetime('now','localtime') WHERE symbol=?`)
-        .run(name, type || 'stock', mkt, parseFloat(shares)||0, parseFloat(avg_cost)||0, parseFloat(current_price)||0, note||'', sym);
+      db.prepare(`UPDATE investments SET name=?, type=?, market=?, shares=?, avg_cost=?, current_price=?, note=?, exchange=?, updated_at=datetime('now','localtime') WHERE symbol=?`)
+        .run(name, type || 'stock', mkt, parseFloat(shares)||0, parseFloat(avg_cost)||0, parseFloat(current_price)||0, note||'', exchange||'', sym);
     } else {
       const nextOrd = (db.prepare(`SELECT COALESCE(MAX(sort_order),0) AS m FROM investments`).get().m || 0) + 1;
-      db.prepare(`INSERT INTO investments (symbol, name, type, market, shares, avg_cost, current_price, note, sort_order) VALUES (?,?,?,?,?,?,?,?,?)`)
-        .run(sym, name||sym, type||'stock', mkt, parseFloat(shares)||0, parseFloat(avg_cost)||0, parseFloat(current_price)||0, note||'', nextOrd);
+      db.prepare(`INSERT INTO investments (symbol, name, type, market, shares, avg_cost, current_price, note, exchange, sort_order) VALUES (?,?,?,?,?,?,?,?,?,?)`)
+        .run(sym, name||sym, type||'stock', mkt, parseFloat(shares)||0, parseFloat(avg_cost)||0, parseFloat(current_price)||0, note||'', exchange||'', nextOrd);
     }
     io.emit('investment:update');
     res.json({ success: true });
@@ -222,59 +290,46 @@ module.exports = (io) => {
       const { market, symbol } = req.query;
       let holdings;
       if (symbol) {
-        holdings = db.prepare(`SELECT symbol, market FROM investments WHERE symbol=?`).all(symbol.toUpperCase());
+        holdings = db.prepare(`SELECT symbol, market, exchange FROM investments WHERE symbol=?`).all(symbol.toUpperCase());
       } else if (market) {
-        holdings = db.prepare(`SELECT symbol, market FROM investments WHERE market=?`).all(market);
+        holdings = db.prepare(`SELECT symbol, market, exchange FROM investments WHERE market=?`).all(market);
       } else {
-        holdings = db.prepare(`SELECT symbol, market FROM investments`).all();
+        holdings = db.prepare(`SELECT symbol, market, exchange FROM investments`).all();
       }
       if (!holdings.length) return res.json({ success: true, updated: 0 });
 
       const stmt = db.prepare(`UPDATE investments SET current_price=?, updated_at=datetime('now','localtime') WHERE symbol=?`);
       const updated = [];
 
-      // 依市場分組
-      const byMarket = {};
-      holdings.forEach(h => { (byMarket[h.market] = byMarket[h.market] || []).push(h.symbol); });
-
-      for (const [mkt, symbols] of Object.entries(byMarket)) {
-        if (mkt === 'tw' || mkt === 'us') {
-          for (const sym of symbols) {
-            try {
-              const suffix = mkt === 'tw' ? '.TW' : '';
-              const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}${suffix}?interval=1d&range=1d`;
-              const data = await fetchJSON(url);
-              const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
-              if (price && price > 0) { stmt.run(parseFloat(price.toFixed(4)), sym); updated.push(sym); }
-            } catch(e) { /* 個股失敗跳過 */ }
-          }
-        } else if (mkt === 'crypto') {
-          // 取 USDT→TWD 匯率（優先用 DB 快取）
-          let usdtRate = db.prepare(`SELECT rate FROM assets_rates WHERE currency='USDT'`).get()?.rate;
-          if (!usdtRate) {
-            try {
-              const fiat = await fetchJSON('https://open.er-api.com/v6/latest/TWD');
-              usdtRate = parseFloat((1 / fiat.rates.USD).toFixed(4));
-            } catch(e) { usdtRate = 30; }
-          }
-          try {
-            const pairs = symbols.map(s => s + 'USDT');
-            const param = encodeURIComponent(JSON.stringify(pairs));
-            const prices = await fetchJSON(`https://api.binance.com/api/v3/ticker/price?symbols=${param}`);
-            if (Array.isArray(prices)) {
-              prices.forEach(item => {
-                const sym = item.symbol.replace('USDT', '');
-                if (symbols.includes(sym)) {
-                  const priceUSDT = parseFloat(item.price);
-                  const decimals = priceUSDT < 0.01 ? 8 : 2;
-                  stmt.run(parseFloat((priceUSDT * usdtRate).toFixed(decimals)), sym);
-                  updated.push(sym);
-                }
-              });
-            }
-          } catch(e) { /* Binance 失敗跳過 */ }
-        }
+      // 台股 / 美股 — Yahoo Finance
+      const stockHoldings = holdings.filter(h => h.market === 'tw' || h.market === 'us');
+      for (const h of stockHoldings) {
+        try {
+          const suffix = h.market === 'tw' ? '.TW' : '';
+          const url = `https://query1.finance.yahoo.com/v8/finance/chart/${h.symbol}${suffix}?interval=1d&range=1d`;
+          const data = await fetchJSON(url);
+          const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
+          if (price && price > 0) { stmt.run(parseFloat(price.toFixed(4)), h.symbol); updated.push(h.symbol); }
+        } catch(e) { /* 個股失敗跳過 */ }
       }
+
+      // 加密貨幣 — 依 exchange 欄位路由
+      const cryptoHoldings = holdings.filter(h => h.market === 'crypto');
+      const cryptoResults = await Promise.allSettled(
+        cryptoHoldings.map(async h => {
+          const price = await fetchCryptoPriceUSDT(h.symbol, h.exchange || '');
+          return { sym: h.symbol, price };
+        })
+      );
+      cryptoResults.forEach(r => {
+        if (r.status !== 'fulfilled') return;
+        const { sym, price } = r.value;
+        if (price > 0) {
+          const decimals = price < 0.01 ? 8 : 6;
+          stmt.run(parseFloat(price.toFixed(decimals)), sym);
+          updated.push(sym);
+        }
+      });
 
       if (updated.length) io.emit('investment:update');
       res.json({ success: true, updated: updated.length, symbols: updated });
@@ -420,22 +475,33 @@ module.exports = (io) => {
       return { ...a, rate: rate ?? '未設定', twdAmount: twdAmt };
     });
 
-    // ── 庫存即時市值（台股 TWD，美股/加密 × USD/TWD 匯率）
+    // ── 庫存即時市值（台股 TWD，美股 × USD，加密 × USDT）
     const holdings = db.prepare(`SELECT market, shares, avg_cost, current_price FROM investments`).all();
-    const usdRate  = rateMap['USD'] || 1;
+    const usdRate  = rateMap['USD']  || 1;
+    const usdtRate = rateMap['USDT'] || usdRate;
     let holdingsTWD = 0;
     holdings.forEach(h => {
-      const price = h.current_price > 0 ? h.current_price : h.avg_cost;
+      const price = h.current_price > 0 ? h.current_price : (h.market === 'crypto' ? 0 : h.avg_cost);
       const val   = h.shares * price;
-      holdingsTWD += h.market === 'tw' ? val : val * usdRate;
+      if      (h.market === 'tw')     holdingsTWD += val;
+      else if (h.market === 'crypto') holdingsTWD += val * usdtRate;
+      else                            holdingsTWD += val * usdRate;
     });
 
-    const totalTWD = accountsTWD + holdingsTWD;
+    // ── 台股借券市值（單獨計算，不混入庫存市值）
+    const shorts = db.prepare(`SELECT short_shares, avg_sell_price, current_price FROM tw_shorts WHERE short_shares > 0.00001`).all();
+    let shortsTWD = 0;
+    shorts.forEach(s => {
+      const price = s.current_price > 0 ? s.current_price : s.avg_sell_price;
+      shortsTWD += s.short_shares * price;
+    });
 
-    // 佔比（基於總資產）
+    const totalTWD = accountsTWD + holdingsTWD + shortsTWD;
+
+    // 佔比（基於現金存款總額）
     rows.forEach(r => {
-      r.percentage = (totalTWD > 0 && r.twdAmount !== null)
-        ? ((r.twdAmount / totalTWD) * 100).toFixed(2) + '%'
+      r.percentage = (accountsTWD > 0 && r.twdAmount !== null)
+        ? ((r.twdAmount / accountsTWD) * 100).toFixed(2) + '%'
         : '--';
     });
 
@@ -498,38 +564,30 @@ module.exports = (io) => {
     res.json({ success: true });
   });
 
-  // POST /api/investment/assets/rates/fetch — 自動抓取匯率
+  // GET /api/investment/assets/rates — 輕量讀取匯率
+  router.get('/assets/rates', (req, res) => {
+    const rates = db.prepare(`SELECT currency, rate FROM assets_rates`).all();
+    res.json({ success: true, data: rates });
+  });
+
+  // POST /api/investment/assets/rates/fetch — 自動抓取匯率（法幣 + USDT/USDC）
   router.post('/assets/rates/fetch', async (req, res) => {
     try {
-      // 1. 法幣匯率：USD、JPY → TWD
+      // 帳戶中使用的法幣（排除 TWD、USDT、USDC）
+      const accCurrencies = db.prepare(
+        `SELECT DISTINCT currency FROM assets_accounts WHERE currency NOT IN ('TWD','USDT','USDC')`
+      ).all().map(r => r.currency);
+
+      // 法幣匯率
       const fiat = await fetchJSON('https://open.er-api.com/v6/latest/TWD');
       if (fiat.result !== 'success') throw new Error('匯率 API 回應異常');
       const usdTwd  = parseFloat((1 / fiat.rates.USD).toFixed(4));
-      const jpyTwd  = parseFloat((1 / fiat.rates.JPY).toFixed(4));
       const usdtTwd = usdTwd; // USDT ≈ USD
 
-      // 2. 加密貨幣：以 USDT 為本位，換算台幣
-      const cryptoSymbols = ['BTCUSDT','ETHUSDT','SOLUSDT','DOGEUSDT',
-                             'BONKUSDT','WIFUSDT','PEPEUSDT','USDCUSDT'];
-      const symbolsParam = encodeURIComponent(JSON.stringify(cryptoSymbols));
-      let cryptoList = [];
-      try {
-        cryptoList = await fetchJSON(
-          `https://api.binance.com/api/v3/ticker/price?symbols=${symbolsParam}`
-        );
-        if (!Array.isArray(cryptoList)) cryptoList = [];
-      } catch(e) { /* Binance 失敗不影響法幣匯率存檔 */ }
-
-      // 3. 整理並存入 DB
-      const toSave = { USD: usdTwd, JPY: jpyTwd, USDT: usdtTwd };
-      for (const item of cryptoList) {
-        const sym = item.symbol.replace('USDT', '');
-        const priceUSDT = parseFloat(item.price);
-        // 小數幣保留 8 位；大幣保留 2 位
-        const twdRate = priceUSDT < 0.01
-          ? parseFloat((priceUSDT * usdtTwd).toFixed(8))
-          : parseFloat((priceUSDT * usdtTwd).toFixed(2));
-        toSave[sym] = twdRate;
+      // 只存法幣 + USDT/USDC（不存個別加密幣種）
+      const toSave = { USD: usdTwd, USDT: usdtTwd, USDC: usdtTwd };
+      for (const cur of accCurrencies) {
+        if (fiat.rates[cur]) toSave[cur] = parseFloat((1 / fiat.rates[cur]).toFixed(4));
       }
 
       const stmt = db.prepare(`INSERT INTO assets_rates (currency, rate) VALUES (?,?)
@@ -561,17 +619,21 @@ module.exports = (io) => {
     res.json({ success: true });
   });
 
-  // POST /api/investment/assets/snapshots — 記錄今日快照
+  // POST /api/investment/assets/snapshots — 記錄快照（可自訂日期與金額）
   router.post('/assets/snapshots', (req, res) => {
-    const { note } = req.body;
-    const { totalTWD } = calcAssets();
-    const date = new Date().toISOString().slice(0, 10);
+    const { note, date: reqDate, amount } = req.body;
+    const date = (reqDate && /^\d{4}-\d{2}-\d{2}$/.test(reqDate))
+      ? reqDate
+      : new Date().toISOString().slice(0, 10);
+    const total = (amount != null && !isNaN(parseFloat(amount)) && parseFloat(amount) > 0)
+      ? parseFloat(amount)
+      : calcAssets().totalTWD;
     // 同一天只保留最新一筆
     db.prepare(`DELETE FROM assets_snapshots WHERE date=?`).run(date);
     db.prepare(`INSERT INTO assets_snapshots (date, total_twd, note) VALUES (?,?,?)`)
-      .run(date, totalTWD, note||'');
+      .run(date, total, note||'');
     io.emit('investment:update');
-    res.json({ success: true, date, total_twd: totalTWD });
+    res.json({ success: true, date, total_twd: total });
   });
 
   // DELETE /api/investment/assets/snapshots/:id
@@ -628,6 +690,40 @@ module.exports = (io) => {
     db.prepare(`DELETE FROM forex WHERE id=?`).run(req.params.id);
     io.emit('investment:update');
     res.json({ success: true });
+  });
+
+  // ── 年度損益 ──
+  router.get('/yearly-pnl', (req, res) => {
+    try {
+      const rows = db.prepare(`SELECT * FROM investment_yearly_pnl ORDER BY year DESC`).all();
+      res.json({ success: true, data: rows });
+    } catch(e) { res.json({ success: false, error: e.message }); }
+  });
+
+  router.post('/yearly-pnl', (req, res) => {
+    try {
+      const { year, realized_pnl, unrealized_pnl, dividend_income, tax_paid, note } = req.body;
+      if (!year) return res.json({ success: false, error: '請填寫年份' });
+      const r = db.prepare(`INSERT OR REPLACE INTO investment_yearly_pnl (year,realized_pnl,unrealized_pnl,dividend_income,tax_paid,note,updated_at) VALUES (?,?,?,?,?,?,datetime('now','localtime'))`)
+        .run(Number(year), Number(realized_pnl||0), Number(unrealized_pnl||0), Number(dividend_income||0), Number(tax_paid||0), note||'');
+      res.json({ success: true, id: r.lastInsertRowid });
+    } catch(e) { res.json({ success: false, error: e.message }); }
+  });
+
+  router.put('/yearly-pnl/:year', (req, res) => {
+    try {
+      const { realized_pnl, unrealized_pnl, dividend_income, tax_paid, note } = req.body;
+      db.prepare(`UPDATE investment_yearly_pnl SET realized_pnl=?,unrealized_pnl=?,dividend_income=?,tax_paid=?,note=?,updated_at=datetime('now','localtime') WHERE year=?`)
+        .run(Number(realized_pnl||0), Number(unrealized_pnl||0), Number(dividend_income||0), Number(tax_paid||0), note||'', Number(req.params.year));
+      res.json({ success: true });
+    } catch(e) { res.json({ success: false, error: e.message }); }
+  });
+
+  router.delete('/yearly-pnl/:year', (req, res) => {
+    try {
+      db.prepare(`DELETE FROM investment_yearly_pnl WHERE year=?`).run(Number(req.params.year));
+      res.json({ success: true });
+    } catch(e) { res.json({ success: false, error: e.message }); }
   });
 
   return router;

@@ -269,6 +269,7 @@
       <div class="nav-item"        data-sec="ai"          onclick="nav('ai')">         <span class="ico">🤖</span><span>AI 助理</span></div>
       <div class="nav-item"        data-sec="line"        onclick="nav('line')">       <span class="ico">📣</span><span>通知</span></div>
       <div class="nav-item"        data-sec="travel"      onclick="nav('travel')">     <span class="ico">✈️</span><span>旅遊</span></div>
+      <div class="nav-item"        data-sec="games"       onclick="nav('games')">      <span class="ico">🎮</span><span>遊戲</span></div>
     </div>
     <div id="nav-advanced" style="display:none;">
       <div class="nav-group-label">進階功能</div>
@@ -419,6 +420,7 @@
         <div class="inv-tab"        id="inv-tab-us"     onclick="switchInvTab('us')"><img class="tab-flag" src="/flags/us.svg" alt="US"> 美股</div>
         <div class="inv-tab"        id="inv-tab-crypto" onclick="switchInvTab('crypto')">💎 加密貨幣</div>
         <div class="inv-tab"        id="inv-tab-forex"  onclick="switchInvTab('forex')">💰 存款</div>
+        <div class="inv-tab"        id="inv-tab-yearlypnl" onclick="switchInvTab('yearlypnl')">📊 年度損益</div>
       </div>
 
       <!-- ── 資產總覽 ── -->
@@ -548,6 +550,35 @@
           </div>
         </div>
       </div>
+
+      <!-- 年度損益 sub -->
+      <div class="inv-sub" id="inv-sub-yearlypnl">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+          <button class="btn btn-primary btn-sm" onclick="showAddYearlyPnlModal()">&#65291; 新增年度</button>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;">
+              <thead>
+                <tr style="background:var(--bg);border-bottom:2px solid var(--border);">
+                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">年份</th>
+                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">已實現損益</th>
+                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">未實現損益</th>
+                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">股利/利息</th>
+                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">稅費</th>
+                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);font-weight:700;">淨損益</th>
+                  <th style="padding:10px 14px;font-size:13px;color:var(--muted);">備註</th>
+                  <th style="padding:10px 14px;width:80px;"></th>
+                </tr>
+              </thead>
+              <tbody id="yearlypnl-tbody">
+                <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:40px;">尚無年度損益記錄</td></tr>
+              </tbody>
+              <tfoot id="yearlypnl-tfoot"></tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ════ INVEST (投資 - 開發中) ════ -->
@@ -653,8 +684,8 @@
     <div class="section" id="section-travel">
       <!-- Travel Sub-tabs -->
       <div class="inv-tabs" id="travel-tabs" style="margin-bottom:18px;">
-        <div class="inv-tab active" id="travel-tab-trips" onclick="switchTravelTab('trips')">🗓️ 行程</div>
-        <div class="inv-tab" id="travel-tab-weekly" onclick="switchTravelTab('weekly')">📆 大小週</div>
+        <div class="inv-tab active" id="travel-tab-weekly" onclick="switchTravelTab('weekly')">📋 總覽</div>
+        <div class="inv-tab" id="travel-tab-trips" onclick="switchTravelTab('trips')">🗓️ 行程</div>
         <div class="inv-tab" id="travel-tab-memories" onclick="switchTravelTab('memories')">📸 回憶</div>
         <div class="inv-tab" id="travel-tab-footprint" onclick="switchTravelTab('footprint')">🗺️ 足跡</div>
       </div>
@@ -723,15 +754,14 @@
         </div>
       </div>
 
-      <!-- 大小週 sub -->
+      <!-- 總覽 (大小週) sub -->
       <div id="travel-sub-weekly" style="display:none;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span id="weekly-count-badge" style="font-size:14px;color:var(--muted);"></span>
-          </div>
+        <!-- 年度頁籤列 -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+          <div id="weekly-year-tabs" style="display:flex;gap:4px;flex-wrap:wrap;"></div>
           <div style="display:flex;gap:8px;">
             <button class="btn btn-outline btn-sm" onclick="showWeeklySetupModal()">⚙️ 設定排程</button>
-            <button class="btn btn-primary btn-sm" onclick="showAddWeeklyModal()">&#65291; 手動新增</button>
+            <button class="btn btn-primary btn-sm" onclick="weeklyAddInlineRow()">&#65291; 新增</button>
           </div>
         </div>
         <div class="card" style="padding:0;overflow:hidden;">
@@ -746,7 +776,7 @@
                   <th style="padding:10px 12px;font-size:13px;color:var(--muted);">交通</th>
                   <th style="padding:10px 12px;font-size:13px;color:var(--muted);">票券</th>
                   <th style="padding:10px 12px;font-size:13px;color:var(--muted);">住宿</th>
-                  <th style="padding:10px 12px;width:60px;"></th>
+                  <th style="padding:10px 12px;width:68px;"></th>
                 </tr>
               </thead>
               <tbody id="weekly-tbody"><tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px;">載入中...</td></tr></tbody>
@@ -766,10 +796,76 @@
       <!-- 足跡 sub -->
       <div id="travel-sub-footprint" style="display:none;">
         <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:16px;gap:8px;">
+          <button id="btn-download-maps" class="btn btn-outline btn-sm" onclick="downloadMaps()" title="下載/更新地圖資料">📥 下載地圖</button>
           <button id="travel-view-card" class="btn btn-primary btn-sm" onclick="setTravelView('card')">&#9646;&#9646; 卡片</button>
           <button id="travel-view-list" class="btn btn-outline btn-sm" onclick="setTravelView('list')">&#9776; 列表</button>
         </div>
         <div id="travel-country-grid" style="display:flex;flex-wrap:wrap;gap:16px;padding:4px 0;"></div>
+      </div>
+    </div>
+
+    <!-- ════ GAMES ════ -->
+    <div class="section" id="section-games">
+      <div class="sec-header">
+        <div>
+          <div class="sec-title">🎮 遊戲</div>
+          <div class="sec-sub">PS 成就獎盃總覽</div>
+        </div>
+      </div>
+      <!-- PS 成就獎盃 -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+          <span>🏆 PS 成就獎盃總覽</span>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input id="psn-username-input" type="text" class="form-control" style="width:200px;font-size:14px;" placeholder="輸入 PSN ID" onkeydown="if(event.key==='Enter')fetchPsnProfile()">
+            <button class="btn btn-primary btn-sm" onclick="fetchPsnProfile()">🔍 查詢</button>
+          </div>
+        </div>
+        <!-- 概覽卡片 -->
+        <div id="psn-overview" style="display:none;">
+          <div style="display:flex;align-items:center;gap:20px;padding:16px 0;flex-wrap:wrap;">
+            <img id="psn-avatar" src="" alt="avatar" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid var(--primary);display:none;">
+            <div>
+              <div id="psn-display-name" style="font-size:22px;font-weight:800;"></div>
+              <div id="psn-level-badge" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;padding:4px 12px;border-radius:20px;font-size:14px;font-weight:700;margin-top:6px;">
+                <span>⭐</span><span id="psn-level">--</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:16px;flex-wrap:wrap;margin-left:auto;">
+              <div style="text-align:center;">
+                <div style="font-size:24px;">🏆</div>
+                <div id="psn-platinum" style="font-size:22px;font-weight:800;color:#a855f7;">--</div>
+                <div style="font-size:12px;color:var(--muted);">白金</div>
+              </div>
+              <div style="text-align:center;">
+                <div style="font-size:24px;">🥇</div>
+                <div id="psn-gold" style="font-size:22px;font-weight:800;color:#f59e0b;">--</div>
+                <div style="font-size:12px;color:var(--muted);">黃金</div>
+              </div>
+              <div style="text-align:center;">
+                <div style="font-size:24px;">🥈</div>
+                <div id="psn-silver" style="font-size:22px;font-weight:800;color:#94a3b8;">--</div>
+                <div style="font-size:12px;color:var(--muted);">白銀</div>
+              </div>
+              <div style="text-align:center;">
+                <div style="font-size:24px;">🥉</div>
+                <div id="psn-bronze" style="font-size:22px;font-weight:800;color:#cd7c4a;">--</div>
+                <div style="font-size:12px;color:var(--muted);">銅牌</div>
+              </div>
+              <div style="text-align:center;">
+                <div style="font-size:24px;">📊</div>
+                <div id="psn-total" style="font-size:22px;font-weight:800;color:var(--primary);">--</div>
+                <div style="font-size:12px;color:var(--muted);">總獎盃</div>
+              </div>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--muted);margin-top:8px;" id="psn-cache-note"></div>
+        </div>
+        <div id="psn-empty" style="text-align:center;padding:40px 0;color:var(--muted);">
+          <div style="font-size:40px;margin-bottom:8px;">🎮</div>
+          <div style="font-size:15px;">輸入 PSN ID 查詢獎盃資料</div>
+          <div style="font-size:13px;margin-top:4px;">資料來源：<a href="https://psnprofiles.com" target="_blank" style="color:var(--primary);">PSNProfiles</a></div>
+        </div>
       </div>
     </div>
 
@@ -877,6 +973,7 @@ const PAGE_META = {
   ai:         ['🤖 AI 助理','智能生活分析'],
   line:       ['📣 通知管理','LINE & Telegram 通知'],
   travel:     ['✈️ 旅遊足跡','點擊國家展開地圖'],
+  games:      ['🎮 遊戲','PS 成就獎盃與遊戲管理'],
   work:       ['💼 工作','工作管理（開發中）'],
   analysis:   ['🔍 分析','進階分析（開發中）'],
   investpro:  ['💹 投資進階','投資進階（開發中）'],
@@ -1567,6 +1664,11 @@ function switchInvTab(tab){
     $('inv-header-assets').style.display = 'none';
     $('inv-header-market').style.display = 'none';
     loadForex();
+  } else if(tab === 'yearlypnl'){
+    $('inv-sub-yearlypnl').classList.add('active');
+    $('inv-header-assets').style.display = 'none';
+    $('inv-header-market').style.display = 'none';
+    loadYearlyPnl();
   } else {
     $('inv-sub-market').classList.add('active');
     $('inv-header-assets').style.display = 'none';
@@ -3027,7 +3129,8 @@ let _travelGeoData = null;
 let _travelCurrentConfig = null;
 
 let _travelView = 'card';
-let _travelTab = 'trips';
+let _travelTab = 'weekly';
+let _weeklyYear = new Date().getFullYear();
 let _currentTripId = null;
 let _tripTab = 'checklist';
 let _tripsCache = [];
@@ -3548,34 +3651,60 @@ async function deleteMemory(id) {
 }
 
 
-// ── 大小週 ──
+// ── 大小週 / 總覽 ──
 async function loadWeekly() {
   const res = await api('/api/travel/weekly');
   _weeklyCache = res.data || [];
+  _renderWeeklyYearTabs();
+  _renderWeeklyTable();
+}
+
+function _getWeeklyYears() {
+  const years = new Set(_weeklyCache.map(w => (w.week_date||'').slice(0,4)).filter(Boolean));
+  years.add(String(new Date().getFullYear()));
+  return [...years].sort().reverse();
+}
+
+function _renderWeeklyYearTabs() {
+  const el = $('weekly-year-tabs');
+  if (!el) return;
+  const years = _getWeeklyYears();
+  if (!years.includes(String(_weeklyYear))) _weeklyYear = parseInt(years[0]) || new Date().getFullYear();
+  el.innerHTML = years.map(y =>
+    `<button onclick="switchWeeklyYear(${y})" style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:14px;font-weight:${_weeklyYear==y?'700':'500'};background:${_weeklyYear==y?'var(--primary)':'var(--border)'};color:${_weeklyYear==y?'#fff':'var(--muted)'};transition:all .15s;">${y}</button>`
+  ).join('');
+}
+
+function switchWeeklyYear(y) {
+  _weeklyYear = y;
+  _renderWeeklyYearTabs();
+  _renderWeeklyTable();
+}
+
+function _renderWeeklyTable() {
   const tbody = $('weekly-tbody');
-  const badge = $('weekly-count-badge');
   if (!tbody) return;
-  if (badge) badge.textContent = _weeklyCache.length ? `共 ${_weeklyCache.length} 筆` : '';
   const today = new Date().toISOString().slice(0,10);
-  if (!_weeklyCache.length) {
+  const yearStr = String(_weeklyYear);
+  const rows = _weeklyCache.filter(w => (w.week_date||'').startsWith(yearStr));
+  const TD = 'padding:9px 12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+  if (!rows.length) {
     tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:40px;">
-      <div style="font-size:40px;margin-bottom:10px;">📆</div>
-      <div style="font-size:15px;font-weight:600;margin-bottom:6px;">尚無大小週排程</div>
-      <div style="font-size:13px;">點擊「⚙️ 設定排程」自動產生，或「手動新增」逐筆建立</div>
+      <div style="font-size:32px;margin-bottom:8px;">📆</div>
+      <div style="font-size:14px;">${yearStr} 年尚無排程，點擊「＋ 新增」建立</div>
     </td></tr>`;
     return;
   }
-  const TD = 'padding:10px 12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
-  tbody.innerHTML = _weeklyCache.map(w => {
-    const isBig   = w.week_type === '大';
-    const isPast  = w.week_date < today;
+  tbody.innerHTML = rows.map(w => {
+    const isBig  = w.week_type === '大';
+    const isPast = w.week_date < today;
     const hasData = w.location || w.transportation || w.tickets || w.accommodation;
     const rowOpacity = isPast ? 'opacity:.5;' : '';
     const rowHighlight = hasData && !isPast ? 'background:rgba(99,102,241,.04);' : '';
-    const typeBg  = isBig ? 'background:#dbeafe;color:#1e40af;' : 'background:#f3f4f6;color:#374151;';
+    const typeBg = isBig ? 'background:#dbeafe;color:#1e40af;' : 'background:#f3f4f6;color:#374151;';
     return `<tr style="${rowOpacity}${rowHighlight}border-bottom:1px solid var(--border);transition:background .1s;"
       onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='${hasData&&!isPast?'rgba(99,102,241,.04)':''}'">
-      <td style="${TD}text-align:center;">
+      <td style="${TD}text-align:center;width:56px;">
         <span style="display:inline-block;${typeBg}border-radius:6px;padding:2px 8px;font-size:13px;font-weight:700;">${w.week_type}</span>
       </td>
       <td style="${TD}font-size:14px;${isBig?'font-weight:600;':''}">${w.week_date||'--'}</td>
@@ -3584,12 +3713,70 @@ async function loadWeekly() {
       <td style="${TD}font-size:13px;color:var(--muted);" title="${_escHtml(w.transportation||'')}">${_escHtml(w.transportation||'')}</td>
       <td style="${TD}font-size:13px;color:var(--muted);" title="${_escHtml(w.tickets||'')}">${_escHtml(w.tickets||'')}</td>
       <td style="${TD}font-size:13px;color:var(--muted);" title="${_escHtml(w.accommodation||'')}">${_escHtml(w.accommodation||'')}</td>
-      <td style="padding:10px 6px;text-align:center;white-space:nowrap;">
+      <td style="padding:9px 6px;text-align:center;white-space:nowrap;width:68px;">
         <button onclick="showEditWeeklyModal(${w.id})" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--muted);padding:2px;" title="編輯">✏️</button>
         <button onclick="deleteWeekly(${w.id})" style="background:none;border:none;cursor:pointer;font-size:17px;color:var(--muted);padding:2px;" title="刪除">×</button>
       </td>
     </tr>`;
   }).join('');
+}
+
+function weeklyAddInlineRow() {
+  // Show a quick-add inline form row prepended to the table
+  const tbody = $('weekly-tbody');
+  if (!tbody) return;
+  // Remove any existing inline row
+  const existing = document.getElementById('weekly-inline-row');
+  if (existing) existing.remove();
+
+  const INP = 'style="width:100%;box-sizing:border-box;padding:4px 6px;font-size:13px;border:1px solid var(--border);border-radius:4px;background:var(--card);color:var(--text);"';
+  const today = new Date().toISOString().slice(0,10);
+  const yr = _weeklyYear;
+
+  const tr = document.createElement('tr');
+  tr.id = 'weekly-inline-row';
+  tr.style.cssText = 'background:rgba(99,102,241,.06);border-bottom:2px solid var(--primary);';
+  tr.innerHTML = `
+    <td style="padding:8px 10px;text-align:center;">
+      <select id="wil-type" ${INP} style="width:56px;padding:4px;">
+        <option value="大">大</option><option value="小">小</option>
+      </select>
+    </td>
+    <td style="padding:8px 10px;"><input id="wil-date" type="date" ${INP} value="${today}"></td>
+    <td style="padding:8px 10px;"><input id="wil-return" type="date" ${INP}></td>
+    <td style="padding:8px 10px;"><input id="wil-location" type="text" ${INP} placeholder="地點"></td>
+    <td style="padding:8px 10px;"><input id="wil-transport" type="text" ${INP} placeholder="交通"></td>
+    <td style="padding:8px 10px;"><input id="wil-tickets" type="text" ${INP} placeholder="票券"></td>
+    <td style="padding:8px 10px;"><input id="wil-accommodation" type="text" ${INP} placeholder="住宿"></td>
+    <td style="padding:8px 6px;text-align:center;white-space:nowrap;">
+      <button onclick="submitWeeklyInlineRow()" style="background:var(--primary);color:#fff;border:none;cursor:pointer;border-radius:4px;padding:3px 8px;font-size:12px;">✓</button>
+      <button onclick="document.getElementById('weekly-inline-row').remove()" style="background:none;border:none;cursor:pointer;font-size:17px;color:var(--muted);padding:2px;">×</button>
+    </td>`;
+  tbody.insertBefore(tr, tbody.firstChild);
+  document.getElementById('wil-date').focus();
+}
+
+async function submitWeeklyInlineRow() {
+  const week_date = $('wil-date')?.value;
+  if (!week_date) { toast('請填寫出發日期','err'); return; }
+  const body = {
+    week_type: $('wil-type')?.value || '大',
+    week_date,
+    return_date: $('wil-return')?.value || null,
+    location: $('wil-location')?.value?.trim() || '',
+    transportation: $('wil-transport')?.value?.trim() || '',
+    tickets: $('wil-tickets')?.value?.trim() || '',
+    accommodation: $('wil-accommodation')?.value?.trim() || '',
+    note: '',
+  };
+  const res = await api('/api/travel/weekly', 'POST', body);
+  if (res.success) {
+    document.getElementById('weekly-inline-row')?.remove();
+    // Update year if new entry is for a different year
+    _weeklyYear = parseInt((body.week_date||'').slice(0,4)) || _weeklyYear;
+    await loadWeekly();
+    toast('已新增');
+  } else toast(res.error||'新增失敗','err');
 }
 
 function showWeeklySetupModal() {
@@ -3718,6 +3905,189 @@ async function deleteWeekly(id) {
 
 function _escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ════════════════════════════════════════════════
+// 年度損益
+// ════════════════════════════════════════════════
+let _yearlyPnlCache = [];
+
+async function loadYearlyPnl() {
+  const res = await api('/api/investment/yearly-pnl');
+  _yearlyPnlCache = res.data || [];
+  const tbody = $('yearlypnl-tbody');
+  const tfoot = $('yearlypnl-tfoot');
+  if (!tbody) return;
+  if (!_yearlyPnlCache.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:40px;">
+      <div style="font-size:32px;margin-bottom:8px;">📊</div>
+      <div>尚無年度損益記錄，點擊「＋ 新增年度」開始記錄</div>
+    </td></tr>`;
+    if (tfoot) tfoot.innerHTML = '';
+    return;
+  }
+  const fmtPnl = n => {
+    const v = Number(n||0);
+    const s = v >= 0 ? '+' : '';
+    return `<span style="color:${v>=0?'var(--success)':'var(--danger)'};">${s}${fmtMoney(Math.abs(v))}</span>`;
+  };
+  let totalRealized=0, totalUnreal=0, totalDiv=0, totalTax=0;
+  tbody.innerHTML = _yearlyPnlCache.map(r => {
+    const net = (r.realized_pnl||0) + (r.dividend_income||0) - (r.tax_paid||0);
+    totalRealized += r.realized_pnl||0;
+    totalUnreal   += r.unrealized_pnl||0;
+    totalDiv      += r.dividend_income||0;
+    totalTax      += r.tax_paid||0;
+    return `<tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:10px 14px;font-weight:700;">${r.year}</td>
+      <td style="padding:10px 14px;">${fmtPnl(r.realized_pnl)}</td>
+      <td style="padding:10px 14px;">${fmtPnl(r.unrealized_pnl)}</td>
+      <td style="padding:10px 14px;color:var(--success);">+${fmtMoney(r.dividend_income||0)}</td>
+      <td style="padding:10px 14px;color:var(--danger);">-${fmtMoney(r.tax_paid||0)}</td>
+      <td style="padding:10px 14px;font-weight:700;">${fmtPnl(net)}</td>
+      <td style="padding:10px 14px;font-size:13px;color:var(--muted);">${_escHtml(r.note||'')}</td>
+      <td style="padding:10px 8px;text-align:center;white-space:nowrap;">
+        <button onclick="showEditYearlyPnlModal(${r.year})" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--muted);" title="編輯">✏️</button>
+        <button onclick="deleteYearlyPnl(${r.year})" style="background:none;border:none;cursor:pointer;font-size:17px;color:var(--muted);" title="刪除">×</button>
+      </td>
+    </tr>`;
+  }).join('');
+  const totalNet = totalRealized + totalDiv - totalTax;
+  if (tfoot) tfoot.innerHTML = `<tr style="background:var(--bg);font-weight:700;border-top:2px solid var(--border);">
+    <td style="padding:10px 14px;">合計</td>
+    <td style="padding:10px 14px;">${fmtPnl(totalRealized)}</td>
+    <td style="padding:10px 14px;">${fmtPnl(totalUnreal)}</td>
+    <td style="padding:10px 14px;color:var(--success);">+${fmtMoney(totalDiv)}</td>
+    <td style="padding:10px 14px;color:var(--danger);">-${fmtMoney(totalTax)}</td>
+    <td style="padding:10px 14px;">${fmtPnl(totalNet)}</td>
+    <td colspan="2"></td>
+  </tr>`;
+}
+
+function _yearlyPnlForm(r = {}) {
+  const currentYear = new Date().getFullYear();
+  return `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">年份 *</label>
+        <input id="yp-year" type="number" class="form-input" style="width:100%;box-sizing:border-box;" value="${r.year||currentYear}" min="2000" max="2099" ${r.year?'readonly':''}></div>
+      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">已實現損益 (TWD)</label>
+        <input id="yp-realized" type="number" class="form-input" style="width:100%;box-sizing:border-box;" value="${r.realized_pnl||0}" step="1" placeholder="0"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">未實現損益 (TWD)</label>
+        <input id="yp-unrealized" type="number" class="form-input" style="width:100%;box-sizing:border-box;" value="${r.unrealized_pnl||0}" step="1" placeholder="0"></div>
+      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">股利/利息 (TWD)</label>
+        <input id="yp-dividend" type="number" class="form-input" style="width:100%;box-sizing:border-box;" value="${r.dividend_income||0}" step="1" placeholder="0"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">稅費 (TWD)</label>
+        <input id="yp-tax" type="number" class="form-input" style="width:100%;box-sizing:border-box;" value="${r.tax_paid||0}" step="1" placeholder="0"></div>
+      <div><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">備註</label>
+        <input id="yp-note" type="text" class="form-input" style="width:100%;box-sizing:border-box;" value="${_escHtml(r.note||'')}"></div>
+    </div>`;
+}
+
+function showAddYearlyPnlModal() {
+  showModal(`<div style="padding:4px;">
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:18px;">新增年度損益</h3>
+    ${_yearlyPnlForm()}
+    <div style="display:flex;gap:10px;margin-top:4px;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="submitAddYearlyPnl()">新增</button>
+    </div></div>`);
+}
+
+async function submitAddYearlyPnl() {
+  const year = parseInt($('yp-year')?.value);
+  if (!year) { toast('請填寫年份','err'); return; }
+  const body = { year, realized_pnl:parseFloat($('yp-realized')?.value)||0,
+    unrealized_pnl:parseFloat($('yp-unrealized')?.value)||0,
+    dividend_income:parseFloat($('yp-dividend')?.value)||0,
+    tax_paid:parseFloat($('yp-tax')?.value)||0, note:$('yp-note')?.value?.trim()||'' };
+  const res = await api('/api/investment/yearly-pnl', 'POST', body);
+  if (res.success) { closeModalForce(); loadYearlyPnl(); toast('已新增','ok'); }
+  else toast(res.error||'新增失敗','err');
+}
+
+function showEditYearlyPnlModal(year) {
+  const r = _yearlyPnlCache.find(x => x.year === year);
+  if (!r) return;
+  showModal(`<div style="padding:4px;">
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:18px;">編輯 ${year} 年度損益</h3>
+    ${_yearlyPnlForm(r)}
+    <div style="display:flex;gap:10px;margin-top:4px;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="submitEditYearlyPnl(${year})">儲存</button>
+    </div></div>`);
+}
+
+async function submitEditYearlyPnl(year) {
+  const body = { realized_pnl:parseFloat($('yp-realized')?.value)||0,
+    unrealized_pnl:parseFloat($('yp-unrealized')?.value)||0,
+    dividend_income:parseFloat($('yp-dividend')?.value)||0,
+    tax_paid:parseFloat($('yp-tax')?.value)||0, note:$('yp-note')?.value?.trim()||'' };
+  const res = await api(`/api/investment/yearly-pnl/${year}`, 'PUT', body);
+  if (res.success) { closeModalForce(); loadYearlyPnl(); toast('已更新','ok'); }
+  else toast(res.error||'更新失敗','err');
+}
+
+async function deleteYearlyPnl(year) {
+  if (!confirm(`確認刪除 ${year} 年度損益記錄？`)) return;
+  const res = await api(`/api/investment/yearly-pnl/${year}`, 'DELETE');
+  if (res.success) { loadYearlyPnl(); toast('已刪除'); }
+  else toast(res.error||'刪除失敗','err');
+}
+
+// ════════════════════════════════════════════════
+// 地圖下載
+// ════════════════════════════════════════════════
+async function downloadMaps() {
+  const btn = $('btn-download-maps');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ 下載中...'; }
+  try {
+    const res = await api('/api/travel/download-maps', 'POST');
+    if (!res.success) { toast('下載失敗：'+res.error,'err'); return; }
+    const results = res.results || {};
+    const lines = Object.entries(results).map(([c,s]) => `${c}: ${s}`).join('\n');
+    toast('地圖下載完成');
+    alert('地圖下載結果：\n\n' + lines + '\n\n已下載的地圖需重新進入頁面才會生效。');
+    loadTravelFootprint();
+  } catch(e) { toast('下載失敗：'+e.message,'err'); }
+  finally { if (btn) { btn.disabled = false; btn.textContent = '📥 下載地圖'; } }
+}
+
+// ════════════════════════════════════════════════
+// 遊戲 / PSN 獎盃
+// ════════════════════════════════════════════════
+async function fetchPsnProfile() {
+  const username = ($('psn-username-input')?.value||'').trim();
+  if (!username) { toast('請輸入 PSN ID','err'); return; }
+  const btn = document.querySelector('[onclick="fetchPsnProfile()"]');
+  if (btn) { btn.disabled=true; btn.textContent='⏳ 查詢中...'; }
+  try {
+    const res = await api(`/api/games/psn/profile?username=${encodeURIComponent(username)}`);
+    if (!res.success) { toast('查詢失敗：'+res.error,'err'); return; }
+    _renderPsnProfile(res.data, res.cached, res.updated_at);
+  } catch(e) { toast('查詢失敗','err'); }
+  finally { if (btn) { btn.disabled=false; btn.textContent='🔍 查詢'; } }
+}
+
+function _renderPsnProfile(d, cached, updatedAt) {
+  $('psn-empty').style.display = 'none';
+  $('psn-overview').style.display = '';
+  $('psn-display-name').textContent = d.displayName || d.username;
+  $('psn-level').textContent = d.level != null ? d.level : '--';
+  $('psn-platinum').textContent = d.trophies?.platinum ?? '--';
+  $('psn-gold').textContent     = d.trophies?.gold ?? '--';
+  $('psn-silver').textContent   = d.trophies?.silver ?? '--';
+  $('psn-bronze').textContent   = d.trophies?.bronze ?? '--';
+  $('psn-total').textContent    = d.trophies?.total ?? '--';
+  const avatarEl = $('psn-avatar');
+  if (d.avatar) { avatarEl.src = d.avatar; avatarEl.style.display=''; }
+  else avatarEl.style.display = 'none';
+  const noteEl = $('psn-cache-note');
+  if (cached && updatedAt) noteEl.textContent = `快取資料（更新於 ${updatedAt}） — 點擊查詢按鈕重新整理`;
+  else noteEl.textContent = '';
 }
 
 function _renderTravelMap(geoData, config) {

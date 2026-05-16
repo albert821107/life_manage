@@ -1,8 +1,39 @@
 'use strict';
 
 const express = require('express');
+const https   = require('https');
+const http    = require('http');
 
 const ALLOWED_COUNTRIES = new Set(['japan', 'thailand', 'korea', 'taiwan', 'hk', 'vietnam']);
+
+const GEOJSON_SOURCES = {
+  japan:    'https://cdn.jsdelivr.net/gh/dataofjapan/land/japan.geojson',
+  thailand: 'https://cdn.jsdelivr.net/gh/apisit/thailand.json/thailand.json',
+  taiwan:   'https://raw.githubusercontent.com/codeforgermany/click_that_hood/main/public/data/taiwan.geojson',
+  korea:    'https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2013/json/skorea-provinces-geo.json',
+  vietnam:  'https://raw.githubusercontent.com/dsfsi/covid19africa/master/data/geojson/countries/vnm.geojson',
+};
+
+function fetchUrl(url, redirectCount = 0) {
+  return new Promise((resolve, reject) => {
+    if (redirectCount > 5) return reject(new Error('Too many redirects'));
+    const protocol = url.startsWith('https') ? https : http;
+    const req = protocol.get(url, { headers: { 'User-Agent': 'life-manager/1.0' } }, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        const loc = res.headers.location.startsWith('http') ? res.headers.location : new URL(res.headers.location, url).href;
+        res.resume();
+        return fetchUrl(loc, redirectCount + 1).then(resolve).catch(reject);
+      }
+      if (res.statusCode !== 200) { res.resume(); return reject(new Error(`HTTP ${res.statusCode}`)); }
+      const chunks = [];
+      res.on('data', c => chunks.push(c));
+      res.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')));
+      res.on('error', reject);
+    });
+    req.on('error', reject);
+    req.setTimeout(60000, () => { req.destroy(new Error('Timeout')); });
+  });
+}
 
 module.exports = (io) => {
   const router = express.Router();
@@ -229,6 +260,24 @@ module.exports = (io) => {
       db.prepare(`DELETE FROM travel_weekly_schedule WHERE id=?`).run(req.params.id);
       res.json({ success: true });
     } catch(e) { res.json({ success: false, error: e.message }); }
+  });
+
+  // POST /api/travel/download-maps — download GeoJSON for all countries
+  router.post('/download-maps', async (req, res) => {
+    const results = {};
+    for (const [country, url] of Object.entries(GEOJSON_SOURCES)) {
+      const existing = db.prepare('SELECT country FROM travel_geojson WHERE country=?').get(country);
+      if (existing) { results[country] = 'skipped'; continue; }
+      try {
+        const text = await fetchUrl(url);
+        JSON.parse(text);
+        db.prepare('INSERT OR REPLACE INTO travel_geojson (country,geojson) VALUES (?,?)').run(country, text);
+        results[country] = 'ok';
+      } catch(e) {
+        results[country] = 'fail: ' + e.message;
+      }
+    }
+    res.json({ success: true, results });
   });
 
   // POST /api/travel/weekly/generate — auto-generate schedule from params
