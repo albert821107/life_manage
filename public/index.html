@@ -4242,29 +4242,26 @@ function _yearlyPnlForm(r = {}) {
         <div id="yp-total-preview" style="font-size:16px;font-weight:700;"></div>
       </div>
     </div>
-  </div>
-  <script>
-  (function(){
-    function upd(){
-      var r=parseFloat(document.getElementById('yp-realized')?.value)||0;
-      var u=parseFloat(document.getElementById('yp-unrealized')?.value)||0;
-      var t=r+u;
-      var el=document.getElementById('yp-total-preview');
-      if(el){el.textContent=(t>=0?'+':'')+t.toLocaleString();el.style.color=t>=0?'var(--success)':'var(--danger)';}
-    }
-    setTimeout(function(){
-      ['yp-realized','yp-unrealized'].forEach(function(id){
-        var el=document.getElementById(id);
-        if(el)el.addEventListener('input',upd);
-      });
-      upd();
-    },50);
-  })();
-  </script>`;
+  </div>`;
+}
+
+function _ypBindPreview() {
+  function upd() {
+    const r = parseFloat($('yp-realized')?.value)  || 0;
+    const u = parseFloat($('yp-unrealized')?.value) || 0;
+    const t = r + u;
+    const el = $('yp-total-preview');
+    if (el) { el.textContent = (t >= 0 ? '+' : '') + t.toLocaleString(); el.style.color = t >= 0 ? 'var(--success)' : 'var(--danger)'; }
+  }
+  setTimeout(() => {
+    ['yp-realized','yp-unrealized'].forEach(id => { const el = $(id); if (el) el.addEventListener('input', upd); });
+    upd();
+  }, 50);
 }
 
 function showAddYearlyPnlModal() {
   showModal('📊 新增年度損益', _yearlyPnlForm(), { onSubmit: submitAddYearlyPnl, submitLabel: '＋ 新增' });
+  _ypBindPreview();
 }
 
 async function submitAddYearlyPnl() {
@@ -4281,6 +4278,7 @@ function showEditYearlyPnlModal(year) {
   const r = _yearlyPnlCache.find(x => x.year === year);
   if (!r) return;
   showModal(`✏️ 編輯 ${year} 年度損益`, _yearlyPnlForm(r), { onSubmit: () => submitEditYearlyPnl(year), submitLabel: '儲存' });
+  _ypBindPreview();
 }
 
 async function submitEditYearlyPnl(year) {
