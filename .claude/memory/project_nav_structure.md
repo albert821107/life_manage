@@ -38,6 +38,7 @@ metadata:
 | 2-3 | 投資(進階) | investpro |
 | 2-3-1 | 年度損益 | tab=yearlypnl |
 | 2-4 | 操盤 | trading |
+| 2-5 | 履歷 | resume |
 
 ## 有子頁籤的大頁籤切換函式
 

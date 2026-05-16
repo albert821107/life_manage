@@ -229,7 +229,8 @@
     .tab-flag{width:20px;height:15px;object-fit:cover;border-radius:2px;display:inline-block;vertical-align:middle;flex-shrink:0;}
     .docs-layout{display:flex;}
     @media(max-width:640px){.docs-layout{flex-direction:column;} #docs-sidebar{max-width:100%!important;min-width:unset!important;}}
-    #docs-dropzone.drag-over{border-color:var(--primary);background:var(--primary)14;}
+    #docs-dropzone.drag-over,#resume-dropzone.drag-over{border-color:var(--primary);background:var(--primary)14;}
+    .docx-body{font-family:inherit;line-height:1.8;} .docx-body h1,.docx-body h2,.docx-body h3{font-weight:700;margin:16px 0 8px;} .docx-body p{margin:6px 0;} .docx-body table{border-collapse:collapse;width:100%;margin:12px 0;} .docx-body td,.docx-body th{border:1px solid var(--border);padding:6px 10px;}
     .docs-file-item{padding:6px 8px;border-radius:6px;cursor:pointer;font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:4px;word-break:break-all;}
     .docs-file-item:hover{background:var(--border);}
     .docs-file-item.active{background:var(--primary)22;color:var(--primary);font-weight:600;}
@@ -303,6 +304,7 @@
       <div class="nav-item" data-sec="analysis"  onclick="nav('analysis')">  <span class="ico">📄</span><span>文件閱讀</span></div>
       <div class="nav-item" data-sec="investpro" onclick="nav('investpro')"> <span class="ico">💹</span><span>投資<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
       <div class="nav-item" data-sec="trading"   onclick="nav('trading')">   <span class="ico">🎯</span><span>操盤<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
+      <div class="nav-item" data-sec="resume"    onclick="nav('resume')">    <span class="ico">📋</span><span>履歷</span></div>
     </div>
   </nav>
   <div class="sidebar-footer"><small id="db-status">● 已連線</small></div>
@@ -1040,6 +1042,51 @@
       </div>
     </div>
 
+    <!-- ════ RESUME ════ -->
+    <div class="section" id="section-resume">
+      <div class="sec-header">
+        <div>
+          <div class="sec-title">📋 履歷</div>
+          <div class="sec-sub">讀取與產生履歷檔案</div>
+        </div>
+        <div id="resume-toolbar" style="display:none;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <span id="resume-file-badge" style="font-size:12px;padding:3px 10px;border-radius:12px;background:var(--primary)22;color:var(--primary);font-weight:600;"></span>
+          <button class="btn btn-sm" onclick="resumeExport()" style="background:var(--success);color:#fff;">⬇ 產檔</button>
+          <button class="btn btn-sm btn-outline" onclick="resumeClearFile()">✕ 清除</button>
+        </div>
+      </div>
+
+      <!-- 拖曳區 -->
+      <div id="resume-dropzone"
+        style="border:2px dashed var(--border);border-radius:12px;padding:52px 24px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:16px;"
+        ondragover="resumeDragOver(event)" ondragleave="resumeDragLeave(event)" ondrop="resumeDrop(event)"
+        onclick="resumePickFile()">
+        <div style="font-size:44px;margin-bottom:14px;">📂</div>
+        <div style="font-size:16px;font-weight:600;margin-bottom:8px;">拖曳檔案至此</div>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:8px;">
+          <span style="font-size:12px;padding:3px 10px;border-radius:10px;background:var(--bg2);color:var(--muted);">📄 PDF</span>
+          <span style="font-size:12px;padding:3px 10px;border-radius:10px;background:var(--bg2);color:var(--muted);">📝 DOCX</span>
+          <span style="font-size:12px;padding:3px 10px;border-radius:10px;background:var(--bg2);color:var(--muted);">📃 MD</span>
+          <span style="font-size:12px;padding:3px 10px;border-radius:10px;background:var(--bg2);color:var(--muted);">🖼 圖片</span>
+        </div>
+        <div style="font-size:13px;color:var(--muted);">或點擊選擇檔案</div>
+        <input id="resume-file-input" type="file"
+          accept=".pdf,.doc,.docx,.md,.markdown,.txt,.jpg,.jpeg,.png,.gif,.webp,.bmp,.svg"
+          style="display:none;" onchange="resumeFileInputChange(event)">
+      </div>
+
+      <!-- 載入中 -->
+      <div id="resume-loading" style="display:none;text-align:center;padding:40px;color:var(--muted);">
+        <div style="font-size:32px;margin-bottom:10px;">⏳</div>
+        <div id="resume-loading-msg" style="font-size:15px;">載入中...</div>
+      </div>
+
+      <!-- 內容區 -->
+      <div id="resume-content-wrap" style="display:none;">
+        <div id="resume-render-area" style="background:var(--card);border-radius:12px;padding:28px 32px;min-height:300px;line-height:1.8;font-size:15px;overflow-x:auto;border:1px solid var(--border);"></div>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -1113,6 +1160,7 @@ const PAGE_META = {
   analysis:   ['🔍 分析','進階分析（開發中）'],
   investpro:  ['💹 投資','年度損益與投資分析'],
   trading:    ['🎯 操盤','操盤記錄（開發中）'],
+  resume:     ['📋 履歷','履歷讀取與產生'],
 };
 
 // ════════════════════════════════════════════════
@@ -1176,7 +1224,7 @@ $('fit-month').value  = state.fitMonth;
 // ════════════════════════════════════════════════
 // Navigation
 // ════════════════════════════════════════════════
-const LOADERS = { dashboard:loadDashboard, accounting:loadAccounting, tasks:loadTasks, fitness:loadFitness, investment:loadInvestment, invest:loadInvest, ai:loadAI, line:loadLine, travel:loadTravel, work:loadWork, investpro:loadInvestpro, games:loadGames, analysis:loadAnalysis };
+const LOADERS = { dashboard:loadDashboard, accounting:loadAccounting, tasks:loadTasks, fitness:loadFitness, investment:loadInvestment, invest:loadInvest, ai:loadAI, line:loadLine, travel:loadTravel, work:loadWork, investpro:loadInvestpro, games:loadGames, analysis:loadAnalysis, resume:loadResume };
 
 function nav(sec){
   state.sec = sec;
@@ -4458,6 +4506,153 @@ async function downloadMaps() {
     loadTravelFootprint();
   } catch(e) { toast('下載失敗：'+e.message,'err'); }
   finally { if (btn) { btn.disabled = false; btn.textContent = '📥 下載地圖'; } }
+}
+
+// ════════════════════════════════════════════════
+// ════════════════════════════════════════════════
+// 履歷 (2-5)
+// ════════════════════════════════════════════════
+let _resumeCurrentFile = null;
+
+function loadResume() { /* state persists in memory */ }
+
+function resumeDragOver(e) { e.preventDefault(); $('resume-dropzone').classList.add('drag-over'); }
+function resumeDragLeave(e) { $('resume-dropzone').classList.remove('drag-over'); }
+function resumeDrop(e) {
+  e.preventDefault();
+  $('resume-dropzone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) _resumeLoadFile(file);
+}
+function resumePickFile() { $('resume-file-input').click(); }
+function resumeFileInputChange(e) {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (file) _resumeLoadFile(file);
+}
+
+function _resumeShowLoading(msg) {
+  $('resume-dropzone').style.display = 'none';
+  $('resume-loading').style.display = '';
+  $('resume-loading-msg').textContent = msg || '載入中...';
+  $('resume-content-wrap').style.display = 'none';
+  $('resume-toolbar').style.display = 'none';
+}
+function _resumeShowContent(name, typeLabel) {
+  $('resume-loading').style.display = 'none';
+  $('resume-content-wrap').style.display = '';
+  $('resume-toolbar').style.display = 'flex';
+  $('resume-file-badge').textContent = `${typeLabel}  ${name}`;
+}
+
+function resumeClearFile() {
+  _resumeCurrentFile = null;
+  $('resume-dropzone').style.display = '';
+  $('resume-content-wrap').style.display = 'none';
+  $('resume-loading').style.display = 'none';
+  $('resume-toolbar').style.display = 'none';
+  $('resume-render-area').innerHTML = '';
+}
+
+function resumeExport() {
+  toast('產檔功能規格制定中，敬請期待', 'ok');
+}
+
+async function _resumeLoadFile(file) {
+  const name = file.name;
+  const ext  = name.split('.').pop().toLowerCase();
+  _resumeCurrentFile = { name, ext };
+
+  if (['jpg','jpeg','png','gif','webp','bmp','svg'].includes(ext)) {
+    _resumeShowLoading('載入圖片...');
+    const reader = new FileReader();
+    reader.onload = ev => {
+      $('resume-render-area').innerHTML =
+        `<div style="text-align:center;"><img src="${ev.target.result}" style="max-width:100%;border-radius:8px;box-shadow:0 2px 12px #0002;"></div>`;
+      _resumeShowContent(name, '🖼');
+    };
+    reader.readAsDataURL(file);
+
+  } else if (ext === 'md' || ext === 'markdown' || ext === 'txt') {
+    _resumeShowLoading('解析 Markdown...');
+    const reader = new FileReader();
+    reader.onload = ev => {
+      $('resume-render-area').innerHTML = _mdToHtml(ev.target.result || '');
+      _resumeShowContent(name, '📃');
+    };
+    reader.readAsText(file, 'utf-8');
+
+  } else if (ext === 'pdf') {
+    _resumeShowLoading('載入 PDF...');
+    await _resumeRenderPdf(file);
+    _resumeShowContent(name, '📄');
+
+  } else if (ext === 'doc' || ext === 'docx') {
+    _resumeShowLoading('解析 Word 文件...');
+    await _resumeRenderDocx(file);
+    _resumeShowContent(name, '📝');
+
+  } else {
+    toast('不支援此格式：.' + ext, 'err');
+  }
+}
+
+async function _resumeRenderPdf(file) {
+  // Lazy load PDF.js
+  if (!window.pdfjsLib) {
+    await _loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+  try {
+    const buf = await file.arrayBuffer();
+    const pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
+    const area = $('resume-render-area');
+    area.innerHTML = '';
+    const total = Math.min(pdf.numPages, 30);
+    for (let i = 1; i <= total; i++) {
+      $('resume-loading-msg').textContent = `渲染第 ${i} / ${total} 頁...`;
+      const page    = await pdf.getPage(i);
+      const vp      = page.getViewport({ scale: 1.5 });
+      const canvas  = document.createElement('canvas');
+      canvas.width  = vp.width;
+      canvas.height = vp.height;
+      canvas.style.cssText = 'width:100%;margin-bottom:12px;border-radius:4px;box-shadow:0 1px 6px #0002;display:block;';
+      area.appendChild(canvas);
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+    }
+    if (pdf.numPages > 30) {
+      area.insertAdjacentHTML('beforeend',
+        `<div style="text-align:center;color:var(--muted);padding:16px;">（僅顯示前 30 頁，共 ${pdf.numPages} 頁）</div>`);
+    }
+  } catch(e) {
+    $('resume-render-area').innerHTML = `<div style="color:var(--danger);padding:20px;">PDF 解析失敗：${_escHtml(e.message)}</div>`;
+  }
+}
+
+async function _resumeRenderDocx(file) {
+  if (!window.mammoth) {
+    await _loadScript('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js');
+  }
+  try {
+    const buf    = await file.arrayBuffer();
+    const result = await window.mammoth.convertToHtml({ arrayBuffer: buf });
+    $('resume-render-area').innerHTML =
+      `<div class="docx-body">${result.value}</div>`;
+    if (result.messages.length) {
+      console.warn('[mammoth]', result.messages);
+    }
+  } catch(e) {
+    $('resume-render-area').innerHTML = `<div style="color:var(--danger);padding:20px;">Word 解析失敗：${_escHtml(e.message)}</div>`;
+  }
+}
+
+function _loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
 }
 
 // ════════════════════════════════════════════════
