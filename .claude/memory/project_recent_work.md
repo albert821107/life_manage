@@ -1,8 +1,10 @@
 ---
 name: project-recent-work
-description: life_manage 近期開發重點與投資模組重構細節
-metadata:
+description: 個人管家（life_manage）近期開發重點與投資模組重構細節
+metadata: 
+  node_type: memory
   type: project
+  originSessionId: f9aedee9-fbce-41f1-b0d7-b6bdeb62d9bb
 ---
 
 近期（2026-05 前後）主力開發投資模組（js/modules/investment.js）：

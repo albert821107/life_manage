@@ -1,4 +1,4 @@
-# CLAUDE.md — 個人人生管理系統 (life_manage)
+# CLAUDE.md — 個人管家 (life_manage)
 
 > 此檔案供 Claude Code AI 快速了解專案背景，任何電腦 clone 後請先閱讀此檔。
 
@@ -6,7 +6,7 @@
 
 ## 專案概述
 
-**個人人生管理系統** — 單人使用的本地端全功能生活管理 SPA。
+**個人管家** — 單人使用的本地端全功能生活管理 SPA。
 開發者在多台電腦間輪流開發，使用繁體中文。
 
 - **倉庫位置（本機）：** `c:\Project\life_manage`（Windows）

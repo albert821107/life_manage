@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>生活管理系統</title>
+  <title>個人管家</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -283,7 +283,7 @@
 <aside class="sidebar">
   <div class="sidebar-brand">
     <h2>🌿 生活管理系統</h2>
-    <div class="ver">Personal Life Manager v1</div>
+    <div class="ver">個人管家 v1</div>
   </div>
   <nav class="nav">
     <div class="nav-group-label">基本功能</div>
@@ -299,7 +299,7 @@
       <div class="nav-group-label">進階功能</div>
       <div class="nav-item" data-sec="work"      onclick="nav('work')">      <span class="ico">💼</span><span>工作<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
       <div class="nav-item" data-sec="analysis"  onclick="nav('analysis')">  <span class="ico">🔍</span><span>分析<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
-      <div class="nav-item" data-sec="investpro" onclick="nav('investpro')"> <span class="ico">💹</span><span>投資(進階)<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
+      <div class="nav-item" data-sec="investpro" onclick="nav('investpro')"> <span class="ico">💹</span><span>投資<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
       <div class="nav-item" data-sec="trading"   onclick="nav('trading')">   <span class="ico">🎯</span><span>操盤<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
       <div class="nav-item" data-sec="resume"    onclick="nav('resume')">    <span class="ico">📋</span><span>履歷<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
     </div>
@@ -500,7 +500,7 @@
       </div>
       <div class="chat-wrap">
         <div class="chat-msgs" id="chat-msgs">
-          <div class="chat-empty">👋 你好！我是你的個人生活管理 AI 助理。<br>我了解你的財務、任務、健身和投資狀況，歡迎提問！</div>
+          <div class="chat-empty">👋 你好！我是個人管家 AI 助理。<br>我了解你的財務、任務、健身和投資狀況，歡迎提問！</div>
         </div>
         <div class="chat-bar">
           <textarea id="chat-input" placeholder="輸入問題... (Enter 送出，Shift+Enter 換行)" rows="1"></textarea>

@@ -1,11 +1,13 @@
 ---
 name: project-overview
-description: life_manage 專案基本資訊、tech stack、模組結構
-metadata:
+description: 個人管家（life_manage）專案基本資訊、tech stack、模組結構
+metadata: 
+  node_type: memory
   type: project
+  originSessionId: f9aedee9-fbce-41f1-b0d7-b6bdeb62d9bb
 ---
 
-個人人生管理系統（life_manage），Node.js + Express + sql.js (SQLite WebAssembly) + Socket.io，單頁 SPA（public/index.html 單一大檔）。
+個人管家（life_manage），Node.js + Express + sql.js (SQLite WebAssembly) + Socket.io，單頁 SPA（public/index.html 單一大檔）。
 
 **Why:** 單人本機使用，無認證系統，sql.js 避免 native 編譯問題。
 

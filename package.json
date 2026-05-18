@@ -1,7 +1,7 @@
 {
   "name": "life-manager",
   "version": "1.0.0",
-  "description": "個人人生管理系統 v1 - 記帳 / 任務 / 健身 / 投資 / AI助理 / LINE通知",
+  "description": "個人管家 v1 - 記帳 / 任務 / 健身 / 投資 / AI助理 / LINE通知",
   "main": "js/server.js",
   "scripts": {
     "start": "node js/server.js",

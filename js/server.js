@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * 個人人生管理系統 v1 - 主伺服器
+ * 個人管家 v1 - 主伺服器
  *
  * 啟動方式:
  *   node js/server.js          一般啟動
@@ -139,7 +139,7 @@ app.post('/api/admin/reload', (req, res) => {
   // ==========================================
   httpServer.listen(PORT, () => {
   console.log('\n╔══════════════════════════════════════╗');
-  console.log('║   🧠  個人人生管理系統 v1             ║');
+  console.log('║   🧠  個人管家 v1                     ║');
   console.log('╚══════════════════════════════════════╝');
   console.log(`\n   🌐 http://localhost:${PORT}\n`);
   console.log('   模組列表:');
