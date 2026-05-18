@@ -14,3 +14,4 @@ metadata:
 **How to apply:**
 - `git commit`、`git push` — 必須等使用者說「commit」「推送」「push」等才執行
 - `git status`、`git log`、`git diff`、`git show` 等 — 可直接執行，無需確認
+- commit 時 `data/life_manager.db` 一律納入，不可省略
