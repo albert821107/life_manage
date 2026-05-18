@@ -294,14 +294,15 @@
       <div class="nav-item"        data-sec="line"        onclick="nav('line')">       <span class="ico">📣</span><span>通知<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
       <div class="nav-item"        data-sec="travel"      onclick="nav('travel')">     <span class="ico">✈️</span><span>旅遊<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
       <div class="nav-item"        data-sec="games"       onclick="nav('games')">      <span class="ico">🎮</span><span>遊戲<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
+      <div class="nav-item"        data-sec="resume"      onclick="nav('resume')">     <span class="ico">📋</span><span>履歷<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
     </div>
     <div id="nav-advanced" style="display:none;">
       <div class="nav-group-label">進階功能</div>
       <div class="nav-item" data-sec="work"      onclick="nav('work')">      <span class="ico">💼</span><span>工作<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
       <div class="nav-item" data-sec="analysis"  onclick="nav('analysis')">  <span class="ico">🔍</span><span>分析<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
       <div class="nav-item" data-sec="investpro" onclick="nav('investpro')"> <span class="ico">💹</span><span>投資<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
-      <div class="nav-item" data-sec="trading"   onclick="nav('trading')">   <span class="ico">🎯</span><span>操盤<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
-      <div class="nav-item" data-sec="resume"    onclick="nav('resume')">    <span class="ico">📋</span><span>履歷<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
+      <div class="nav-item" data-sec="trading"   onclick="nav('trading')">   <span class="ico">🏦</span><span>交易所<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
+      <div class="nav-item" data-sec="orders"    onclick="nav('orders')">    <span class="ico">📦</span><span>訂單彙整<small style="font-size:10px;color:var(--muted);opacity:.7;"> (開發中)</small></span></div>
     </div>
   </nav>
   <div class="sidebar-footer"><small id="db-status">● 已連線</small></div>
@@ -492,21 +493,131 @@
 
     <!-- ════ AI ════ -->
     <div class="section" id="section-ai">
-      <div class="sec-header">
-        <div class="sec-header-right">
+      <div class="sec-header"></div>
+
+      <!-- AI 子頁籤 -->
+      <div class="inv-tabs" id="ai-tabs" style="margin-bottom:20px;">
+        <div class="inv-tab active" id="ai-tab-chat"    onclick="switchAiTab('chat')">💬 AI 聊天</div>
+        <div class="inv-tab"        id="ai-tab-chatgpt" onclick="switchAiTab('chatgpt')"><svg width="15" height="15" viewBox="0 0 41 41" style="vertical-align:-3px;margin-right:4px;"><rect width="41" height="41" rx="8" fill="#10a37f"/><path fill="white" d="M37.53 16.56a10.22 10.22 0 0 0-.88-8.39 10.33 10.33 0 0 0-11.12-4.95A10.29 10.29 0 0 0 8.52 7.13a10.22 10.22 0 0 0-6.83 4.95 10.33 10.33 0 0 0 1.27 12.1 10.22 10.22 0 0 0 .87 8.38 10.33 10.33 0 0 0 11.13 4.96 10.22 10.22 0 0 0 7.7 3.44 10.34 10.34 0 0 0 9.86-7.17 10.22 10.22 0 0 0 6.82-4.95 10.33 10.33 0 0 0-1.27-12.08zM20.11 37.53a7.65 7.65 0 0 1-4.91-1.78l.24-.14 8.16-4.71a1.36 1.36 0 0 0 .67-1.16V18.18l3.45 1.99a.12.12 0 0 1 .07.09v9.52a7.69 7.69 0 0 1-7.68 7.75zm-16.49-7.05a7.65 7.65 0 0 1-.91-5.15l.24.14 8.16 4.71a1.32 1.32 0 0 0 1.33 0l9.97-5.75v3.98a.13.13 0 0 1-.06.11l-8.25 4.76a7.69 7.69 0 0 1-10.48-2.8zM2.44 13.47a7.65 7.65 0 0 1 4.04-3.37v9.74a1.31 1.31 0 0 0 .66 1.15l9.93 5.73-3.45 1.99a.13.13 0 0 1-.12 0l-8.25-4.76a7.69 7.69 0 0 1-2.81-10.48zm28.33 6.59-9.97-5.75 3.45-1.99a.13.13 0 0 1 .12 0l8.25 4.76a7.68 7.68 0 0 1-1.16 13.83v-9.69a1.35 1.35 0 0 0-.69-1.16zm3.43-5.17-.24-.14-8.16-4.71a1.32 1.32 0 0 0-1.34 0l-9.96 5.75V11.8a.13.13 0 0 1 .05-.11l8.25-4.75a7.68 7.68 0 0 1 11.4 7.95zM14.87 21.98l-3.45-1.98a.13.13 0 0 1-.07-.1v-9.52a7.68 7.68 0 0 1 12.6-5.9l-.24.14-8.16 4.71a1.36 1.36 0 0 0-.67 1.16l-.01 11.49zm1.88-4.02 4.44-2.56 4.45 2.57v5.12l-4.44 2.56-4.45-2.57V17.96z"/></svg>ChatGPT</div>
+        <div class="inv-tab"        id="ai-tab-claude"  onclick="switchAiTab('claude')"><svg width="15" height="15" viewBox="0 0 15 15" style="vertical-align:-3px;margin-right:4px;"><rect width="15" height="15" rx="3" fill="#CC785C"/><text x="7.5" y="11" text-anchor="middle" fill="white" font-size="8" font-weight="800" font-family="Arial,sans-serif">Cl</text></svg>Claude</div>
+        <div class="inv-tab"        id="ai-tab-gemini"  onclick="switchAiTab('gemini')"><svg width="15" height="15" viewBox="0 0 15 15" style="vertical-align:-3px;margin-right:4px;"><defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4285F4"/><stop offset="100%" stop-color="#34A853"/></linearGradient></defs><rect width="15" height="15" rx="3" fill="url(#gg)"/><path fill="white" d="M7.5 2.5C7.5 2.5 7.5 5.5 7.5 7.5C7.5 7.5 5.5 7.5 2.5 7.5C5.5 7.5 7.5 7.5 7.5 7.5C7.5 7.5 7.5 9.5 7.5 12.5C7.5 9.5 7.5 7.5 7.5 7.5C7.5 7.5 9.5 7.5 12.5 7.5C9.5 7.5 7.5 7.5 7.5 7.5C7.5 7.5 7.5 5.5 7.5 2.5Z"/></svg>Gemini</div>
+        <div class="inv-tab"        id="ai-tab-copilot" onclick="switchAiTab('copilot')"><svg width="15" height="15" viewBox="0 0 15 15" style="vertical-align:-3px;margin-right:4px;"><rect width="15" height="15" rx="3" fill="#24292e"/><path fill="white" d="M7.5 2a3 3 0 0 0-3 3v1H3.5a.5.5 0 0 0 0 1h.1a4 4 0 0 0 7.8 0h.1a.5.5 0 0 0 0-1H10.5V5a3 3 0 0 0-3-3zm-1.5 6a1.5 1.5 0 0 1-1.5-1.5V5.5h3V6.5A1.5 1.5 0 0 1 6 8zm3 0a1.5 1.5 0 0 1-1.5-1.5V5.5h3V6.5A1.5 1.5 0 0 1 9 8zm-1.5 2.5c-1.5 0-2.5.5-2.5 1H11c0-.5-1-.999-2.5-1l-.5-.001z"/></svg>Copilot</div>
+      </div>
+
+      <!-- ── 聊天 ── -->
+      <div id="ai-sub-chat">
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px;">
           <span id="ai-mode-badge" class="badge b-pending" style="font-size:12px;">載入中...</span>
           <button class="btn btn-outline btn-sm" onclick="clearAIHistory()">🗑 清除對話</button>
         </div>
-      </div>
-      <div class="chat-wrap">
-        <div class="chat-msgs" id="chat-msgs">
-          <div class="chat-empty">👋 你好！我是個人管家 AI 助理。<br>我了解你的財務、任務、健身和投資狀況，歡迎提問！</div>
+        <div class="chat-wrap">
+          <div class="chat-msgs" id="chat-msgs">
+            <div class="chat-empty">👋 你好！我是個人管家 AI 助理。<br>我了解你的財務、任務、健身和投資狀況，歡迎提問！</div>
+          </div>
+          <div class="chat-bar">
+            <textarea id="chat-input" placeholder="輸入問題... (Enter 送出，Shift+Enter 換行)" rows="1"></textarea>
+            <button class="btn btn-primary" id="chat-send-btn" onclick="sendChat()">送出</button>
+          </div>
         </div>
-        <div class="chat-bar">
-          <textarea id="chat-input" placeholder="輸入問題... (Enter 送出，Shift+Enter 換行)" rows="1"></textarea>
-          <button class="btn btn-primary" id="chat-send-btn" onclick="sendChat()">送出</button>
+      </div>
+
+      <!-- ── ChatGPT ── -->
+      <div id="ai-sub-chatgpt" style="display:none;">
+        <div class="card" style="max-width:600px;">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+            <svg width="42" height="42" viewBox="0 0 41 41" style="flex-shrink:0;border-radius:10px;"><rect width="41" height="41" rx="8" fill="#10a37f"/><path fill="white" d="M37.53 16.56a10.22 10.22 0 0 0-.88-8.39 10.33 10.33 0 0 0-11.12-4.95A10.29 10.29 0 0 0 8.52 7.13a10.22 10.22 0 0 0-6.83 4.95 10.33 10.33 0 0 0 1.27 12.1 10.22 10.22 0 0 0 .87 8.38 10.33 10.33 0 0 0 11.13 4.96 10.22 10.22 0 0 0 7.7 3.44 10.34 10.34 0 0 0 9.86-7.17 10.22 10.22 0 0 0 6.82-4.95 10.33 10.33 0 0 0-1.27-12.08zM20.11 37.53a7.65 7.65 0 0 1-4.91-1.78l.24-.14 8.16-4.71a1.36 1.36 0 0 0 .67-1.16V18.18l3.45 1.99a.12.12 0 0 1 .07.09v9.52a7.69 7.69 0 0 1-7.68 7.75zm-16.49-7.05a7.65 7.65 0 0 1-.91-5.15l.24.14 8.16 4.71a1.32 1.32 0 0 0 1.33 0l9.97-5.75v3.98a.13.13 0 0 1-.06.11l-8.25 4.76a7.69 7.69 0 0 1-10.48-2.8zM2.44 13.47a7.65 7.65 0 0 1 4.04-3.37v9.74a1.31 1.31 0 0 0 .66 1.15l9.93 5.73-3.45 1.99a.13.13 0 0 1-.12 0l-8.25-4.76a7.69 7.69 0 0 1-2.81-10.48zm28.33 6.59-9.97-5.75 3.45-1.99a.13.13 0 0 1 .12 0l8.25 4.76a7.68 7.68 0 0 1-1.16 13.83v-9.69a1.35 1.35 0 0 0-.69-1.16zm3.43-5.17-.24-.14-8.16-4.71a1.32 1.32 0 0 0-1.34 0l-9.96 5.75V11.8a.13.13 0 0 1 .05-.11l8.25-4.75a7.68 7.68 0 0 1 11.4 7.95zM14.87 21.98l-3.45-1.98a.13.13 0 0 1-.07-.1v-9.52a7.68 7.68 0 0 1 12.6-5.9l-.24.14-8.16 4.71a1.36 1.36 0 0 0-.67 1.16l-.01 11.49zm1.88-4.02 4.44-2.56 4.45 2.57v5.12l-4.44 2.56-4.45-2.57V17.96z"/></svg>
+            <div>
+              <div style="font-size:16px;font-weight:700;">ChatGPT (OpenAI)</div>
+              <div style="font-size:12px;color:var(--muted);">GPT-4o、GPT-4o-mini 等模型</div>
+            </div>
+            <span id="ai-key-badge-openai" class="badge b-pending" style="margin-left:auto;font-size:11px;">未設定</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;font-size:13px;color:var(--muted);border-left:3px solid #10a37f;padding-left:14px;line-height:1.8;">
+            <div><strong style="color:var(--text);">1. 前往 OpenAI Platform</strong><br>開啟 <a href="https://platform.openai.com" target="_blank" style="color:#10a37f;">platform.openai.com</a> 並登入帳號</div>
+            <div><strong style="color:var(--text);">2. 建立 API Key</strong><br>左側選單 → API Keys → 「+ Create new secret key」→ 複製後妥善保管（只顯示一次）</div>
+            <div><strong style="color:var(--text);">3. 加值帳戶</strong><br><a href="https://platform.openai.com/account/billing" target="_blank" style="color:#10a37f;">Billing</a> → Add payment method → 儲值後方可使用（最低約 $5 USD）</div>
+            <div><strong style="color:var(--text);">4. 填入以下欄位儲存</strong><br>Key 格式：<code style="background:var(--bg2);padding:1px 5px;border-radius:3px;">sk-proj-...</code>　儲存後無需重啟，立即生效</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <input id="ai-key-input-openai" class="input" type="password" placeholder="sk-proj-..." style="flex:1;">
+            <button class="btn btn-primary" onclick="saveAiKey('openai')">💾 儲存</button>
+          </div>
+          <div id="ai-key-result-openai" style="display:none;margin-top:10px;font-size:13px;padding:8px 12px;border-radius:8px;"></div>
         </div>
       </div>
+
+      <!-- ── Claude ── -->
+      <div id="ai-sub-claude" style="display:none;">
+        <div class="card" style="max-width:600px;">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+            <svg width="42" height="42" viewBox="0 0 42 42" style="flex-shrink:0;border-radius:10px;"><rect width="42" height="42" rx="8" fill="#CC785C"/><text x="21" y="28" text-anchor="middle" fill="white" font-size="22" font-weight="700" font-family="Georgia,serif">C</text></svg>
+            <div>
+              <div style="font-size:16px;font-weight:700;">Claude (Anthropic)</div>
+              <div style="font-size:12px;color:var(--muted);">Claude 4 Sonnet、Opus、Haiku 等模型</div>
+            </div>
+            <span id="ai-key-badge-anthropic" class="badge b-pending" style="margin-left:auto;font-size:11px;">未設定</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;font-size:13px;color:var(--muted);border-left:3px solid #CC785C;padding-left:14px;line-height:1.8;">
+            <div><strong style="color:var(--text);">1. 前往 Anthropic Console</strong><br>開啟 <a href="https://console.anthropic.com" target="_blank" style="color:#CC785C;">console.anthropic.com</a> 並登入帳號</div>
+            <div><strong style="color:var(--text);">2. 建立 API Key</strong><br>左側 API Keys → 「+ Create Key」→ 複製後妥善保管（只顯示一次）</div>
+            <div><strong style="color:var(--text);">3. 加值帳戶</strong><br><a href="https://console.anthropic.com/settings/billing" target="_blank" style="color:#CC785C;">Settings → Billing</a> → Add credits（最低 $5 USD），或申請免費 API 額度</div>
+            <div><strong style="color:var(--text);">4. 填入以下欄位儲存</strong><br>Key 格式：<code style="background:var(--bg2);padding:1px 5px;border-radius:3px;">sk-ant-api03-...</code></div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <input id="ai-key-input-anthropic" class="input" type="password" placeholder="sk-ant-api03-..." style="flex:1;">
+            <button class="btn btn-primary" onclick="saveAiKey('anthropic')">💾 儲存</button>
+          </div>
+          <div id="ai-key-result-anthropic" style="display:none;margin-top:10px;font-size:13px;padding:8px 12px;border-radius:8px;"></div>
+        </div>
+      </div>
+
+      <!-- ── Gemini ── -->
+      <div id="ai-sub-gemini" style="display:none;">
+        <div class="card" style="max-width:600px;">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+            <svg width="42" height="42" viewBox="0 0 42 42" style="flex-shrink:0;border-radius:10px;"><defs><linearGradient id="gmg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4285F4"/><stop offset="50%" stop-color="#34A853"/><stop offset="100%" stop-color="#FBBC05"/></linearGradient></defs><rect width="42" height="42" rx="8" fill="url(#gmg)"/><path fill="white" d="M21 5C21 5 21 14 21 21C21 21 14 21 5 21C14 21 21 21 21 21C21 21 21 28 21 37C21 28 21 21 21 21C21 21 28 21 37 21C28 21 21 21 21 21C21 21 21 14 21 5Z"/></svg>
+            <div>
+              <div style="font-size:16px;font-weight:700;">Gemini (Google)</div>
+              <div style="font-size:12px;color:var(--muted);">Gemini 2.5 Pro / Flash 等模型，免費額度充裕</div>
+            </div>
+            <span id="ai-key-badge-google" class="badge b-pending" style="margin-left:auto;font-size:11px;">未設定</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;font-size:13px;color:var(--muted);border-left:3px solid #4285F4;padding-left:14px;line-height:1.8;">
+            <div><strong style="color:var(--text);">1. 前往 Google AI Studio</strong><br>開啟 <a href="https://aistudio.google.com" target="_blank" style="color:#4285F4;">aistudio.google.com</a> 並登入 Google 帳號</div>
+            <div><strong style="color:var(--text);">2. 取得 API Key</strong><br>左側「<a href="https://aistudio.google.com/apikey" target="_blank" style="color:#4285F4;">Get API key</a>」→「Create API key」→ 選擇 Google Cloud 專案（或建立新專案）→ 複製 Key</div>
+            <div><strong style="color:var(--text);">3. 免費額度</strong><br>Gemini Flash 提供<strong>免費</strong>使用額度（每分鐘 15 次請求），個人使用綽綽有餘，無需加值</div>
+            <div><strong style="color:var(--text);">4. 填入以下欄位儲存</strong><br>Key 格式：<code style="background:var(--bg2);padding:1px 5px;border-radius:3px;">AIzaSy...</code></div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <input id="ai-key-input-google" class="input" type="password" placeholder="AIzaSy..." style="flex:1;">
+            <button class="btn btn-primary" onclick="saveAiKey('google')">💾 儲存</button>
+          </div>
+          <div id="ai-key-result-google" style="display:none;margin-top:10px;font-size:13px;padding:8px 12px;border-radius:8px;"></div>
+        </div>
+      </div>
+
+      <!-- ── GitHub Copilot ── -->
+      <div id="ai-sub-copilot" style="display:none;">
+        <div class="card" style="max-width:600px;">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+            <svg width="42" height="42" viewBox="0 0 42 42" style="flex-shrink:0;border-radius:10px;"><rect width="42" height="42" rx="8" fill="#24292e"/><path fill="white" d="M21 7a8 8 0 0 0-8 8v3.5H10a1 1 0 0 0 0 2h.3a9 9 0 0 0 17.4 0H28a1 1 0 0 0 0-2h-3V15a8 8 0 0 0-8-8zm-4 11a3.5 3.5 0 0 1-3.5-3.5V13h7v1.5A3.5 3.5 0 0 1 17 18zm8 0a3.5 3.5 0 0 1-3.5-3.5V13h7v1.5A3.5 3.5 0 0 1 25 18zm-4 7c-4 0-6.5 1.3-6.5 2.5h13C27.5 26.3 25 25 21 25z"/></svg>
+            <div>
+              <div style="font-size:16px;font-weight:700;">GitHub Copilot</div>
+              <div style="font-size:12px;color:var(--muted);">程式碼 AI 助理，整合 VSCode / JetBrains 等 IDE</div>
+            </div>
+          </div>
+          <div style="background:rgba(36,41,46,.08);border:1px solid rgba(36,41,46,.2);border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:12px;color:var(--muted);line-height:1.6;">
+            ℹ️ GitHub Copilot 屬於<strong>訂閱制</strong>，透過 IDE 外掛使用，<strong>不需要 API Key</strong>，無法透過本系統直接呼叫。
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px;font-size:13px;color:var(--muted);border-left:3px solid #24292e;padding-left:14px;line-height:1.8;">
+            <div><strong style="color:var(--text);">1. 訂閱 GitHub Copilot</strong><br>前往 <a href="https://github.com/features/copilot" target="_blank" style="color:var(--primary);">github.com/features/copilot</a>，個人方案 $10/月，學生可申請免費</div>
+            <div><strong style="color:var(--text);">2. 安裝 VSCode 擴充</strong><br>在 VSCode 搜尋 <a href="https://marketplace.visualstudio.com/items?itemName=GitHub.copilot" target="_blank" style="color:var(--primary);">GitHub Copilot</a> 並安裝 → 使用 GitHub 帳號登入授權</div>
+            <div><strong style="color:var(--text);">3. 使用 Copilot Chat</strong><br>安裝 <a href="https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat" target="_blank" style="color:var(--primary);">GitHub Copilot Chat</a> 擴充 → 側邊欄即可開啟 AI 對話</div>
+            <div><strong style="color:var(--text);">4. 適用場景</strong><br>程式碼補全、解釋程式碼、生成函式、Debug、撰寫測試 — 專注在開發輔助，與 ChatGPT/Claude 的通用 AI 定位不同</div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- ════ LINE ════ -->
@@ -848,8 +959,8 @@
     <div class="section" id="section-investpro">
       <!-- 子頁籤 -->
       <div class="inv-tabs" id="investpro-tabs">
-        <div class="inv-tab active" id="investpro-tab-unrealized" onclick="switchInvestproTab('unrealized')">📈 未實現損益</div>
-        <div class="inv-tab"        id="investpro-tab-yearlypnl"  onclick="switchInvestproTab('yearlypnl')">📊 年度損益</div>
+        <div class="inv-tab active" id="investpro-tab-yearlypnl"  onclick="switchInvestproTab('yearlypnl')">📊 年度損益</div>
+        <div class="inv-tab"        id="investpro-tab-unrealized" onclick="switchInvestproTab('unrealized')">📈 未實現損益</div>
       </div>
 
       <!-- 未實現損益 sub -->
@@ -1021,11 +1132,35 @@
         </div>
       </div>
 
+      <!-- 子頁籤 -->
+      <div class="inv-tabs" id="trading-tabs" style="margin-bottom:20px;">
+        <div class="inv-tab active" id="trading-tab-overview" onclick="switchTradingTab('overview')">📊 交易所總覽</div>
+        <div class="inv-tab"        id="trading-tab-config"   onclick="switchTradingTab('config')">⚙️ 金鑰管理</div>
+      </div>
+
+      <!-- 操盤總覽 -->
+      <div id="trading-sub-overview">
+
+      <!-- 交易所選擇 -->
+      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+        <button id="ov-btn-bybit"   class="btn btn-primary btn-sm" onclick="switchOverviewExc('bybit')">🟡 Bybit</button>
+        <button id="ov-btn-binance" class="btn btn-outline btn-sm" onclick="switchOverviewExc('binance')">🟠 Binance</button>
+        <button id="ov-btn-coinup"  class="btn btn-outline btn-sm" onclick="switchOverviewExc('coinup')">🔷 CoinUp</button>
+        <button id="ov-btn-max"     class="btn btn-outline btn-sm" onclick="switchOverviewExc('max')">🟢 MAX</button>
+      </div>
+
+      <!-- ── Bybit 總覽 ── -->
+      <div id="ov-content-bybit">
+
       <!-- 帳戶資產 -->
-      <div class="stats-grid" style="margin-bottom:20px;">
+      <div class="stats-grid" style="margin-bottom:12px;">
         <div class="stat-card">
           <div class="lbl">💰 總權益 (USDT)</div>
           <div class="val" id="bybit-equity">--</div>
+        </div>
+        <div class="stat-card">
+          <div class="lbl">💼 錢包餘額 (USDT)</div>
+          <div class="val" id="bybit-wallet">--</div>
         </div>
         <div class="stat-card">
           <div class="lbl">💵 可用餘額 (USDT)</div>
@@ -1034,6 +1169,33 @@
         <div class="stat-card">
           <div class="lbl">📊 未平倉盈虧 (USDT)</div>
           <div class="val" id="bybit-upnl">--</div>
+        </div>
+        <div class="stat-card">
+          <div class="lbl">🔐 已用初始保證金 (USDT)</div>
+          <div class="val" id="bybit-init-margin">--</div>
+        </div>
+        <div class="stat-card">
+          <div class="lbl">⚠️ 維持保證金 (USDT)</div>
+          <div class="val" id="bybit-maint-margin">--</div>
+        </div>
+      </div>
+
+      <!-- 統一交易帳戶標題 -->
+      <div style="font-size:13px;font-weight:600;color:var(--muted);margin-bottom:8px;letter-spacing:.5px;">📊 統一交易帳戶 (UNIFIED)</div>
+
+      <!-- 幣種明細 -->
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:20px;">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600;font-size:14px;">💳 幣種明細</div>
+        <div id="bybit-coins" style="overflow-x:auto;min-height:40px;">
+          <div style="text-align:center;padding:24px 0;color:var(--muted);">載入中...</div>
+        </div>
+      </div>
+
+      <!-- 資金帳戶 -->
+      <div style="font-size:13px;font-weight:600;color:var(--muted);margin-bottom:8px;letter-spacing:.5px;">💰 資金帳戶 (FUND)</div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:20px;">
+        <div id="bybit-fund-coins" style="overflow-x:auto;min-height:40px;">
+          <div style="text-align:center;padding:24px 0;color:var(--muted);">載入中...</div>
         </div>
       </div>
 
@@ -1046,14 +1208,377 @@
       </div>
 
       <!-- 未設定提示 -->
-      <div id="bybit-unconfig" style="display:none;text-align:center;padding:60px 0;color:var(--muted);">
-        <div style="font-size:48px;margin-bottom:14px;">🔑</div>
-        <div style="font-size:17px;font-weight:700;margin-bottom:8px;color:var(--text);">尚未設定 Bybit API</div>
-        <div style="font-size:13px;margin-bottom:16px;">請在 .env 設定 BYBIT_API_KEY 與 BYBIT_API_SECRET</div>
-        <div style="font-size:12px;color:var(--muted);background:var(--bg2);border-radius:8px;padding:12px 18px;display:inline-block;text-align:left;">
-          BYBIT_API_KEY=your-key<br>
-          BYBIT_API_SECRET=your-secret<br>
-          BYBIT_TESTNET=false
+      <div id="bybit-unconfig" style="display:none;padding:40px 0;">
+        <div class="card" style="max-width:620px;margin:0 auto;">
+          <div style="text-align:center;margin-bottom:24px;">
+            <div style="font-size:40px;margin-bottom:10px;">🔑</div>
+            <div style="font-size:17px;font-weight:700;color:var(--text);">尚未設定 Bybit API</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:6px;">依照以下步驟取得 API Key 並填入 .env</div>
+          </div>
+
+          <!-- 步驟 -->
+          <div style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px;">
+            <div style="display:flex;gap:14px;align-items:flex-start;">
+              <div style="min-width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">1</div>
+              <div>
+                <div style="font-weight:600;margin-bottom:4px;">登入 Bybit 帳戶</div>
+                <div style="font-size:13px;color:var(--muted);">前往 Bybit 官網並登入你的帳戶（需完成 KYC 驗證）</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:14px;align-items:flex-start;">
+              <div style="min-width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">2</div>
+              <div>
+                <div style="font-weight:600;margin-bottom:4px;">進入 API 管理頁面</div>
+                <div style="font-size:13px;color:var(--muted);">右上角頭像 → <strong>我的帳戶</strong> → <strong>API 管理</strong>（或直接搜尋「API Management」）</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:14px;align-items:flex-start;">
+              <div style="min-width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">3</div>
+              <div>
+                <div style="font-weight:600;margin-bottom:4px;">建立新的 API Key</div>
+                <div style="font-size:13px;color:var(--muted);">點擊「建立新金鑰」→ 選擇 <strong>系統生成的 API Keys</strong><br>
+                權限勾選：✅ 讀取（必要）　❌ 提款（不要勾）<br>
+                IP 限制：可填入本機 IP 提高安全性，或留空</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:14px;align-items:flex-start;">
+              <div style="min-width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">4</div>
+              <div>
+                <div style="font-weight:600;margin-bottom:4px;">複製 API Key 與 Secret</div>
+                <div style="font-size:13px;color:var(--muted);">建立後頁面會顯示 <strong>API Key</strong> 和 <strong>API Secret</strong>（Secret 只顯示一次，請立即複製）</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:14px;align-items:flex-start;">
+              <div style="min-width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">5</div>
+              <div>
+                <div style="font-weight:600;margin-bottom:4px;">填入 .env 檔案</div>
+                <div style="font-size:13px;color:var(--muted);">開啟專案根目錄的 <code style="background:var(--bg2);padding:1px 6px;border-radius:4px;">.env</code> 檔案，填入以下設定後重啟伺服器：</div>
+                <div style="margin-top:8px;font-size:12px;font-family:monospace;background:var(--bg2);border-radius:8px;padding:12px 16px;line-height:1.8;">
+                  BYBIT_API_KEY=貼上你的 API Key<br>
+                  BYBIT_API_SECRET=貼上你的 Secret<br>
+                  BYBIT_TESTNET=false
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="font-size:12px;color:var(--muted);text-align:center;padding-top:16px;border-top:1px solid var(--border);">
+            ⚠️ 本系統僅使用「讀取」權限查詢帳戶資訊，不會執行任何交易或提款操作
+          </div>
+        </div>
+      </div>
+
+      </div><!-- /ov-content-bybit -->
+
+      <!-- ── Binance 總覽（佔位） ── -->
+      <div id="ov-content-binance" style="display:none;">
+        <div class="card" style="text-align:center;padding:48px 24px;">
+          <div style="font-size:44px;margin-bottom:14px;">🚧</div>
+          <div style="font-size:16px;font-weight:700;margin-bottom:8px;">Binance 整合開發中</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:20px;">可先至「金鑰管理」新增 Binance API Key 備用</div>
+          <button class="btn btn-outline btn-sm" onclick="switchTradingTab('config');switchExcTab('binance')">前往金鑰管理 →</button>
+        </div>
+      </div>
+
+      <!-- ── CoinUp 總覽（佔位） ── -->
+      <div id="ov-content-coinup" style="display:none;">
+        <div class="card" style="text-align:center;padding:48px 24px;">
+          <div style="font-size:44px;margin-bottom:14px;">🚧</div>
+          <div style="font-size:16px;font-weight:700;margin-bottom:8px;">CoinUp 整合開發中</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:20px;">可先至「金鑰管理」新增 CoinUp API Key 備用</div>
+          <button class="btn btn-outline btn-sm" onclick="switchTradingTab('config');switchExcTab('coinup')">前往金鑰管理 →</button>
+        </div>
+      </div>
+
+      <!-- ── MAX 總覽（佔位） ── -->
+      <div id="ov-content-max" style="display:none;">
+        <div class="card" style="text-align:center;padding:48px 24px;">
+          <div style="font-size:44px;margin-bottom:14px;">🚧</div>
+          <div style="font-size:16px;font-weight:700;margin-bottom:8px;">MAX 整合開發中</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:20px;">可先至「金鑰管理」新增 MAX API Key 備用</div>
+          <button class="btn btn-outline btn-sm" onclick="switchTradingTab('config');switchExcTab('max')">前往金鑰管理 →</button>
+        </div>
+      </div>
+
+      </div><!-- /trading-sub-overview -->
+
+      <!-- API 設定 -->
+      <!-- 金鑰管理 -->
+      <div id="trading-sub-config" style="display:none;">
+        <!-- 交易所選擇列 -->
+        <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+          <button id="exc-btn-bybit"   class="btn btn-primary btn-sm" onclick="switchExcTab('bybit')">🟡 Bybit</button>
+          <button id="exc-btn-binance" class="btn btn-outline btn-sm" onclick="switchExcTab('binance')">🟠 Binance</button>
+          <button id="exc-btn-coinup"  class="btn btn-outline btn-sm" onclick="switchExcTab('coinup')">🔷 CoinUp</button>
+          <button id="exc-btn-max"     class="btn btn-outline btn-sm" onclick="switchExcTab('max')">🟢 MAX</button>
+        </div>
+
+        <!-- Bybit -->
+        <div id="exc-content-bybit">
+          <div class="card" style="margin-bottom:16px;">
+            <div style="font-size:13px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;">🟡 Bybit 金鑰清單
+              <span style="font-size:11px;color:var(--muted);font-weight:400;">（使用中的 Key 會自動套用到交易所總覽）</span>
+            </div>
+            <div id="exc-keys-bybit"><div style="text-align:center;padding:20px;color:var(--muted);">載入中...</div></div>
+          </div>
+          <!-- 新增金鑰 -->
+          <div class="card">
+            <div style="font-size:13px;font-weight:700;margin-bottom:14px;">➕ 新增 Bybit 金鑰</div>
+            <div style="display:grid;gap:12px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div>
+                  <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">名稱標籤</label>
+                  <input id="exc-add-bybit-label" class="input" placeholder="e.g. 主帳號、子帳號" style="width:100%;">
+                </div>
+                <div style="display:flex;align-items:flex-end;gap:8px;padding-bottom:1px;">
+                  <input id="exc-add-bybit-testnet" type="checkbox" style="width:15px;height:15px;cursor:pointer;margin-bottom:2px;">
+                  <label for="exc-add-bybit-testnet" style="font-size:13px;cursor:pointer;">使用測試網</label>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">API Key</label>
+                <input id="exc-add-bybit-key" class="input" placeholder="API Key" style="width:100%;">
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">API Secret</label>
+                <input id="exc-add-bybit-secret" class="input" type="password" placeholder="API Secret" style="width:100%;">
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <input id="exc-add-bybit-active" type="checkbox" checked style="width:15px;height:15px;cursor:pointer;">
+                <label for="exc-add-bybit-active" style="font-size:13px;cursor:pointer;">新增後立即設為使用中</label>
+              </div>
+            </div>
+            <div style="margin-top:16px;display:flex;gap:10px;">
+              <button class="btn btn-primary" onclick="addExchangeKey('bybit')" style="flex:1;">💾 新增金鑰</button>
+              <button class="btn btn-outline" onclick="testTradingConnection()">🔗 測試連線</button>
+            </div>
+            <div id="exc-add-bybit-result" style="display:none;margin-top:10px;font-size:13px;padding:8px 12px;border-radius:8px;"></div>
+            <div style="margin-top:16px;font-size:12px;color:var(--muted);line-height:1.8;border-top:1px solid var(--border);padding-top:12px;">
+              💡 Bybit → 右上角頭像 → 我的帳戶 → API 管理 → 建立新金鑰<br>
+              ⚠️ 權限只需「讀取」，勿開啟提款<br>
+              🧪 測試網申請：<code style="background:var(--bg2);padding:1px 4px;border-radius:3px;">testnet.bybit.com</code> → 登入 → API 管理 → 另建 Key（與正式網完全隔離）
+            </div>
+          </div>
+        </div>
+
+        <!-- Binance -->
+        <div id="exc-content-binance" style="display:none;">
+          <div class="card" style="margin-bottom:16px;">
+            <div style="font-size:13px;font-weight:700;margin-bottom:14px;">🟠 Binance 金鑰清單</div>
+            <div id="exc-keys-binance"><div style="text-align:center;padding:20px;color:var(--muted);">載入中...</div></div>
+          </div>
+          <div class="card">
+            <div style="font-size:13px;font-weight:700;margin-bottom:14px;">➕ 新增 Binance 金鑰</div>
+            <div style="display:grid;gap:12px;">
+              <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">名稱標籤</label><input id="exc-add-binance-label" class="input" placeholder="e.g. 現貨帳號" style="width:100%;"></div>
+              <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">API Key</label><input id="exc-add-binance-key" class="input" placeholder="API Key" style="width:100%;"></div>
+              <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">API Secret</label><input id="exc-add-binance-secret" class="input" type="password" placeholder="API Secret" style="width:100%;"></div>
+              <div style="display:flex;gap:8px;align-items:center;"><input id="exc-add-binance-active" type="checkbox" checked style="width:15px;height:15px;cursor:pointer;"><label for="exc-add-binance-active" style="font-size:13px;cursor:pointer;">新增後立即設為使用中</label></div>
+            </div>
+            <div style="margin-top:16px;"><button class="btn btn-primary" onclick="addExchangeKey('binance')" style="width:100%;">💾 新增金鑰</button></div>
+            <div id="exc-add-binance-result" style="display:none;margin-top:10px;font-size:13px;padding:8px 12px;border-radius:8px;"></div>
+            <div style="margin-top:12px;font-size:12px;color:var(--muted);line-height:1.8;border-top:1px solid var(--border);padding-top:12px;">
+              💡 Binance → 帳號 → API 管理 → 建立新金鑰 → 完成 2FA 驗證<br>⚠️ 僅開啟「讀取」權限，綁定 IP 更安全
+            </div>
+          </div>
+        </div>
+
+        <!-- CoinUp -->
+        <div id="exc-content-coinup" style="display:none;">
+          <div class="card" style="margin-bottom:16px;">
+            <div style="font-size:13px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;">🔷 CoinUp 金鑰清單
+              <span style="font-size:11px;color:var(--muted);font-weight:400;">（使用中的 Key 會自動套用到交易所總覽）</span>
+            </div>
+            <div id="exc-keys-coinup"><div style="text-align:center;padding:20px;color:var(--muted);">載入中...</div></div>
+          </div>
+          <div class="card">
+            <div style="font-size:13px;font-weight:700;margin-bottom:14px;">➕ 新增 CoinUp 金鑰</div>
+            <div style="display:grid;gap:12px;">
+              <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">名稱標籤</label><input id="exc-add-coinup-label" class="input" placeholder="e.g. 主帳號" style="width:100%;"></div>
+              <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">API Key</label><input id="exc-add-coinup-key" class="input" placeholder="API Key" style="width:100%;"></div>
+              <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">API Secret</label><input id="exc-add-coinup-secret" class="input" type="password" placeholder="API Secret" style="width:100%;"></div>
+              <div style="display:flex;gap:8px;align-items:center;"><input id="exc-add-coinup-active" type="checkbox" checked style="width:15px;height:15px;cursor:pointer;"><label for="exc-add-coinup-active" style="font-size:13px;cursor:pointer;">新增後立即設為使用中</label></div>
+            </div>
+            <div style="margin-top:16px;"><button class="btn btn-primary" onclick="addExchangeKey('coinup')" style="width:100%;">💾 新增金鑰</button></div>
+            <div id="exc-add-coinup-result" style="display:none;margin-top:10px;font-size:13px;padding:8px 12px;border-radius:8px;"></div>
+            <div style="margin-top:12px;font-size:12px;color:var(--muted);line-height:1.8;border-top:1px solid var(--border);padding-top:12px;">
+              💡 CoinUp → 登入 → 右上角帳戶 → API 管理 → 建立新 API Key<br>⚠️ 僅開啟「讀取」權限，勿開啟提款
+            </div>
+          </div>
+        </div>
+
+        <!-- MAX -->
+        <div id="exc-content-max" style="display:none;">
+          <div class="card" style="margin-bottom:16px;">
+            <div style="font-size:13px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;">🟢 MAX 金鑰清單
+              <span style="font-size:11px;color:var(--muted);font-weight:400;">（使用中的 Key 會自動套用到交易所總覽）</span>
+            </div>
+            <div id="exc-keys-max"><div style="text-align:center;padding:20px;color:var(--muted);">載入中...</div></div>
+          </div>
+          <div class="card">
+            <div style="font-size:13px;font-weight:700;margin-bottom:14px;">➕ 新增 MAX 金鑰</div>
+            <div style="display:grid;gap:12px;">
+              <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">名稱標籤</label><input id="exc-add-max-label" class="input" placeholder="e.g. 主帳號" style="width:100%;"></div>
+              <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">API Key</label><input id="exc-add-max-key" class="input" placeholder="API Key" style="width:100%;"></div>
+              <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">API Secret</label><input id="exc-add-max-secret" class="input" type="password" placeholder="API Secret" style="width:100%;"></div>
+              <div style="display:flex;gap:8px;align-items:center;"><input id="exc-add-max-active" type="checkbox" checked style="width:15px;height:15px;cursor:pointer;"><label for="exc-add-max-active" style="font-size:13px;cursor:pointer;">新增後立即設為使用中</label></div>
+            </div>
+            <div style="margin-top:16px;"><button class="btn btn-primary" onclick="addExchangeKey('max')" style="width:100%;">💾 新增金鑰</button></div>
+            <div id="exc-add-max-result" style="display:none;margin-top:10px;font-size:13px;padding:8px 12px;border-radius:8px;"></div>
+            <div style="margin-top:12px;font-size:12px;color:var(--muted);line-height:1.8;border-top:1px solid var(--border);padding-top:12px;">
+              💡 MAX → 登入 max.maicoin.com → 右上角 → API 存取 → 建立 API 金鑰<br>⚠️ 僅開啟「讀取」權限，勿開啟提款
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /trading-sub-config -->
+
+    </div>
+
+    <!-- ════ ORDERS ════ -->
+    <div class="section" id="section-orders">
+      <div class="sec-header"></div>
+
+      <div class="inv-tabs" id="orders-tabs" style="margin-bottom:24px;">
+        <div class="inv-tab active" id="orders-tab-import" onclick="switchOrdersTab('import')">📥 匯入</div>
+        <div class="inv-tab"        id="orders-tab-query"  onclick="switchOrdersTab('query')">🔍 查詢彙整</div>
+      </div>
+
+      <!-- ── 匯入 ── -->
+      <div id="orders-sub-import">
+
+        <!-- 批次資訊 -->
+        <div class="card" style="margin-bottom:16px;">
+          <div style="font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;">批次資訊</div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:180px;">
+              <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">名稱 *</label>
+              <input id="order-batch-name" class="input" placeholder="例：5月團購、廠商A訂單…" style="width:100%;">
+            </div>
+            <div style="flex:2;min-width:200px;">
+              <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">備註</label>
+              <input id="order-batch-note" class="input" placeholder="選填說明" style="width:100%;">
+            </div>
+          </div>
+        </div>
+
+        <!-- 明細輸入 -->
+        <div class="card" style="margin-bottom:16px;padding:0;overflow:hidden;">
+          <div style="padding:12px 16px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.5px;">明細</span>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-outline btn-sm" onclick="_showPasteModal()">📋 貼上</button>
+              <button class="btn btn-outline btn-sm" onclick="_addOrderRow()">＋ 加一行</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:1100px;">
+              <thead>
+                <tr style="background:var(--bg2);">
+                  <th style="padding:9px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);white-space:nowrap;width:90px;">付款方式</th>
+                  <th style="padding:9px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);white-space:nowrap;width:80px;">姓名</th>
+                  <th style="padding:9px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);white-space:nowrap;width:100px;">手機</th>
+                  <th style="padding:9px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);">地址</th>
+                  <th style="padding:9px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);width:120px;">備註</th>
+                  <th style="padding:9px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);">商品名稱</th>
+                  <th style="padding:9px 10px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);width:72px;">單價</th>
+                  <th style="padding:9px 10px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);width:56px;">數量</th>
+                  <th style="padding:9px 10px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);width:80px;">小計</th>
+                  <th style="padding:9px 10px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);width:90px;">訂單總金額</th>
+                  <th style="padding:9px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);width:130px;">臉書帳號名稱</th>
+                  <th style="border-bottom:1px solid var(--border);width:32px;"></th>
+                </tr>
+              </thead>
+              <tbody id="order-items-body"></tbody>
+            </table>
+          </div>
+          <div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;">
+            <button class="btn btn-primary" onclick="saveOrderBatch()" style="min-width:120px;">💾 儲存批次</button>
+          </div>
+        </div>
+
+        <!-- 已存批次 -->
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="padding:12px 16px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.5px;">已儲存批次</span>
+            <button class="btn btn-outline btn-sm" onclick="_loadOrderBatches()">↻ 重整</button>
+          </div>
+          <div id="order-batches-list">
+            <div style="text-align:center;padding:40px;color:var(--muted);">載入中…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 查詢彙整 ── -->
+      <div id="orders-sub-query" style="display:none;">
+        <div style="display:flex;gap:8px;margin-bottom:20px;background:var(--bg2);padding:4px;border-radius:10px;width:fit-content;">
+          <button id="orders-view-summary-btn" onclick="switchOrdersView('summary')"
+            style="border:none;padding:7px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;background:var(--primary);color:#fff;transition:.15s;">
+            📊 跨批次彙整
+          </button>
+          <button id="orders-view-batch-btn" onclick="switchOrdersView('batch')"
+            style="border:none;padding:7px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:.15s;">
+            📁 單一批次
+          </button>
+        </div>
+
+        <!-- 彙整 -->
+        <div id="orders-view-summary">
+          <div class="card" style="padding:0;overflow:hidden;">
+            <div style="padding:12px 16px;background:var(--bg);border-bottom:1px solid var(--border);font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.5px;">品項彙整（全批次加總）</div>
+            <div style="overflow-x:auto;">
+              <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                <thead>
+                  <tr style="background:var(--bg2);">
+                    <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);">商品名稱</th>
+                    <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);">平均單價</th>
+                    <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);">總數量</th>
+                    <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);">總金額</th>
+                    <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);">購買者</th>
+                    <th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);">批次</th>
+                  </tr>
+                </thead>
+                <tbody id="orders-summary-tbody">
+                  <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted);">尚無資料</td></tr>
+                </tbody>
+                <tfoot id="orders-summary-tfoot"></tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 單一批次 -->
+        <div id="orders-view-batch" style="display:none;">
+          <div style="margin-bottom:16px;">
+            <select id="orders-batch-select" class="input" onchange="loadOrderBatchItems(this.value)" style="max-width:340px;">
+              <option value="">— 選擇批次 —</option>
+            </select>
+          </div>
+          <div class="card" style="padding:0;overflow:hidden;">
+            <div style="overflow-x:auto;">
+              <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:1000px;">
+                <thead>
+                  <tr style="background:var(--bg2);">
+                    <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);white-space:nowrap;">付款方式</th>
+                    <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);white-space:nowrap;">姓名</th>
+                    <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);white-space:nowrap;">手機</th>
+                    <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);">地址</th>
+                    <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);">備註</th>
+                    <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);">商品名稱</th>
+                    <th style="padding:9px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);white-space:nowrap;">單價</th>
+                    <th style="padding:9px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);">數量</th>
+                    <th style="padding:9px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);">小計</th>
+                    <th style="padding:9px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);white-space:nowrap;">訂單總金額</th>
+                    <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border);white-space:nowrap;">臉書帳號名稱</th>
+                  </tr>
+                </thead>
+                <tbody id="orders-batch-tbody">
+                  <tr><td colspan="11" style="text-align:center;padding:40px;color:var(--muted);">請選擇批次</td></tr>
+                </tbody>
+                <tfoot id="orders-batch-tfoot"></tfoot>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1163,7 +1688,8 @@ const PAGE_META = {
   work:       ['💼 工作','Jira 工單管理'],
   analysis:   ['🔍 分析','加密文件管理'],
   investpro:  ['💹 投資','未實現損益追蹤'],
-  trading:    ['🎯 操盤','Bybit 帳戶連動'],
+  trading:    ['🏦 交易所','Bybit / Binance / CoinUp / MAX 多帳戶管理'],
+  orders:     ['📦 訂單彙整','匯入明細、跨批次彙整查詢'],
   resume:     ['📋 履歷','履歷讀取與產生'],
 };
 
@@ -1225,7 +1751,7 @@ function toast(msg, type='ok'){
 // ════════════════════════════════════════════════
 // Navigation
 // ════════════════════════════════════════════════
-const LOADERS = { dashboard:loadDashboard, investment:loadInvestment, invest:loadInvest, ai:loadAI, line:loadLine, travel:loadTravel, work:loadWork, investpro:loadInvestpro, games:loadGames, analysis:loadAnalysis, resume:loadResume, trading:loadTrading };
+const LOADERS = { dashboard:loadDashboard, investment:loadInvestment, invest:loadInvest, ai:loadAI, line:loadLine, travel:loadTravel, work:loadWork, investpro:loadInvestpro, games:loadGames, analysis:loadAnalysis, resume:loadResume, trading:loadTrading, orders:loadOrders };
 
 function nav(sec){
   state.sec = sec;
@@ -1251,7 +1777,7 @@ async function initNavSort(){
     res.order.forEach(sec => {
       const item = document.querySelector(`[data-sec="${sec}"]`);
       if(!item) return;
-      const isAdv = ['analysis','investpro','trading','work'].includes(sec);
+      const isAdv = ['analysis','investpro','trading','work','orders'].includes(sec);
       if(isAdv && advEl) advEl.appendChild(item);
       else if(!isAdv && basicEl) basicEl.appendChild(item);
     });
@@ -2692,13 +3218,59 @@ function showAddHolding(existing=null){
 // ════════════════════════════════════════════════
 let aiLoading = false;
 
+let _aiTab = 'chat';
+function switchAiTab(tab) {
+  _aiTab = tab;
+  document.querySelectorAll('#ai-tabs .inv-tab').forEach(el => el.classList.remove('active'));
+  ['chat','chatgpt','claude','gemini','copilot'].forEach(t => {
+    const el = $(`ai-sub-${t}`);
+    if (el) el.style.display = t === tab ? '' : 'none';
+  });
+  const tabEl = $(`ai-tab-${tab}`);
+  if (tabEl) tabEl.classList.add('active');
+  if (tab !== 'chat') loadAiKeys();
+}
+
+async function loadAiKeys() {
+  const r = await api('/api/ai/keys');
+  if (!r.success) return;
+  const badges = { openai: 'openai', anthropic: 'anthropic', google: 'google' };
+  Object.entries(r.data).forEach(([p, info]) => {
+    const badge = $(`ai-key-badge-${p}`);
+    if (badge) {
+      badge.textContent = info.set ? '✅ 已設定' : '未設定';
+      badge.className = 'badge ' + (info.set ? 'b-done' : 'b-pending');
+    }
+  });
+}
+
+async function saveAiKey(provider) {
+  const inp = $(`ai-key-input-${provider}`);
+  const resultEl = $(`ai-key-result-${provider}`);
+  const key = inp?.value?.trim();
+  if (!key) { if (resultEl) { resultEl.style.display=''; resultEl.style.background='rgba(239,68,68,.12)'; resultEl.style.color='var(--danger)'; resultEl.textContent='請輸入 API Key'; } return; }
+  const r = await api('/api/ai/keys', 'POST', { provider, key });
+  if (resultEl) {
+    resultEl.style.display = '';
+    if (r.success) {
+      resultEl.style.background = 'rgba(34,197,94,.12)'; resultEl.style.color = 'var(--success)';
+      resultEl.textContent = '✅ 儲存成功';
+      if (inp) inp.value = '';
+      loadAiKeys();
+    } else {
+      resultEl.style.background = 'rgba(239,68,68,.12)'; resultEl.style.color = 'var(--danger)';
+      resultEl.textContent = `❌ ${r.error}`;
+    }
+  }
+}
+
 async function loadAI(){
   const r = await api('/api/ai/history');
   const msgs = r.data||[];
   const badge = $('ai-mode-badge');
   if(r.mockMode){
     badge.textContent='模擬模式'; badge.className='badge b-pending';
-    badge.title='請在 .env 設定 OPENAI_API_KEY 以使用真實 AI';
+    badge.title='請在 ChatGPT 頁籤設定 OPENAI_API_KEY';
   } else {
     badge.textContent='OpenAI 已連線'; badge.className='badge b-done';
   }
@@ -3791,7 +4363,7 @@ function _escHtml(s) {
 // ════════════════════════════════════════════════
 // INVESTPRO
 // ════════════════════════════════════════════════
-let _investproTab  = 'unrealized';
+let _investproTab  = 'yearlypnl';
 let _yearlyPnlData = [];
 let _ypChart       = null;
 
@@ -3914,7 +4486,7 @@ function _renderYearlyChart() {
           borderWidth: 2.5,
           pointRadius: 5,
           pointBackgroundColor: '#6366f1',
-          tension: 0.35,
+          tension: 0,
           fill: true,
           yAxisID: 'y',
         },
@@ -3927,7 +4499,7 @@ function _renderYearlyChart() {
           pointRadius: 4,
           pointBackgroundColor: '#10b981',
           borderDash: [5, 3],
-          tension: 0.35,
+          tension: 0,
           fill: false,
           yAxisID: 'y',
         },
@@ -4187,9 +4759,149 @@ async function downloadMaps() {
 }
 
 // ════════════════════════════════════════════════
-// 2-4 操盤 - Bybit 框架
+// 2-4 交易所
 // ════════════════════════════════════════════════
+let _tradingTab = 'overview';
+let _excTab = 'bybit';
+let _overviewExc = 'bybit';
+
+function switchOverviewExc(exc) {
+  _overviewExc = exc;
+  ['bybit','binance','coinup','max'].forEach(e => {
+    const btn  = $(`ov-btn-${e}`);
+    const cont = $(`ov-content-${e}`);
+    if (btn)  btn.className = e === exc ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
+    if (cont) cont.style.display = e === exc ? '' : 'none';
+  });
+  if (exc === 'bybit') loadTrading();
+}
+
+function switchTradingTab(tab) {
+  _tradingTab = tab;
+  ['overview','config'].forEach(t => {
+    const el  = $(`trading-tab-${t}`);
+    const sub = $(`trading-sub-${t}`);
+    if (el)  el.classList.toggle('active', t === tab);
+    if (sub) sub.style.display = t === tab ? '' : 'none';
+  });
+  if (tab === 'config') { switchExcTab(_excTab); }
+}
+
+function switchExcTab(exc) {
+  _excTab = exc;
+  ['bybit','binance','coinup','max'].forEach(e => {
+    const btn  = $(`exc-btn-${e}`);
+    const cont = $(`exc-content-${e}`);
+    if (btn)  btn.className = e === exc ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
+    if (cont) cont.style.display = e === exc ? '' : 'none';
+  });
+  loadExchangeKeys(exc);
+}
+
+async function loadExchangeKeys(exc) {
+  const box = $(`exc-keys-${exc}`);
+  if (!box) return;
+  const res = await api(`/api/trading/exchanges/keys?exchange=${exc}`);
+  if (!res.success || !res.data.length) {
+    box.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">尚無金鑰，請在下方新增</div>';
+    return;
+  }
+  const rows = res.data.map((k, i) => {
+    const extra = k.extra || {};
+    const tags = [];
+    if (k.is_active) tags.push('<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(34,197,94,.15);color:var(--success);font-weight:600;">使用中</span>');
+    if (extra.testnet) tags.push('<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(245,158,11,.15);color:#f59e0b;font-weight:600;">測試網</span>');
+    const rowStyle = i % 2 !== 0 ? 'background:var(--bg2);' : '';
+    return `<tr style="${rowStyle}">
+      <td style="padding:11px 14px;font-weight:600;font-size:13px;vertical-align:middle;">${k.label}</td>
+      <td style="padding:11px 14px;font-family:monospace;font-size:12px;color:var(--muted);vertical-align:middle;">${k.api_key_masked}</td>
+      <td style="padding:11px 14px;font-family:monospace;font-size:12px;color:var(--muted);vertical-align:middle;">${k.api_secret_masked}</td>
+      <td style="padding:11px 14px;vertical-align:middle;">${tags.join(' ') || '<span style="font-size:12px;color:var(--muted);">備用</span>'}</td>
+      <td style="padding:11px 14px;text-align:right;vertical-align:middle;">
+        <div style="display:flex;gap:6px;justify-content:flex-end;">
+          ${!k.is_active ? `<button class="btn btn-outline btn-sm" style="font-size:12px;padding:3px 10px;" onclick="activateExchangeKey(${k.id},'${exc}')">切換使用</button>` : ''}
+          <button class="btn btn-outline btn-sm" style="color:var(--danger);font-size:12px;padding:3px 10px;" onclick="deleteExchangeKey(${k.id},'${exc}')">刪除</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+  box.innerHTML = `<table style="width:100%;border-collapse:collapse;">
+    <thead><tr style="background:var(--bg2);">
+      <th style="text-align:left;padding:9px 14px;font-size:12px;font-weight:600;color:var(--muted);border-bottom:2px solid var(--border);">名稱</th>
+      <th style="text-align:left;padding:9px 14px;font-size:12px;font-weight:600;color:var(--muted);border-bottom:2px solid var(--border);">API Key</th>
+      <th style="text-align:left;padding:9px 14px;font-size:12px;font-weight:600;color:var(--muted);border-bottom:2px solid var(--border);">Secret</th>
+      <th style="text-align:left;padding:9px 14px;font-size:12px;font-weight:600;color:var(--muted);border-bottom:2px solid var(--border);">狀態</th>
+      <th style="text-align:right;padding:9px 14px;font-size:12px;font-weight:600;color:var(--muted);border-bottom:2px solid var(--border);">操作</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+async function activateExchangeKey(id, exc) {
+  const res = await api(`/api/trading/exchanges/keys/${id}/activate`, 'PUT', {});
+  if (res.success) { toast('已切換使用中金鑰', 'ok'); loadExchangeKeys(exc); }
+  else toast('切換失敗：' + res.error, 'err');
+}
+
+async function deleteExchangeKey(id, exc) {
+  if (!confirm('確定刪除此金鑰？')) return;
+  const res = await api(`/api/trading/exchanges/keys/${id}`, 'DELETE');
+  if (res.success) { toast('已刪除', 'ok'); loadExchangeKeys(exc); }
+  else toast('刪除失敗：' + res.error, 'err');
+}
+
+async function addExchangeKey(exc) {
+  const label   = ($(`exc-add-${exc}-label`)?.value   || '').trim();
+  const key     = ($(`exc-add-${exc}-key`)?.value     || '').trim();
+  const secret  = ($(`exc-add-${exc}-secret`)?.value  || '').trim();
+  const active  = $(`exc-add-${exc}-active`)?.checked ?? true;
+  const resultEl = $(`exc-add-${exc}-result`);
+
+  const extra = {};
+  if (exc === 'bybit') extra.testnet = $(`exc-add-bybit-testnet`)?.checked ?? false;
+
+  if (!key || !secret) {
+    if (resultEl) { resultEl.style.display=''; resultEl.style.background='rgba(239,68,68,.12)'; resultEl.style.color='var(--danger)'; resultEl.textContent='請填寫 API Key 和 Secret'; }
+    return;
+  }
+
+  const res = await api('/api/trading/exchanges/keys', 'POST', { exchange: exc, label, api_key: key, api_secret: secret, extra, set_active: active });
+  if (resultEl) {
+    resultEl.style.display = '';
+    if (res.success) {
+      resultEl.style.background = 'rgba(34,197,94,.12)'; resultEl.style.color = 'var(--success)';
+      resultEl.textContent = '✅ 金鑰已新增' + (active ? '，已設為使用中' : '');
+      $(`exc-add-${exc}-key`).value = '';
+      $(`exc-add-${exc}-secret`).value = '';
+      if ($(`exc-add-${exc}-label`)) $(`exc-add-${exc}-label`).value = '';
+      loadExchangeKeys(exc);
+    } else {
+      resultEl.style.background = 'rgba(239,68,68,.12)'; resultEl.style.color = 'var(--danger)';
+      resultEl.textContent = `❌ ${res.error}`;
+    }
+  }
+}
+
+async function testTradingConnection() {
+  const result = $('bybit-cfg-result');
+  if (result) { result.style.display=''; result.style.background='var(--bg2)'; result.style.color='var(--muted)'; result.textContent='🔗 測試中...'; }
+  const res = await api('/api/trading/bybit/status');
+  if (!result) return;
+  result.style.display = '';
+  if (!res.configured) {
+    result.style.background = 'rgba(239,68,68,.12)'; result.style.color = 'var(--danger)';
+    result.textContent = '❌ 尚未設定 API Key';
+  } else if (!res.connected) {
+    result.style.background = 'rgba(239,68,68,.12)'; result.style.color = 'var(--danger)';
+    result.textContent = `❌ 連線失敗：${res.error}`;
+  } else {
+    result.style.background = 'rgba(34,197,94,.12)'; result.style.color = 'var(--success)';
+    result.textContent = `✅ 連線成功（${res.testnet ? '測試網' : '正式網'}）`;
+  }
+}
+
 async function loadTrading() {
+  switchTradingTab(_tradingTab);
   const res = await api('/api/trading/bybit/status');
   const badge   = $('bybit-status-badge');
   const unconf  = $('bybit-unconfig');
@@ -4199,6 +4911,8 @@ async function loadTrading() {
     if (badge)  { badge.textContent = '⚠️ 未設定 API Key'; badge.style.color = 'var(--danger)'; }
     if (unconf) unconf.style.display = '';
     if (posBox) posBox.innerHTML = '';
+    const coinsBox = $('bybit-coins'); if (coinsBox) coinsBox.innerHTML = '';
+    const fundBox  = $('bybit-fund-coins'); if (fundBox) fundBox.innerHTML = '';
     return;
   }
   if (unconf) unconf.style.display = 'none';
@@ -4216,15 +4930,84 @@ async function loadTrading() {
   const balRes = await api('/api/trading/bybit/balance');
   if (balRes.success) {
     const list = balRes.data?.list?.[0];
-    const coin = list?.coin?.find(c => c.coin === 'USDT') || {};
-    const setVal = (id, v) => { const el = $(id); if (el) el.textContent = v !== undefined ? parseFloat(v||0).toFixed(2) : '--'; };
-    setVal('bybit-equity',    coin.equity    ?? list?.totalEquity);
-    setVal('bybit-available', coin.availableToWithdraw ?? list?.totalAvailableBalance);
-    setVal('bybit-upnl',      coin.unrealisedPnl ?? list?.totalUnrealisedPnl);
+    const coins = list?.coin || [];
+    const usdtCoin = coins.find(c => c.coin === 'USDT') || {};
+    const fmt2 = v => v !== undefined && v !== '' ? parseFloat(v||0).toFixed(2) : '--';
+    const setVal = (id, v) => { const el = $(id); if (el) el.textContent = fmt2(v); };
+
+    setVal('bybit-equity',       usdtCoin.equity       ?? list?.totalEquity);
+    setVal('bybit-wallet',       usdtCoin.walletBalance ?? list?.totalWalletBalance);
+    setVal('bybit-available',    usdtCoin.availableToWithdraw ?? list?.totalAvailableBalance);
+    setVal('bybit-upnl',         usdtCoin.unrealisedPnl ?? list?.totalUnrealisedPnl);
+    setVal('bybit-init-margin',  usdtCoin.totalOrderIM  ?? list?.totalInitialMargin);
+    setVal('bybit-maint-margin', usdtCoin.totalPositionMM ?? list?.totalMaintenanceMargin);
+
     const upnlEl = $('bybit-upnl');
     if (upnlEl) {
       const v = parseFloat(upnlEl.textContent);
       upnlEl.style.color = v > 0 ? 'var(--success)' : v < 0 ? 'var(--danger)' : '';
+    }
+
+    // 統一交易帳戶幣種明細
+    const coinsBox = $('bybit-coins');
+    if (coinsBox) {
+      const activeCoin = coins.filter(c => parseFloat(c.walletBalance||0) !== 0);
+      if (!activeCoin.length) {
+        coinsBox.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">無持倉幣種</div>';
+      } else {
+        coinsBox.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead><tr style="background:var(--bg);border-bottom:2px solid var(--border);">
+            <th style="padding:8px 14px;text-align:left;">幣種</th>
+            <th style="padding:8px 14px;text-align:right;">權益</th>
+            <th style="padding:8px 14px;text-align:right;">錢包餘額</th>
+            <th style="padding:8px 14px;text-align:right;">可用餘額</th>
+            <th style="padding:8px 14px;text-align:right;">未實現盈虧</th>
+            <th style="padding:8px 14px;text-align:right;">累計已實現盈虧</th>
+          </tr></thead>
+          <tbody>${activeCoin.map(c => {
+            const upnl = parseFloat(c.unrealisedPnl||0);
+            const cum  = parseFloat(c.cumRealisedPnl||0);
+            const upnlC = upnl > 0 ? 'var(--success)' : upnl < 0 ? 'var(--danger)' : '';
+            const cumC  = cum  > 0 ? 'var(--success)' : cum  < 0 ? 'var(--danger)' : '';
+            return `<tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:8px 14px;font-weight:700;">${c.coin}</td>
+              <td style="padding:8px 14px;text-align:right;">${fmt2(c.equity)}</td>
+              <td style="padding:8px 14px;text-align:right;">${fmt2(c.walletBalance)}</td>
+              <td style="padding:8px 14px;text-align:right;">${fmt2(c.availableToWithdraw)}</td>
+              <td style="padding:8px 14px;text-align:right;color:${upnlC};font-weight:600;">${upnl >= 0?'+':''}${upnl.toFixed(2)}</td>
+              <td style="padding:8px 14px;text-align:right;color:${cumC};">${cum >= 0?'+':''}${cum.toFixed(2)}</td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>`;
+      }
+    }
+  }
+
+  // 載入資金帳戶
+  const fundBox = $('bybit-fund-coins');
+  const fundRes = await api('/api/trading/bybit/fund-balance');
+  if (fundBox) {
+    if (fundRes.success) {
+      const fundCoins = (fundRes.data?.balance || []).filter(c => parseFloat(c.walletBalance||0) !== 0);
+      if (!fundCoins.length) {
+        fundBox.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">資金帳戶無餘額</div>';
+      } else {
+        const fmt2 = v => v !== undefined && v !== '' ? parseFloat(v||0).toFixed(2) : '--';
+        fundBox.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead><tr style="background:var(--bg);border-bottom:2px solid var(--border);">
+            <th style="padding:8px 14px;text-align:left;">幣種</th>
+            <th style="padding:8px 14px;text-align:right;">錢包餘額</th>
+            <th style="padding:8px 14px;text-align:right;">可轉移餘額</th>
+          </tr></thead>
+          <tbody>${fundCoins.map(c => `<tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px 14px;font-weight:700;">${c.coin}</td>
+            <td style="padding:8px 14px;text-align:right;">${fmt2(c.walletBalance)}</td>
+            <td style="padding:8px 14px;text-align:right;">${fmt2(c.transferBalance)}</td>
+          </tr>`).join('')}</tbody>
+        </table>`;
+      }
+    } else {
+      fundBox.innerHTML = `<div style="text-align:center;padding:20px;color:var(--muted);">${fundRes.error || '無法取得資金帳戶'}</div>`;
     }
   }
 
@@ -4539,6 +5322,230 @@ async function loadJiraIssues() {
       <td style="padding:8px 10px;white-space:nowrap;font-size:12px;color:var(--muted);">${updated}</td>
     </tr>`;
   }).join('');
+}
+
+// ── 訂單彙整 ─────────────────────────────────────────────────────────────────
+let _ordersTab = 'import';
+let _ordersView = 'summary';
+
+function loadOrders() { switchOrdersTab(_ordersTab); }
+
+function switchOrdersTab(tab) {
+  _ordersTab = tab;
+  ['import','query'].forEach(t => {
+    const el  = $(`orders-tab-${t}`);
+    const sub = $(`orders-sub-${t}`);
+    if (el)  el.classList.toggle('active', t === tab);
+    if (sub) sub.style.display = t === tab ? '' : 'none';
+  });
+  if (tab === 'import') _loadOrderBatches();
+  if (tab === 'query')  switchOrdersView(_ordersView);
+}
+
+function switchOrdersView(view) {
+  _ordersView = view;
+  const sBtn = $('orders-view-summary-btn'), bBtn = $('orders-view-batch-btn');
+  const sDiv = $('orders-view-summary'),     bDiv = $('orders-view-batch');
+  const on  = 'background:var(--primary);color:#fff;';
+  const off = 'background:transparent;color:var(--muted);';
+  if (sBtn) sBtn.style.cssText += view==='summary' ? on : off;
+  if (bBtn) bBtn.style.cssText += view==='batch'   ? on : off;
+  if (sDiv) sDiv.style.display = view==='summary' ? '' : 'none';
+  if (bDiv) bDiv.style.display = view==='batch'   ? '' : 'none';
+  if (view === 'summary') _loadOrderSummary();
+  if (view === 'batch')   _loadOrderBatchSelect();
+}
+
+function _addOrderRow(data = {}) {
+  const tbody = $('order-items-body');
+  if (!tbody) return;
+  const tr = document.createElement('tr');
+  tr.style.cssText = 'border-bottom:1px solid var(--border);';
+  tr.onmouseenter = () => tr.style.background = 'var(--bg2)';
+  tr.onmouseleave = () => tr.style.background = '';
+  const inp = (cls, val, ph, extra='') =>
+    `<input class="input ${cls}" value="${String(val||'').replace(/"/g,'&quot;')}" placeholder="${ph}" style="width:100%;font-size:12px;padding:5px 7px;${extra}">`;
+  tr.innerHTML = `
+    <td style="padding:4px 6px;">${inp('ord-pay',   data.payment_method||'', '匯款/現金…')}</td>
+    <td style="padding:4px 6px;">${inp('ord-cname', data.customer_name||'',  '姓名')}</td>
+    <td style="padding:4px 6px;">${inp('ord-phone', data.phone||'',           '0912…')}</td>
+    <td style="padding:4px 6px;">${inp('ord-addr',  data.address||'',         '地址')}</td>
+    <td style="padding:4px 6px;">${inp('ord-note',  data.note||'',            '備註')}</td>
+    <td style="padding:4px 6px;">${inp('ord-name',  data.item_name||'',       '商品名稱')}</td>
+    <td style="padding:4px 6px;"><input class="input ord-price" value="${data.unit_price||''}" placeholder="0" type="number" min="0" style="width:68px;font-size:12px;padding:5px 7px;text-align:right;" oninput="_calcOrderRow(this)"></td>
+    <td style="padding:4px 6px;"><input class="input ord-qty"   value="${data.quantity||''}"   placeholder="1" type="number" min="0" style="width:52px;font-size:12px;padding:5px 7px;text-align:right;" oninput="_calcOrderRow(this)"></td>
+    <td style="padding:4px 6px;"><input class="input ord-amt"   value="${data.amount||''}"    placeholder="自動" type="number" style="width:76px;font-size:12px;padding:5px 7px;text-align:right;background:var(--bg2);color:var(--primary);font-weight:600;" readonly></td>
+    <td style="padding:4px 6px;"><input class="input ord-total" value="${data.order_total||''}" placeholder="0" type="number" style="width:84px;font-size:12px;padding:5px 7px;text-align:right;"></td>
+    <td style="padding:4px 6px;">${inp('ord-fb',   data.facebook_name||'', '臉書帳號')}</td>
+    <td style="padding:4px 4px;text-align:center;">
+      <button style="border:none;background:none;color:var(--muted);font-size:14px;cursor:pointer;padding:2px 4px;"
+        onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='var(--muted)'"
+        onclick="this.closest('tr').remove()">✕</button>
+    </td>`;
+  tbody.appendChild(tr);
+}
+
+function _calcOrderRow(input) {
+  const tr  = input.closest('tr');
+  const qty   = parseFloat(tr.querySelector('.ord-qty')?.value)   || 0;
+  const price = parseFloat(tr.querySelector('.ord-price')?.value) || 0;
+  const el = tr.querySelector('.ord-amt');
+  if (el) el.value = (qty && price) ? (qty * price).toFixed(0) : '';
+}
+
+function _showPasteModal() {
+  showModal('📋 貼上表格資料', `
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.7;">
+      從 Excel / Sheets 複製後貼上，欄位順序（Tab 分隔）：<br>
+      <code style="background:var(--bg2);padding:2px 6px;border-radius:4px;font-size:11px;">付款方式 姓名 手機 地址 備註 商品名稱 單價 數量 小計 訂單總金額 臉書帳號</code><br>
+      小計若留空會自動計算（單價×數量）。
+    </div>
+    <textarea id="paste-area" class="input" rows="10" placeholder="貼上資料…"
+      style="width:100%;resize:vertical;font-family:monospace;font-size:11px;"></textarea>`,
+    { onSubmit: _parsePasteData, submitLabel: '匯入' });
+}
+
+function _parsePasteData() {
+  const raw = $('paste-area')?.value || '';
+  raw.trim().split('\n').filter(l => l.trim()).forEach(line => {
+    const c = line.split('\t').map(s => s.trim());
+    _addOrderRow({
+      payment_method: c[0]||'', customer_name: c[1]||'', phone: c[2]||'',
+      address: c[3]||'', note: c[4]||'', item_name: c[5]||'',
+      unit_price: c[6]||'', quantity: c[7]||'', amount: c[8]||'',
+      order_total: c[9]||'', facebook_name: c[10]||'',
+    });
+  });
+  closeModalForce();
+}
+
+async function saveOrderBatch() {
+  const name = ($('order-batch-name')?.value || '').trim();
+  if (!name) { toast('請填寫批次名稱', 'err'); return; }
+  const items = [...document.querySelectorAll('#order-items-body tr')].map(tr => ({
+    payment_method: tr.querySelector('.ord-pay')?.value.trim()   || '',
+    customer_name:  tr.querySelector('.ord-cname')?.value.trim() || '',
+    phone:          tr.querySelector('.ord-phone')?.value.trim() || '',
+    address:        tr.querySelector('.ord-addr')?.value.trim()  || '',
+    note:           tr.querySelector('.ord-note')?.value.trim()  || '',
+    item_name:      tr.querySelector('.ord-name')?.value.trim()  || '',
+    unit_price:     tr.querySelector('.ord-price')?.value        || 0,
+    quantity:       tr.querySelector('.ord-qty')?.value          || 0,
+    amount:         tr.querySelector('.ord-amt')?.value          || 0,
+    order_total:    tr.querySelector('.ord-total')?.value        || 0,
+    facebook_name:  tr.querySelector('.ord-fb')?.value.trim()    || '',
+  })).filter(it => it.item_name || it.customer_name);
+  if (!items.length) { toast('請至少填寫一筆明細', 'err'); return; }
+  const res = await api('/api/orders/batches', 'POST', { name, note: $('order-batch-note')?.value||'', items });
+  if (res.success) {
+    toast('批次已儲存', 'ok');
+    $('order-batch-name').value = '';
+    $('order-batch-note').value = '';
+    $('order-items-body').innerHTML = '';
+    _loadOrderBatches();
+  } else toast(res.error || '儲存失敗', 'err');
+}
+
+async function _loadOrderBatches() {
+  const res = await api('/api/orders/batches');
+  const box = $('order-batches-list');
+  if (!box) return;
+  if (!res.success || !res.data.length) {
+    box.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">尚無批次，請在上方新增</div>';
+    return;
+  }
+  box.innerHTML = res.data.map((b, i) => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;${i ? 'border-top:1px solid var(--border)' : ''};">
+      <div style="flex:1;">
+        <div style="font-weight:600;font-size:14px;">${b.name}</div>
+        ${b.note ? `<div style="font-size:12px;color:var(--muted);margin-top:2px;">${b.note}</div>` : ''}
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
+        <span style="font-size:12px;padding:3px 10px;border-radius:20px;background:var(--bg2);color:var(--muted);">${b.item_count} 項</span>
+        <span style="font-size:13px;font-weight:700;color:var(--primary);">$${Number(b.total_amount||0).toLocaleString('zh-TW')}</span>
+        <span style="font-size:11px;color:var(--muted);">${b.created_at?.slice(0,10)||''}</span>
+        <button style="border:none;background:none;color:var(--muted);font-size:15px;cursor:pointer;padding:2px 6px;"
+          onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='var(--muted)'"
+          onclick="deleteOrderBatch(${b.id})">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+async function deleteOrderBatch(id) {
+  if (!confirm('確定刪除此批次及所有明細？')) return;
+  const res = await api(`/api/orders/batches/${id}`, 'DELETE');
+  if (res.success) { toast('已刪除', 'ok'); _loadOrderBatches(); }
+  else toast(res.error || '刪除失敗', 'err');
+}
+
+async function _loadOrderSummary() {
+  const res = await api('/api/orders/summary');
+  const tbody = $('orders-summary-tbody'), tfoot = $('orders-summary-tfoot');
+  if (!tbody) return;
+  if (!res.success || !res.data.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted);">尚無資料，請先在「匯入」頁籤新增批次</td></tr>';
+    if (tfoot) tfoot.innerHTML = ''; return;
+  }
+  let totalAmt = 0;
+  tbody.innerHTML = res.data.map((r, i) => {
+    totalAmt += parseFloat(r.total_amount || 0);
+    const buyers = (r.buyers||'').split(',').filter(Boolean).map(b =>
+      `<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:var(--bg2);margin:2px 2px 0 0;display:inline-block;">${b.trim()}</span>`
+    ).join('');
+    return `<tr style="border-bottom:1px solid var(--border);" onmouseenter="this.style.background='var(--bg2)'" onmouseleave="this.style.background=''">
+      <td style="padding:10px 16px;font-weight:600;">${r.item_name}</td>
+      <td style="padding:10px 16px;text-align:right;color:var(--muted);">$${Number(r.avg_price||0).toLocaleString('zh-TW',{minimumFractionDigits:0,maximumFractionDigits:0})}</td>
+      <td style="padding:10px 16px;text-align:right;">${Number(r.total_qty||0).toLocaleString('zh-TW')}</td>
+      <td style="padding:10px 16px;text-align:right;font-weight:700;color:var(--primary);">$${Number(r.total_amount||0).toLocaleString('zh-TW')}</td>
+      <td style="padding:10px 16px;">${buyers||'—'}</td>
+      <td style="padding:10px 16px;text-align:center;color:var(--muted);">${r.batch_count}</td>
+    </tr>`;
+  }).join('');
+  if (tfoot) tfoot.innerHTML = `
+    <tr style="background:var(--bg);border-top:2px solid var(--border);">
+      <td style="padding:10px 16px;font-weight:700;" colspan="3">合計</td>
+      <td style="padding:10px 16px;text-align:right;font-weight:700;font-size:15px;color:var(--primary);">$${totalAmt.toLocaleString('zh-TW')}</td>
+      <td colspan="2"></td>
+    </tr>`;
+}
+
+async function _loadOrderBatchSelect() {
+  const res = await api('/api/orders/batches');
+  const sel = $('orders-batch-select');
+  if (!sel || !res.success) return;
+  sel.innerHTML = '<option value="">— 選擇批次 —</option>' +
+    res.data.map(b => `<option value="${b.id}">${b.name}（${b.created_at?.slice(0,10)}）</option>`).join('');
+}
+
+async function loadOrderBatchItems(batchId) {
+  const tbody = $('orders-batch-tbody'), tfoot = $('orders-batch-tfoot');
+  if (!tbody || !batchId) return;
+  tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--muted);">載入中…</td></tr>';
+  const res = await api(`/api/orders/items/${batchId}`);
+  if (!res.success || !res.data.length) {
+    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--muted);">此批次無明細</td></tr>';
+    if (tfoot) tfoot.innerHTML = ''; return;
+  }
+  const td = (v, right=false, bold=false, color='') =>
+    `<td style="padding:8px 12px;${right?'text-align:right;':''}${bold?'font-weight:700;':''}${color?`color:${color};`:''}white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis;" title="${String(v||'').replace(/"/g,'&quot;')}">${v||'—'}</td>`;
+  const fmt = n => n ? `$${Number(n).toLocaleString('zh-TW')}` : '—';
+  let totalAmt = 0;
+  tbody.innerHTML = res.data.map(r => {
+    totalAmt += parseFloat(r.amount || 0);
+    return `<tr style="border-bottom:1px solid var(--border);" onmouseenter="this.style.background='var(--bg2)'" onmouseleave="this.style.background=''">
+      ${td(r.payment_method)} ${td(r.customer_name,false,true)} ${td(r.phone)} ${td(r.address)} ${td(r.note)}
+      ${td(r.item_name,false,true)} ${td(fmt(r.unit_price),true)} ${td(Number(r.quantity||0).toLocaleString('zh-TW'),true)}
+      ${td(fmt(r.amount),true,true,'var(--primary)')}
+      ${td(r.order_total ? fmt(r.order_total) : '—',true,false,'var(--success)')}
+      ${td(r.facebook_name)}
+    </tr>`;
+  }).join('');
+  if (tfoot) tfoot.innerHTML = `
+    <tr style="background:var(--bg);border-top:2px solid var(--border);">
+      <td style="padding:9px 12px;font-weight:700;" colspan="8">合計</td>
+      <td style="padding:9px 12px;text-align:right;font-weight:700;font-size:14px;color:var(--primary);">$${totalAmt.toLocaleString('zh-TW')}</td>
+      <td colspan="2"></td>
+    </tr>`;
 }
 
 // ── 帳密設定 ──────────────────────────────────────────────────────────────────

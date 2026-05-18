@@ -1,6 +1,24 @@
 'use strict';
 
 const express = require('express');
+const fs   = require('fs');
+const path = require('path');
+const ENV_PATH = path.resolve(__dirname, '../../.env');
+
+function readEnvFile() {
+  return fs.existsSync(ENV_PATH) ? fs.readFileSync(ENV_PATH, 'utf8') : '';
+}
+function writeEnvKey(key, value) {
+  let content = readEnvFile();
+  const regex = new RegExp(`^${key}=.*$`, 'm');
+  if (regex.test(content)) {
+    content = content.replace(regex, `${key}=${value}`);
+  } else {
+    content = content.trimEnd() + `\n${key}=${value}`;
+  }
+  fs.writeFileSync(ENV_PATH, content, 'utf8');
+  process.env[key] = value;
+}
 
 /**
  * AI 助理模組 - OpenAI 整合
@@ -10,17 +28,15 @@ module.exports = (io) => {
   const router = express.Router();
   const db = require('../db').get();
 
-  let openai = null;
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (apiKey && !apiKey.startsWith('sk-your')) {
+  function makeOpenAI(key) {
+    if (!key || key.startsWith('sk-your')) return null;
     try {
       const OpenAI = require('openai');
-      openai = new OpenAI({ apiKey });
-    } catch (e) {
-      console.warn('⚠️  OpenAI 套件載入失敗，切換為模擬模式');
-    }
+      return new OpenAI({ apiKey: key });
+    } catch(e) { return null; }
   }
 
+  let openai = makeOpenAI(process.env.OPENAI_API_KEY);
   const MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
   /** 從各模組資料庫拉取上下文摘要 */
@@ -99,6 +115,32 @@ module.exports = (io) => {
     db.prepare(`DELETE FROM ai_chats`).run();
     io.emit('ai:update');
     res.json({ success: true });
+  });
+
+  // GET /api/ai/keys — 取得已設定的 Key（遮罩）
+  router.get('/keys', (req, res) => {
+    const mask = v => v ? v.slice(0, 6) + '••••••' + v.slice(-4) : '';
+    res.json({
+      success: true,
+      data: {
+        openai:    { masked: mask(process.env.OPENAI_API_KEY),    set: !!process.env.OPENAI_API_KEY },
+        anthropic: { masked: mask(process.env.ANTHROPIC_API_KEY), set: !!process.env.ANTHROPIC_API_KEY },
+        google:    { masked: mask(process.env.GOOGLE_AI_KEY),     set: !!process.env.GOOGLE_AI_KEY },
+      }
+    });
+  });
+
+  // POST /api/ai/keys — 儲存 API Key 到 .env
+  router.post('/keys', (req, res) => {
+    try {
+      const { provider, key } = req.body;
+      const map = { openai: 'OPENAI_API_KEY', anthropic: 'ANTHROPIC_API_KEY', google: 'GOOGLE_AI_KEY' };
+      if (!map[provider]) return res.json({ success: false, error: '未知 provider' });
+      if (!key || !key.trim()) return res.json({ success: false, error: '請輸入 API Key' });
+      writeEnvKey(map[provider], key.trim());
+      if (provider === 'openai') openai = makeOpenAI(key.trim());
+      res.json({ success: true });
+    } catch(e) { res.json({ success: false, error: e.message }); }
   });
 
   return router;

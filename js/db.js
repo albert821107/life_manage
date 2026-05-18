@@ -99,7 +99,10 @@ async function init() {
     `CREATE TABLE IF NOT EXISTS work_jira_config (id INTEGER PRIMARY KEY AUTOINCREMENT, base_url TEXT NOT NULL, email TEXT NOT NULL, api_token TEXT NOT NULL, updated_at TEXT DEFAULT (datetime('now','localtime')))`,
     `CREATE TABLE IF NOT EXISTS encrypted_files (id INTEGER PRIMARY KEY AUTOINCREMENT, filename TEXT NOT NULL, mime_type TEXT NOT NULL, size_bytes INTEGER DEFAULT 0, content_encrypted TEXT NOT NULL, iv TEXT NOT NULL, auth_tag TEXT NOT NULL, is_binary INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime('now','localtime')))`,
     `CREATE TABLE IF NOT EXISTS investment_settings (key TEXT NOT NULL PRIMARY KEY, value TEXT NOT NULL, updated_at TEXT DEFAULT (datetime('now','localtime')))`,
-    `CREATE TABLE IF NOT EXISTS work_credentials (id INTEGER PRIMARY KEY AUTOINCREMENT, category TEXT DEFAULT '其他', name TEXT NOT NULL, username TEXT DEFAULT '', password TEXT DEFAULT '', url TEXT DEFAULT '', note TEXT DEFAULT '', created_at TEXT DEFAULT (datetime('now','localtime')), updated_at TEXT DEFAULT (datetime('now','localtime')))`
+    `CREATE TABLE IF NOT EXISTS work_credentials (id INTEGER PRIMARY KEY AUTOINCREMENT, category TEXT DEFAULT '其他', name TEXT NOT NULL, username TEXT DEFAULT '', password TEXT DEFAULT '', url TEXT DEFAULT '', note TEXT DEFAULT '', created_at TEXT DEFAULT (datetime('now','localtime')), updated_at TEXT DEFAULT (datetime('now','localtime')))`,
+    `CREATE TABLE IF NOT EXISTS order_batches (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, note TEXT DEFAULT '', created_at TEXT DEFAULT (datetime('now','localtime')))`,
+    `CREATE TABLE IF NOT EXISTS order_items (id INTEGER PRIMARY KEY AUTOINCREMENT, batch_id INTEGER NOT NULL, payment_method TEXT DEFAULT '', customer_name TEXT DEFAULT '', phone TEXT DEFAULT '', address TEXT DEFAULT '', note TEXT DEFAULT '', item_name TEXT NOT NULL, unit_price REAL DEFAULT 0, quantity REAL DEFAULT 1, amount REAL DEFAULT 0, order_total REAL DEFAULT 0, facebook_name TEXT DEFAULT '', created_at TEXT DEFAULT (datetime('now','localtime')))`,
+    `CREATE TABLE IF NOT EXISTS exchange_keys (id INTEGER PRIMARY KEY AUTOINCREMENT, exchange TEXT NOT NULL, label TEXT NOT NULL DEFAULT '主帳號', api_key TEXT NOT NULL, api_secret TEXT NOT NULL, extra TEXT DEFAULT '{}', is_active INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime('now','localtime')))`
   ];
   SCHEMA.forEach(s => { try { raw.run(s); } catch(e) { console.error('[DB]', e.message); } });
 
@@ -111,6 +114,14 @@ async function init() {
   try { raw.run(`ALTER TABLE tw_shorts ADD COLUMN sort_order INTEGER DEFAULT 0`); } catch(e) { /* already exists */ }
   try { raw.run(`ALTER TABLE investments ADD COLUMN exchange TEXT DEFAULT ''`); } catch(e) { /* already exists */ }
   try { raw.run(`CREATE TABLE IF NOT EXISTS psn_auth (id INTEGER PRIMARY KEY AUTOINCREMENT, access_token TEXT NOT NULL, refresh_token TEXT DEFAULT '', expires_at TEXT NOT NULL, created_at TEXT DEFAULT (datetime('now','localtime')))`); } catch(e) { /* already exists */ }
+  try { raw.run(`ALTER TABLE order_items ADD COLUMN buyer TEXT DEFAULT ''`); } catch(e) { /* already exists */ }
+  try { raw.run(`ALTER TABLE order_items ADD COLUMN payment_method TEXT DEFAULT ''`); } catch(e) { /* already exists */ }
+  try { raw.run(`ALTER TABLE order_items ADD COLUMN customer_name TEXT DEFAULT ''`); } catch(e) { /* already exists */ }
+  try { raw.run(`ALTER TABLE order_items ADD COLUMN phone TEXT DEFAULT ''`); } catch(e) { /* already exists */ }
+  try { raw.run(`ALTER TABLE order_items ADD COLUMN address TEXT DEFAULT ''`); } catch(e) { /* already exists */ }
+  try { raw.run(`ALTER TABLE order_items ADD COLUMN note TEXT DEFAULT ''`); } catch(e) { /* already exists */ }
+  try { raw.run(`ALTER TABLE order_items ADD COLUMN order_total REAL DEFAULT 0`); } catch(e) { /* already exists */ }
+  try { raw.run(`ALTER TABLE order_items ADD COLUMN facebook_name TEXT DEFAULT ''`); } catch(e) { /* already exists */ }
 
   _db.persist();
   console.log('\u2713 SQLite (sql.js) \u5df2\u8f09\u5165: ' + DB_PATH);

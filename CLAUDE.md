@@ -172,7 +172,8 @@ Memory 檔案存於 `.claude/memory/`（git tracked），透過 git push/pull �
 │   │             ├── 1-5-2  行程       tab='trips'     → #travel-sub-trips
 │   │             ├── 1-5-3  回憶       tab='memories'  → #travel-sub-memories
 │   │             └── 1-5-4  足跡       tab='footprint' → #travel-sub-footprint
-│   └── 1-6  遊戲       data-sec="games"       → #section-games
+│   ├── 1-6  遊戲       data-sec="games"       → #section-games
+│   └── 1-7  履歷       data-sec="resume"      → #section-resume
 │
 └── [進階功能]  #nav-advanced
     ├── 2-1  工作       data-sec="work"        → #section-work
@@ -183,7 +184,7 @@ Memory 檔案存於 `.claude/memory/`（git tracked），透過 git push/pull �
     │         └── 子頁籤 (switchInvestproTab)
     │             └── 2-3-1  年度損益   tab='yearlypnl' → #investpro-sub-yearlypnl
     ├── 2-4  操盤       data-sec="trading"     → #section-trading
-    └── 2-5  履歷       data-sec="resume"      → #section-resume
+    └── 2-5  訂單彙整   data-sec="orders"      → #section-orders
 ```
 
 ### 位置表示法範例
